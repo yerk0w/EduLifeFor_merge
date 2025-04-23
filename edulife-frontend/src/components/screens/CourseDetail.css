@@ -1,0 +1,542 @@
+/* src/components/screens/CourseDetail.css */
+.course-detail-screen {
+    width: 100%;
+    height: 100%;
+    background-color: #1A1A1A;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  
+  .course-detail-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    position: relative;
+  }
+  
+  .back-button {
+    background: transparent;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .header-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+    flex: 1;
+    margin: 0;
+    font-family: var(--font-primary, 'Oddval', sans-serif);
+  }
+  
+  .header-spacer {
+    width: 40px; /* Same width as back button for centering */
+  }
+  
+  .course-detail-content {
+    flex: 1;
+    padding: 0 16px 80px; /* Bottom padding for navbar */
+  }
+  
+  .course-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 16px;
+    color: white;
+    font-family: var(--font-primary, 'Oddval', sans-serif);
+  }
+  
+  .course-video-container {
+    margin-bottom: 24px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* YouTube container */
+  .youtube-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+    border-radius: 16px;
+  }
+  
+  .youtube-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+  }
+  
+  /* Direct video player */
+  .video-thumbnail {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background-color: #2D2D2D;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  
+  .video-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .placeholder-image {
+    width: 100%;
+    height: 100%;
+    background-color: #2D2D2D;
+  }
+  
+  .play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+  }
+  
+  .play-button svg {
+    width: 30px;
+    height: 30px;
+    fill: white;
+    margin-left: 4px; /* Slight adjustment for the play icon */
+  }
+  
+  .video-thumbnail:hover .play-button {
+    transform: translate(-50%, -50%) scale(1.1);
+    background-color: rgba(210, 255, 31, 0.8); /* Lime green color when hovered */
+  }
+  
+  .video-thumbnail:hover .play-button svg {
+    fill: #1A1A1A; /* Dark color for the play icon on hover */
+  }
+  
+  .video-duration {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .video-player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    border-radius: 16px;
+  }
+  
+  .video-player.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .video-progress-bar {
+    height: 6px;
+    background-color: #3A3A3A;
+    margin-top: 2px;
+    border-radius: 3px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background-color: #D2FF1F;
+    transition: width 0.3s ease;
+    border-radius: 3px;
+  }
+  
+  .course-description {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #CCC;
+    margin-bottom: 24px;
+    padding: 0 4px;
+  }
+  
+  .course-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+  }
+  
+  .homework-button {
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  
+  .homework-button:hover {
+    color: #D2FF1F;
+  }
+  
+  .homework-button svg {
+    margin-left: 8px;
+    transition: transform 0.2s ease;
+  }
+  
+  .homework-button:hover svg {
+    transform: translateX(4px);
+  }
+  
+  .download-button {
+    width: 44px;
+    height: 44px;
+    background-color: #3A3A3A;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+  
+  .download-button svg {
+    width: 24px;
+    height: 24px;
+    fill: white;
+  }
+  
+  .download-button:hover {
+    background-color: #D2FF1F;
+    transform: translateY(-2px);
+  }
+  
+  .download-button:hover svg {
+    fill: #1A1A1A;
+  }
+  
+  /* Homework section */
+  .homework-container {
+    padding-top: 16px;
+  }
+  
+  .back-to-video {
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: none;
+    color: #CCC;
+    font-size: 16px;
+    padding: 0;
+    margin-bottom: 24px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  
+  .back-to-video:hover {
+    color: white;
+  }
+  
+  .back-to-video svg {
+    margin-right: 8px;
+    width: 20px;
+    height: 20px;
+  }
+  
+  .homework-quiz {
+    background-color: #2D2D2D;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  
+  .homework-quiz h3 {
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-weight: 600;
+    color: white;
+  }
+  
+  .quiz-question {
+    margin-bottom: 24px;
+  }
+  
+  .question-text {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: white;
+  }
+  
+  .question-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .option-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px 16px;
+    background-color: #3A3A3A;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .option-label:hover {
+    background-color: #4A4A4A;
+  }
+  
+  .option-input {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    accent-color: #D2FF1F;
+  }
+  
+  .option-text {
+    font-size: 14px;
+    color: #CCC;
+  }
+  
+  .submit-homework {
+    background-color: #D2FF1F;
+    color: #1A1A1A;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    display: block;
+    margin: 0 auto;
+    margin-top: 32px;
+  }
+  
+  .submit-homework:hover {
+    background-color: #c0ee0e;
+    transform: translateY(-2px);
+  }
+  
+  .homework-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background-color: #2D2D2D;
+    border-radius: 16px;
+    text-align: center;
+  }
+  
+  .homework-empty p {
+    color: #999;
+    font-size: 16px;
+    margin: 0;
+  }
+  
+  /* Animation for page transition */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  .course-detail-screen {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .course-detail-content {
+    animation: slideUp 0.4s ease-out;
+  }
+  
+  /* Additional styles for better mobile experience */
+  @media screen and (max-width: 480px) {
+    .course-title {
+      font-size: 20px;
+    }
+    
+    .play-button {
+      width: 50px;
+      height: 50px;
+    }
+    
+    .play-button svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .video-duration {
+      font-size: 10px;
+      padding: 3px 6px;
+    }
+    
+    .course-description {
+      font-size: 14px;
+    }
+    
+    .homework-button {
+      font-size: 14px;
+    }
+    
+    .download-button {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .download-button svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .back-to-video {
+      font-size: 14px;
+    }
+    
+    .homework-quiz h3 {
+      font-size: 16px;
+    }
+    
+    .question-text {
+      font-size: 14px;
+    }
+    
+    .option-label {
+      padding: 8px 12px;
+    }
+    
+    .option-text {
+      font-size: 13px;
+    }
+    
+    .submit-homework {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+  }
+  
+  /* Tablet and larger screens */
+  @media screen and (min-width: 768px) {
+    .course-detail-content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px 100px;
+    }
+    
+    .course-title {
+      font-size: 28px;
+      margin-bottom: 24px;
+    }
+    
+    .play-button {
+      width: 80px;
+      height: 80px;
+    }
+    
+    .play-button svg {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .video-duration {
+      font-size: 14px;
+      padding: 5px 10px;
+    }
+    
+    .video-progress-bar {
+      height: 8px;
+    }
+    
+    .course-description {
+      font-size: 18px;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    
+    .homework-button {
+      font-size: 18px;
+    }
+    
+    .download-button {
+      width: 50px;
+      height: 50px;
+    }
+    
+    .download-button svg {
+      width: 28px;
+      height: 28px;
+    }
+    
+    .back-to-video {
+      font-size: 18px;
+    }
+    
+    .homework-quiz {
+      padding: 24px;
+    }
+    
+    .homework-quiz h3 {
+      font-size: 22px;
+    }
+    
+    .question-text {
+      font-size: 18px;
+    }
+    
+    .option-label {
+      padding: 12px 20px;
+    }
+    
+    .option-text {
+      font-size: 16px;
+    }
+    
+    .submit-homework {
+      padding: 14px 28px;
+      font-size: 18px;
+    }
+  }
+  

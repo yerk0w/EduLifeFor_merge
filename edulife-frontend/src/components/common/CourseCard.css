@@ -1,0 +1,180 @@
+/* src/components/common/CourseCard.css */
+.course-card {
+  min-width: 200px;
+  width: 200px;
+  height: 160px;
+  border-radius: 16px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Фоновое изображение */
+.course-background {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 70%;
+  overflow: hidden;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.background-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  opacity: 0.9; /* Немного прозрачности для лучшей читаемости текста */
+}
+
+.course-card-content {
+  position: relative;
+  z-index: 2; /* Поверх фонового изображения */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.course-title {
+  font-family: var(--font-primary, 'Oddval', sans-serif);
+  font-weight: 600;
+  color: black;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.title-top {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.title-bottom {
+  font-size: 16px;
+}
+
+.course-card-footer {
+  display: flex;
+  margin-top: auto;
+  gap: 8px;
+  position: relative;
+  z-index: 2; /* Поверх фонового изображения */
+}
+
+.course-stat-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: black;
+  font-weight: 600;
+  flex: 1;
+  height: 28px;
+}
+
+.favorite-button {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+}
+
+.heart-icon {
+  width: 16px;
+  height: 16px;
+  fill: transparent;
+  stroke: black;
+  stroke-width: 2;
+}
+
+.favorite-button.active .heart-icon {
+  fill: #FF3B30;
+  stroke: #FF3B30;
+}
+
+/* Адаптивные стили */
+@media screen and (max-width: 320px) {
+  .course-card {
+    min-width: 160px;
+    width: 160px;
+    height: 140px;
+    padding: 12px;
+  }
+  
+  .title-top {
+    font-size: 16px;
+  }
+  
+  .title-bottom {
+    font-size: 14px;
+  }
+  
+  .course-stat-item {
+    padding: 2px 8px;
+    font-size: 10px;
+    height: 24px;
+  }
+  
+  .favorite-button {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .course-card {
+    min-width: 240px;
+    width: 240px;
+    height: 180px;
+    padding: 20px;
+  }
+  
+  .title-top {
+    font-size: 20px;
+  }
+  
+  .title-bottom {
+    font-size: 18px;
+  }
+  
+  .course-stat-item {
+    padding: 4px 16px;
+    font-size: 14px;
+    height: 32px;
+  }
+  
+  .favorite-button {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .heart-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+@media screen and (min-width : 1600px) {
+  .course-card {
+    width: 360px;
+  }
+}

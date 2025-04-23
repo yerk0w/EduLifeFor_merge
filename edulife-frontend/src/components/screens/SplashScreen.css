@@ -1,0 +1,99 @@
+
+.splash-screen {
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .logo {
+    font-size: var(--font-size-logo);
+    font-weight: 600;
+    color: var(--text-color);
+    z-index: 10;
+    font-family: var(--font-primary);
+    letter-spacing: 1px;
+    animation: fadeIn 1s ease-in-out;
+  }
+  
+ 
+  .flower-container {
+    position: absolute;
+  }
+  
+
+  .flower-image {
+    width: 400px; 
+    height: 400px; 
+    display: block;
+    transform-origin: center;
+    transition: transform 1.5s ease-in-out;
+  }
+  
+  .top-left {
+    top: -125px; 
+    left: -125px;
+  }
+  
+  .bottom-right {
+    bottom: -125px; 
+    right: -125px; 
+  }
+  
+
+  .flower-container.animate .flower-image {
+    transform: rotate(360deg);
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+
+  @media screen and (max-width: 320px) {
+    .flower-image {
+      width: 200px; 
+      height: 200px;
+    }
+    
+    .top-left {
+      top: -100px;
+      left: -100px;
+    }
+    
+    .bottom-right {
+      bottom: -100px;
+      right: -100px;
+    }
+    
+    .logo {
+      font-size: 36px;
+    }
+  }
+  
+  @media screen and (min-width: 768px) {
+    .flower-image {
+      width: 300px; 
+      height: 300px;
+    }
+    
+    .top-left {
+      top: -150px;
+      left: -150px;
+    }
+    
+    .bottom-right {
+      bottom: -150px;
+      right: -150px;
+    }
+    
+    .logo {
+      font-size: 56px;
+    }
+  }
+  

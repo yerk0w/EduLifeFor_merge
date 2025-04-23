@@ -1,0 +1,212 @@
+.schedule-screen {
+  width: 100%;
+  height: 100%;
+  background-color: #1A1A1A;
+  color: white;
+  padding: 16px;
+  padding-bottom: 80px;
+  overflow-y: auto;
+}
+
+.schedule-header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.schedule-header h1 {
+  font-family: var(--font-primary, 'Oddval', sans-serif);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.week-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  background-color: #2D2D2D;
+  border-radius: 20px;
+  padding: 10px;
+}
+
+.arrow-button {
+  width: 32px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #3A3A3A;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.arrow-icon {
+  font-size: 16px;
+}
+
+.week-days {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  border-radius: 16px;
+}
+
+.week-days::-webkit-scrollbar {
+  display: none;
+}
+
+.day-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 16px;
+  transition: all 0.2s ease;
+}
+
+.day-item.selected {
+  background-color: white;
+  color: black;
+}
+
+.day-name {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.day-date {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.schedule-content {
+  background-color: #2D2D2D;
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.schedule-content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.schedule-content-header h2 {
+  font-family: var(--font-primary, 'Oddval', sans-serif);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-tab {
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.filter-tab.active {
+  color: white;
+  background-color: #3A3A3A;
+}
+
+.schedule-items {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Адаптивные стили */
+@media screen and (max-width: 320px) {
+  .schedule-screen {
+    padding: 12px;
+    padding-bottom: 70px;
+  }
+
+  .schedule-header h1 {
+    font-size: 20px;
+  }
+
+  .week-selector {
+    padding: 12px;
+  }
+
+  .day-item {
+    padding: 6px 10px;
+  }
+
+  .day-name {
+    font-size: 10px;
+  }
+
+  .day-date {
+    font-size: 14px;
+  }
+
+  .schedule-content {
+    padding: 12px;
+  }
+
+  .schedule-content-header h2 {
+    font-size: 16px;
+  }
+
+  .filter-tab {
+    font-size: 12px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .schedule-screen {
+    padding: 24px;
+    padding-bottom: 90px;
+    max-width: 768px;
+    margin: 0 auto;
+  }
+
+  .schedule-header h1 {
+    font-size: 28px;
+  }
+
+  .week-selector {
+    padding: 20px;
+  }
+
+  .day-item {
+    padding: 10px 16px;
+  }
+
+  .day-name {
+    font-size: 14px;
+  }
+
+  .day-date {
+    font-size: 18px;
+  }
+
+  .schedule-content {
+    padding: 20px;
+  }
+
+  .schedule-content-header h2 {
+    font-size: 20px;
+  }
+
+  .filter-tab {
+    font-size: 16px;
+    padding: 6px 12px;
+  }
+}
