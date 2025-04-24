@@ -1,24 +1,53 @@
-// src/components/screens/Login.jsx
+// src/components/screens/Register.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Register.css';
+import apiService from '../../services/apiService';
 
 const Register = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [name, setName] = useState(''); // Добавляем состояние для имени
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleReg = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    // Здесь будет логика авторизации
-    console.log('Логин с:', email, name, password); // Добавляем имя в лог
-    // После успешной авторизации перенаправляем на главную
-    navigate('/dashboard');
+    setError('');
+    setLoading(true);
+    
+    try {
+      // Create user data object
+      const userData = {
+        username: email,
+        email: email,
+        full_name: name,
+        password: password
+      };
+      
+      // Call registration API
+      const response = await apiService.auth.register(userData);
+      console.log('Registration successful:', response);
+      
+      // After successful registration, automatically log in
+      await apiService.auth.login(email, password);
+      
+      // Navigate to dashboard
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError(
+        error.response?.data?.detail || 
+        'Не удалось создать аккаунт. Пожалуйста, попробуйте еще раз.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
   
   const handleBack = () => {
-    navigate(-1); // Возврат на предыдущую страницу
+    navigate(-1); // Return to previous page
   };
 
   return (
@@ -29,7 +58,9 @@ const Register = () => {
       <div className="reg-container">
         <h1 className="reg-title">Создать аккаунт</h1>
         
-        <form className="reg-form" onSubmit={handleReg}>
+        {error && <div className="error-message">{error}</div>}
+        
+        <form className="reg-form" onSubmit={handleRegister}>
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -39,6 +70,7 @@ const Register = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
           
@@ -51,11 +83,12 @@ const Register = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
           
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Пароль</label>
             <input
               type="password"
               id="password"
@@ -63,10 +96,17 @@ const Register = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
           
-          <button type="submit" className="reg-button">Создать аккаунт</button>
+          <button 
+            type="submit" 
+            className="reg-button"
+            disabled={loading}
+          >
+            {loading ? 'Создание...' : 'Создать аккаунт'}
+          </button>
         </form>
       </div>
     </div>

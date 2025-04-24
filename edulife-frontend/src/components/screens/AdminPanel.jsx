@@ -1,46 +1,43 @@
-// src/components/screens/AdminPanel.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminPanel.css';
 
-const AdminPanel = ({ courses = [] }) => {  // Добавляем значение по умолчанию - пустой массив
+const AdminPanel = ({ courses = [] }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('courses');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  
-  // Stats for dashboard
+
   const stats = {
     totalStudents: 2458,
     activeStudents: 1845,
-    totalCourses: courses.length, // Теперь это безопасно, так как courses всегда будет массивом
+    totalCourses: courses.length,
     completionRate: 78,
     averageRating: 4.8
   };
-  
-  // Filter courses based on search query
-  const filteredCourses = courses.filter(course => 
+
+  const filteredCourses = courses.filter(course =>
     course.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  
+
   const handleCourseSelect = (course) => {
     setSelectedCourse(course);
     setIsEditing(false);
   };
-  
+
   const handleEditCourse = () => {
     setIsEditing(true);
   };
-  
+
   const handleBack = () => {
     navigate('/');
   };
-  
+
   const renderDashboard = () => (
     <div className="admin-dashboard">
       <h3 className="section-title">Обзор платформы</h3>
-      
+
       <div className="stats-overview">
         <div className="stats-row">
           <div className="stat-card primary">
@@ -60,9 +57,7 @@ const AdminPanel = ({ courses = [] }) => {  // Добавляем значени
               <span>+12.5%</span>
             </div>
           </div>
-          
-          
-          
+
           <div className="stat-card warning">
             <div className="stat-icon">
               <svg viewBox="0 0 24 24" width="24" height="24">

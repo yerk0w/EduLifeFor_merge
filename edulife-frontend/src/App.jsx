@@ -184,10 +184,9 @@ const App = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/notifications" element={<Notifications />} />
-          <Route path="/admin-panel" element={<AdminPanel />} />
+          <Route path="/admin" element={<AdminPanel />} />
           <Route path="/documents" element={<Documents/>} />
           <Route path="/jobs" element={<Jobs/>} />
-          {/* Добавьте другие маршруты здесь */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

@@ -2,21 +2,39 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
+import apiService from '../../services/apiService';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Здесь будет логика авторизации
-    console.log('Логин с:', email, password);
-    // После успешной авторизации перенаправляем на главную
-    navigate('/dashboard');
+    setError('');
+    setLoading(true);
+    
+    try {
+      const response = await apiService.auth.login(username, password);
+      console.log('Login successful:', response);
+      
+      // Navigate to dashboard after successful login
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login error:', error);
+      setError(
+        error.response?.data?.detail || 
+        'Не удалось войти. Проверьте учетные данные и повторите попытку.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
+  
   const handleBack = () => {
-    navigate(-1); // Возврат на предыдущую страницу
+    navigate(-1); // Return to previous page
   };
 
   return (
@@ -25,18 +43,21 @@ const Login = () => {
         &lt;
       </button>
       <div className="login-container">
-        <h1 className="login-title">Войдите в свой</h1>
+        <h1 className="login-title">Войдите в свой аккаунт</h1>
+        
+        {error && <div className="error-message">{error}</div>}
         
         <form className="login-form" onSubmit={handleLogin}>
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
-              type="email"
+              type="text"
               id="email"
               placeholder="careerplace@gmail.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
           
@@ -49,10 +70,17 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
           
-          <button type="submit" className="login-button">Вход</button>
+          <button 
+            type="submit" 
+            className="login-button"
+            disabled={loading}
+          >
+            {loading ? 'Вход...' : 'Вход'}
+          </button>
         </form>
       </div>
     </div>

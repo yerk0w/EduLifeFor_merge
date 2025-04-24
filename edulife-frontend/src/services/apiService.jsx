@@ -1,0 +1,392 @@
+// src/services/apiService.js
+import axios from 'axios';
+
+// Base URLs for different microservices
+const API_BASE_URL = {
+  auth: 'http://localhost:8070',
+  qr: 'http://localhost:8080',
+  raspis: 'http://localhost:8090',
+  dock: 'http://localhost:8100',
+  integration: 'http://localhost:8110'
+};
+
+// Create an axios instance with default configuration
+const apiClient = axios.create({
+  timeout: 10000, // 10 seconds timeout
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+// Request interceptor for adding the auth token to requests
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for handling errors
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    // Handle 401 Unauthorized errors
+    if (error.response && error.response.status === 401) {
+      // Clear invalid token
+      localStorage.removeItem('authToken');
+      // Redirect to login page
+      window.location.href = '/log';
+    }
+    return Promise.reject(error);
+  }
+);
+
+// API Service object
+const apiService = {
+  // Auth Service APIs
+  auth: {
+    login: async (username, password) => {
+      try {
+        const response = await axios.post(`${API_BASE_URL.auth}/auth/login`,
+          new URLSearchParams({
+            'username': username,
+            'password': password
+          }),
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }
+          }
+        );
+        
+        // Store the token in localStorage for future requests
+        if (response.data.access_token) {
+          localStorage.setItem('authToken', response.data.access_token);
+          localStorage.setItem('userId', response.data.user_id);
+          localStorage.setItem('userRole', response.data.role);
+        }
+        
+        return response.data;
+      } catch (error) {
+        console.error('Login error:', error);
+        throw error;
+      }
+    },
+    
+    register: async (userData) => {
+      try {
+        const response = await axios.post(`${API_BASE_URL.auth}/auth/register`, userData);
+        return response.data;
+      } catch (error) {
+        console.error('Registration error:', error);
+        throw error;
+      }
+    },
+    
+    getCurrentUser: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/auth/me`);
+        return response.data;
+      } catch (error) {
+        console.error('Get current user error:', error);
+        throw error;
+      }
+    },
+    
+    logout: () => {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userRole');
+    },
+    
+    getUserById: async (userId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/users/${userId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching user ${userId}:`, error);
+        throw error;
+      }
+    }
+  },
+  
+  // QR Service APIs
+  qr: {
+    generateQR: async (subjectId, shiftId, teacherId) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.qr}/qr`, {
+          subject_id: subjectId,
+          shift_id: shiftId,
+          teacher_id: teacherId
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error generating QR code:', error);
+        throw error;
+      }
+    },
+    
+    validateQR: async (userId, qrCode) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.qr}/validate_qr`, {
+          user_id: userId,
+          qr_code: qrCode
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error validating QR code:', error);
+        throw error;
+      }
+    },
+    
+    getUserSessions: async (userId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.qr}/sessions/${userId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching user sessions for ${userId}:`, error);
+        throw error;
+      }
+    },
+    
+    getScheduleForUser: async (userId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.qr}/schedule/${userId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching schedule for user ${userId}:`, error);
+        throw error;
+      }
+    }
+  },
+  
+  // Schedule Service APIs
+  schedule: {
+    getSchedule: async (filters = {}) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.raspis}/schedule`, {
+          params: filters
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching schedule:', error);
+        throw error;
+      }
+    },
+    
+    getScheduleById: async (scheduleId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.raspis}/schedule/${scheduleId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching schedule ${scheduleId}:`, error);
+        throw error;
+      }
+    },
+    
+    createSchedule: async (scheduleData) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.raspis}/schedule`, scheduleData);
+        return response.data;
+      } catch (error) {
+        console.error('Error creating schedule:', error);
+        throw error;
+      }
+    },
+    
+    updateSchedule: async (scheduleId, scheduleData) => {
+      try {
+        const response = await apiClient.put(`${API_BASE_URL.raspis}/schedule/${scheduleId}`, scheduleData);
+        return response.data;
+      } catch (error) {
+        console.error(`Error updating schedule ${scheduleId}:`, error);
+        throw error;
+      }
+    },
+    
+    deleteSchedule: async (scheduleId) => {
+      try {
+        const response = await apiClient.delete(`${API_BASE_URL.raspis}/schedule/${scheduleId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error deleting schedule ${scheduleId}:`, error);
+        throw error;
+      }
+    },
+    
+    getSubjects: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.raspis}/subjects`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+        throw error;
+      }
+    },
+    
+    getClassrooms: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.raspis}/classrooms`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching classrooms:', error);
+        throw error;
+      }
+    },
+    
+    getLessonTypes: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.raspis}/lesson-types`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching lesson types:', error);
+        throw error;
+      }
+    }
+  },
+  
+  // Document Service APIs
+  documents: {
+    getDocuments: async (page = 1, limit = 10) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.dock}/documents`, {
+          params: { page, limit }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching documents:', error);
+        throw error;
+      }
+    },
+    
+    getDocumentById: async (documentId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.dock}/documents/${documentId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching document ${documentId}:`, error);
+        throw error;
+      }
+    },
+    
+    createDocument: async (documentData) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.dock}/documents`, documentData);
+        return response.data;
+      } catch (error) {
+        console.error('Error creating document:', error);
+        throw error;
+      }
+    },
+    
+    updateDocument: async (documentId, documentData) => {
+      try {
+        const response = await apiClient.put(`${API_BASE_URL.dock}/documents/${documentId}`, documentData);
+        return response.data;
+      } catch (error) {
+        console.error(`Error updating document ${documentId}:`, error);
+        throw error;
+      }
+    },
+    
+    deleteDocument: async (documentId) => {
+      try {
+        const response = await apiClient.delete(`${API_BASE_URL.dock}/documents/${documentId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error deleting document ${documentId}:`, error);
+        throw error;
+      }
+    },
+    
+    getTemplates: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.dock}/templates`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+        throw error;
+      }
+    },
+    
+    downloadTemplate: async (templateId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.dock}/templates/${templateId}/download`, {
+          responseType: 'blob'
+        });
+        
+        return response.data;
+      } catch (error) {
+        console.error(`Error downloading template ${templateId}:`, error);
+        throw error;
+      }
+    }
+  },
+  
+  // Integration Service APIs
+  integration: {
+    createAttendanceReport: async (groupId, startDate, endDate) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.integration}/integration/attendance-report/${groupId}`, null, {
+          params: { start_date: startDate, end_date: endDate }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error creating attendance report:', error);
+        throw error;
+      }
+    },
+    
+    createAbsenceRequest: async (studentId, date, reason) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.integration}/integration/absence-request/${studentId}`, null, {
+          params: { date, reason }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error creating absence request:', error);
+        throw error;
+      }
+    },
+    
+    createStudentReference: async (studentId) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.integration}/integration/reference/${studentId}`);
+        return response.data;
+      } catch (error) {
+        console.error('Error creating student reference:', error);
+        throw error;
+      }
+    },
+    
+    getTeacherSchedule: async (teacherId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.integration}/integration/teacher-schedule/${teacherId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching teacher schedule for ${teacherId}:`, error);
+        throw error;
+      }
+    },
+    
+    getStudentAttendance: async (studentId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.integration}/integration/student-attendance/${studentId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching student attendance for ${studentId}:`, error);
+        throw error;
+      }
+    }
+  }
+};
+
+export default apiService;
