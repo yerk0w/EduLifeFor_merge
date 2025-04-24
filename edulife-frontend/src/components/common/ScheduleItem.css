@@ -34,15 +34,15 @@
   }
   
   .schedule-item-bg-shape.flower {
-    background-image: url('/images/flower-bg.webp');
+    background-image: url('/images/flower-bg.png');
   }
   
   .schedule-item-bg-shape.leaf {
-    background-image: url('/images/leaf-bg.webp');
+    background-image: url('/images/leaf-bg.png');
   }
   
   .schedule-item-bg-shape.blob {
-    background-image: url('/images/blob-bg.webp');
+    background-image: url('/images/blob-bg.png');
     
   }
   .detail-item {

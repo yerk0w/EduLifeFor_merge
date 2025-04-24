@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../common/Navbar';
 import './Profile.css';
 import avatarImage1 from '../../assets/images/avatar.webp';
 import notificationIcon from '../../assets/images/notification.webp';
 import settingsIcon from '../../assets/images/settings.webp';
+import apiService from '../../services/apiService';
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -13,42 +14,82 @@ const Profile = () => {
     const [activeTooltip, setActiveTooltip] = useState(null);
     const chartRef = useRef(null);
     
+    // Стейт для пользовательских данных
+    const [userInfo, setUserInfo] = useState(null);
+    const [attendanceData, setAttendanceData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    
     // State for edit modal
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingSection, setEditingSection] = useState('');
     const [formData, setFormData] = useState({
-      fullName: 'Jane Soci',
-      birthDate: '15.06.1995',
-      gender: 'Женский',
-      country: 'Россия',
-      city: 'Москва',
-      language: 'Русский',
-      email: 'jane.soci@example.com',
-      phone: '+7 (123) 456-78-90',
-      address: 'ул. Примерная, д. 123, кв. 45',
-      telegram: '@janesoci'
+      fullName: '',
+      birthDate: '',
+      gender: '',
+      city: '',
+      group: '',
+      college: '',
+      email: '',
+      phone: '',
+      address: '',
+      telegram: ''
     });
-    
-    // Данные для графика посещаемости по месяцам
-    const monthsData = [
-      { month: 'Jan', value: 85, presentDays: 25, absentDays: 5, totalDays: 30, year: 2024 },
-      { month: 'Feb', value: 90, presentDays: 27, absentDays: 2, totalDays: 29, year: 2024 },
-      { month: 'Mar', value: 80, presentDays: 24, absentDays: 6, totalDays: 30, year: 2024 },
-      { month: 'Apr', value: 88, presentDays: 22, absentDays: 3, totalDays: 25, year: 2024 },
-      { month: 'May', value: 92, presentDays: 28, absentDays: 3, totalDays: 31, year: 2024 },
-      { month: 'Jun', value: 75, presentDays: 20, absentDays: 5, totalDays: 25, year: 2024 },
-      { month: 'Jul', value: 0, presentDays: 0, absentDays: 0, totalDays: 31, year: 2024, isVacation: true },
-      { month: 'Aug', value: 0, presentDays: 0, absentDays: 0, totalDays: 31, year: 2024, isVacation: true },
-      { month: 'Sep', value: 88, presentDays: 26, absentDays: 4, totalDays: 30, year: 2024 },
-      { month: 'Oct', value: 95, presentDays: 29, absentDays: 2, totalDays: 31, year: 2024 },
-      { month: 'Nov', value: 91, presentDays: 27, absentDays: 3, totalDays: 30, year: 2024 },
-      { month: 'Dec', value: 85, presentDays: 26, absentDays: 5, totalDays: 31, year: 2024 }
-    ];
   
     // Максимальное значение для графика
     const maxValue = 100; // Максимальное значение - 100%
     const timeRangeOptions = ['6 Months', '1 Year', 'All'];
     const [showTimeRangeDropdown, setShowTimeRangeDropdown] = useState(false);
+    
+    // Получение данных пользователя при загрузке компонента
+    useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          setLoading(true);
+          
+          // Получаем ID пользователя из localStorage
+          const userId = localStorage.getItem('userId');
+          if (!userId) {
+            throw new Error('Пользователь не авторизован');
+          }
+          
+          // Запрашиваем данные пользователя
+          const userResponse = await apiService.auth.getUserById(userId);
+          
+          if (!userResponse) {
+            throw new Error('Не удалось получить данные пользователя');
+          }
+          
+          setUserInfo(userResponse);
+          
+          // Инициализируем форму данными пользователя
+          setFormData({
+            fullName: userResponse.full_name || '',
+            email: userResponse.email || '',
+            // Дополнительные поля могут быть получены из других источников или API
+            birthDate: '',
+            gender: '',
+            city: '',
+            college: '',
+            group: '',
+            faculty: '',
+            phone: '',
+            address: '',
+            telegram: ''
+          });
+
+          setAttendanceData([]);
+          
+        } catch (err) {
+          console.error('Error fetching user data:', err);
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchUserData();
+    }, []);
     
     // Function to handle edit button click
     const handleEditClick = (section) => {
@@ -66,11 +107,48 @@ const Profile = () => {
     };
     
     // Function to handle form submission
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = async (e) => {
       e.preventDefault();
-      // Here you would typically send the data to your backend
-      console.log('Form submitted:', formData);
-      setIsEditModalOpen(false);
+      
+      try {
+        // Получаем ID пользователя из localStorage
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          throw new Error('Пользователь не авторизован');
+        }
+        
+        // Подготавливаем данные для обновления
+        const updateData = {};
+        
+        if (editingSection === 'personal') {
+          // Для персональных данных
+          updateData.full_name = formData.fullName;
+          // Другие поля могут требовать отдельного API или эндпоинта
+        } else if (editingSection === 'contact') {
+          // Для контактных данных
+          updateData.email = formData.email;
+          // Другие поля также могут требовать отдельного API
+        }
+        
+        // Отправляем запрос на обновление данных
+        // Имитация обновления через консоль
+        console.log('Updating user data:', updateData);
+        
+        // После успешного обновления, обновляем локальное состояние
+        setUserInfo(prev => ({
+          ...prev,
+          ...updateData,
+          full_name: updateData.full_name || prev.full_name,
+          email: updateData.email || prev.email
+        }));
+        
+        // Закрываем модальное окно
+        setIsEditModalOpen(false);
+        
+      } catch (err) {
+        console.error('Error updating user data:', err);
+        alert('Ошибка при обновлении данных: ' + err.message);
+      }
     };
     
     const handleTimeRangeClick = () => {
@@ -103,26 +181,20 @@ const Profile = () => {
       navigate('/notifications');
     };
     
-    
-    // Фильтрация данных в зависимости от выбранного временного диапазона
-    const getFilteredMonthsData = () => {
-      if (timeRange === '6 Months') {
-        return monthsData.slice(-6);
-      } else if (timeRange === '1 Year') {
-        return monthsData;
-      } else {
-        return monthsData; // Для 'All' показываем все данные
-      }
-    };
-    
-    const filteredMonthsData = getFilteredMonthsData();
-    
     // Расчет общей статистики посещаемости
     const calculateTotalAttendance = () => {
-      const totalPresent = filteredMonthsData.reduce((sum, month) => sum + month.presentDays, 0);
-      const totalAbsent = filteredMonthsData.reduce((sum, month) => sum + month.absentDays, 0);
+      if (!attendanceData || attendanceData.length === 0) {
+        return {
+          totalPresent: 0,
+          totalAbsent: 0,
+          attendanceRate: 0
+        };
+      }
+      
+      const totalPresent = attendanceData.reduce((sum, month) => sum + (month.presentDays || 0), 0);
+      const totalAbsent = attendanceData.reduce((sum, month) => sum + (month.absentDays || 0), 0);
       const totalDays = totalPresent + totalAbsent;
-      const attendanceRate = Math.round((totalPresent / totalDays) * 100);
+      const attendanceRate = totalDays > 0 ? Math.round((totalPresent / totalDays) * 100) : 0;
       
       return {
         totalPresent,
@@ -154,27 +226,45 @@ const Profile = () => {
                 <div className="personal-data-list">
                   <div className="personal-data-item">
                     <div className="personal-data-label">Полное имя</div>
-                    <div className="personal-data-value">{formData.fullName}</div>
+                    <div className="personal-data-value">
+                      {userInfo?.full_name || formData.fullName || 'Не указано'}
+                    </div>
                   </div>
                   <div className="personal-data-item">
                     <div className="personal-data-label">Дата рождения</div>
-                    <div className="personal-data-value">{formData.birthDate}</div>
+                    <div className="personal-data-value">
+                      {formData.birthDate || 'Не указано'}
+                    </div>
                   </div>
                   <div className="personal-data-item">
                     <div className="personal-data-label">Пол</div>
-                    <div className="personal-data-value">{formData.gender}</div>
-                  </div>
-                  <div className="personal-data-item">
-                    <div className="personal-data-label">Страна</div>
-                    <div className="personal-data-value">{formData.country}</div>
+                    <div className="personal-data-value">
+                      {formData.gender || 'Не указано'}
+                    </div>
                   </div>
                   <div className="personal-data-item">
                     <div className="personal-data-label">Город</div>
-                    <div className="personal-data-value">{formData.city}</div>
+                    <div className="personal-data-value">
+                      {formData.city || 'Не указано'}
+                    </div>
                   </div>
                   <div className="personal-data-item">
-                    <div className="personal-data-label">Язык</div>
-                    <div className="personal-data-value">{formData.language}</div>
+                    <div className="personal-data-label">Колледж</div>
+                    <div className="personal-data-value">
+                      {formData.college || 'Не указано'}
+                    </div>
+                  </div>
+                  <div className="personal-data-item">
+                    <div className="personal-data-label">Факультет</div>
+                    <div className="personal-data-value">
+                      {formData.faculty || 'Не указано'}
+                    </div>
+                  </div>
+                  <div className="personal-data-item">
+                    <div className="personal-data-label">Группа</div>
+                    <div className="personal-data-value">
+                      {formData.group || 'Не указано'}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -201,7 +291,7 @@ const Profile = () => {
                     <div className="contact-info">
                       <div className="contact-type">Email</div>
                       <div className="contact-value verified">
-                        {formData.email}
+                        {userInfo?.email || formData.email || 'Не указано'}
                         <span className="verified-badge">Подтвержден</span>
                       </div>
                     </div>
@@ -215,7 +305,9 @@ const Profile = () => {
                     </div>
                     <div className="contact-info">
                       <div className="contact-type">Телефон</div>
-                      <div className="contact-value">{formData.phone}</div>
+                      <div className="contact-value">
+                        {formData.phone || 'Не указано'}
+                      </div>
                     </div>
                   </div>
                   
@@ -227,7 +319,9 @@ const Profile = () => {
                     </div>
                     <div className="contact-info">
                       <div className="contact-type">Адрес</div>
-                      <div className="contact-value">{formData.address}</div>
+                      <div className="contact-value">
+                        {formData.address || 'Не указано'}
+                      </div>
                     </div>
                   </div>
                   
@@ -239,7 +333,9 @@ const Profile = () => {
                     </div>
                     <div className="contact-info">
                       <div className="contact-type">Telegram</div>
-                      <div className="contact-value">{formData.telegram}</div>
+                      <div className="contact-value">
+                        {formData.telegram || 'Не указано'}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -253,7 +349,7 @@ const Profile = () => {
       return (
         <div className="profile-statistics">
           
-          {/* Новый контейнер для кнопки Документооборот */}
+          {/* Кнопка Документооборот */}
           <div className="document-flow-container">
             <button className="document-flow-button" onClick={() => navigate('/documents')}>
               <div className="document-flow-icon">
@@ -269,10 +365,10 @@ const Profile = () => {
             </button>
           </div>
           
-          {/* Существующий блок Analytics */}
+          {/* Блок Analytics */}
           <div className="analytics-card">
             <div className="analytics-header">
-              <h3>Analytics</h3>
+              <h3>Аналитика посещаемости</h3>
               <div className="time-range-selector" onClick={handleTimeRangeClick}>
                 <span>{timeRange}</span>
                 <span className="dropdown-icon">▼</span>
@@ -293,55 +389,61 @@ const Profile = () => {
               </div>
             </div>
             
-            <div className="chart-container" ref={chartRef}>
-              {filteredMonthsData.map((item, index) => (
-                <div key={index} className="chart-column">
-                  <div 
-                    className="chart-bar-container"
-                    onClick={() => handleBarClick(index)}
-                  >
+            {attendanceData.length > 0 ? (
+              <div className="chart-container" ref={chartRef}>
+                {attendanceData.map((item, index) => (
+                  <div key={index} className="chart-column">
                     <div 
-                      className={`chart-bar ${item.isVacation ? 'vacation' : ''}`}
-                      style={{ height: `${(item.value / maxValue) * 100}%` }}
+                      className="chart-bar-container"
+                      onClick={() => handleBarClick(index)}
                     >
-                      <div className="chart-bar-handle"></div>
-                    </div>
-                  </div>
-                  <div className={`chart-label ${item.isVacation ? 'vacation' : ''}`}>
-                    {item.month}
-                  </div>
-                  
-                  {activeTooltip === index && (
-                    <div className="chart-tooltip">
-                      <div className="tooltip-content">
-                        <div className="tooltip-title">{item.month} {item.year}</div>
-                        {!item.isVacation ? (
-                          <>
-                            <div className="tooltip-attendance">
-                              <div className="tooltip-present">
-                                <span>Присутствовал:</span>
-                                <span>{item.presentDays} дней</span>
-                              </div>
-                              <div className="tooltip-absent">
-                                <span>Отсутствовал:</span>
-                                <span>{item.absentDays} дней</span>
-                              </div>
-                            </div>
-                            <div className="tooltip-rate">
-                              Посещаемость: {item.value}%
-                            </div>
-                          </>
-                        ) : (
-                          <div className="tooltip-vacation">
-                            <span>Каникулы</span>
-                          </div>
-                        )}
+                      <div 
+                        className={`chart-bar ${item.isVacation ? 'vacation' : ''}`}
+                        style={{ height: `${(item.value / maxValue) * 100}%` }}
+                      >
+                        <div className="chart-bar-handle"></div>
                       </div>
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                    <div className={`chart-label ${item.isVacation ? 'vacation' : ''}`}>
+                      {item.month}
+                    </div>
+                    
+                    {activeTooltip === index && (
+                      <div className="chart-tooltip">
+                        <div className="tooltip-content">
+                          <div className="tooltip-title">{item.month} {item.year}</div>
+                          {!item.isVacation ? (
+                            <>
+                              <div className="tooltip-attendance">
+                                <div className="tooltip-present">
+                                  <span>Присутствовал:</span>
+                                  <span>{item.presentDays} дней</span>
+                                </div>
+                                <div className="tooltip-absent">
+                                  <span>Отсутствовал:</span>
+                                  <span>{item.absentDays} дней</span>
+                                </div>
+                              </div>
+                              <div className="tooltip-rate">
+                                Посещаемость: {item.value}%
+                              </div>
+                            </>
+                          ) : (
+                            <div className="tooltip-vacation">
+                              <span>Каникулы</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="no-data-message">
+                <p>Данные о посещаемости отсутствуют</p>
+              </div>
+            )}
             
             <div className="attendance-summary">
               <div className="attendance-days">
@@ -361,26 +463,6 @@ const Profile = () => {
     const renderReviewsTab = () => {
       return (
         <div className="profile-reviews">
-          <h3>Мои промокоды</h3>
-          <div className="promo-list">
-            <div className="promo-item">
-              <div className="promo-code">WELCOME20</div>
-              <div className="promo-info">
-                <div className="promo-description">Скидка 20% на курс</div>
-                <div className="promo-validity">Действует до: 31.05.2025</div>
-              </div>
-              <button className="promo-copy-button">Копировать</button>
-            </div>
-            <div className="promo-item">
-              <div className="promo-code">FRIEND50</div>
-              <div className="promo-info">
-                <div className="promo-description">50% на второй курс</div>
-                <div className="promo-validity">Действует до: 15.06.2025</div>
-              </div>
-              <button className="promo-copy-button">Копировать</button>
-            </div>
-          </div>
-          
           <h3>Посещаемость</h3>
           <div className="attendance-info">
             <div className="attendance-stat">
@@ -409,6 +491,25 @@ const Profile = () => {
       }
     };
     
+    if (loading) {
+      return (
+        <div className="profile-screen">
+          <div className="loading-message">Загрузка данных...</div>
+        </div>
+      );
+    }
+    
+    if (error) {
+      return (
+        <div className="profile-screen">
+          <div className="error-message">Ошибка: {error}</div>
+          <button className="retry-button" onClick={() => window.location.reload()}>
+            Повторить попытку
+          </button>
+        </div>
+      );
+    }
+    
     return (
       <div className="profile-screen">
         <div className="profile-header">
@@ -427,7 +528,12 @@ const Profile = () => {
             <img src={avatarImage1} alt="User avatar" className="avatar1-image" />
             <div className="avatar-border"></div>
           </div>
-          <h2 className="user-name">Jane Soci</h2>
+          <h2 className="user-name">{userInfo?.full_name || 'Пользователь'}</h2>
+          {userInfo?.role_name && (
+            <p className="user-role">{userInfo.role_name === 'admin' ? 'Администратор' : 
+                                      userInfo.role_name === 'teacher' ? 'Преподаватель' : 
+                                      'Студент'}</p>
+          )}
         </div>
         
         <div className="profile-tabs">
@@ -435,7 +541,7 @@ const Profile = () => {
             className={`tab-button ${activeTab === 'statistics' ? 'active' : ''}`}
             onClick={() => handleTabChange('statistics')}
           >
-            Statistics
+            Статистика
           </button>
           <button 
             className={`tab-button ${activeTab === 'portfolio' ? 'active' : ''}`}
@@ -447,7 +553,7 @@ const Profile = () => {
             className={`tab-button ${activeTab === 'reviews' ? 'active' : ''}`}
             onClick={() => handleTabChange('reviews')}
           >
-            Reviews
+            Обзор
           </button>
         </div>
         
@@ -499,20 +605,11 @@ const Profile = () => {
                         value={formData.gender} 
                         onChange={handleInputChange}
                       >
+                        <option value="">-- Выберите --</option>
                         <option value="Мужской">Мужской</option>
                         <option value="Женский">Женский</option>
                         <option value="Другой">Другой</option>
                       </select>
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Страна</label>
-                      <input 
-                        className="form-input" 
-                        type="text" 
-                        name="country" 
-                        value={formData.country} 
-                        onChange={handleInputChange} 
-                      />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Город</label>
@@ -525,13 +622,13 @@ const Profile = () => {
                       />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Язык</label>
+                      <label className="form-label">Колледж</label>
                       <input 
-                        className="form-input" 
-                        type="text" 
-                        name="language" 
-                        value={formData.language} 
-                        onChange={handleInputChange} 
+                        className="form-input"
+                        type="text"
+                        name="college"
+                        value={formData.college}
+                        onChange={handleInputChange}
                       />
                     </div>
                   </>

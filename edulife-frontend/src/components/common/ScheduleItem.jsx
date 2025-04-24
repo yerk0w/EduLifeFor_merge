@@ -1,4 +1,3 @@
-// src/components/common/ScheduleItem.jsx (с встроенными SVG)
 import React, {useState} from 'react';
 import './ScheduleItem.css';
 
@@ -25,17 +24,15 @@ const ScheduleItem = ({ item }) => {
           <div className="schedule-item-details">
             <div className="detail-item">
               <span className="detail-label">Преподаватель:</span>
-              <span className="detail-value">Иванов И.И.</span>
+              <span className="detail-value">{item.teacher || 'Не указан'}</span>
             </div>
             <div className="detail-item">
-              <span className="detail-label">Описание:</span>
-              <span className="detail-value">Изучение основных принципов проектирования программного обеспечения.</span>
+              <span className="detail-label">Тип занятия:</span>
+              <span className="detail-value">{item.lessonType || 'Не указан'}</span>
             </div>
             <div className="detail-item">
-              <span className="detail-label">Задания:</span>
-              <ul className="tasks-list">
-                <li>Подготовить презентацию по теме</li>
-              </ul>
+              <span className="detail-label">Дата:</span>
+              <span className="detail-value">{item.date}</span>
             </div>
           </div>
         )}

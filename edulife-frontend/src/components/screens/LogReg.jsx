@@ -1,6 +1,6 @@
 // src/components/screens/Home.jsx
 import React from 'react';
-import logregImage from '../../assets/images/logreg.webp';
+import logregImage from '../../assets/images/logreg.png';
 import './Logreg.css';
 
 const Logreg = () => {

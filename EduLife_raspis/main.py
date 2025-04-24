@@ -5,6 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from datetime import date, time, datetime
+from fastapi.staticfiles import StaticFiles
+from starlette.middleware.gzip import GZipMiddleware
 import json
 from api_integration import verify_token, get_teacher_info, get_group_info, send_schedule_notifications, enrich_schedule_data
 
@@ -16,7 +18,7 @@ app = FastAPI(
     description="API для управления расписанием занятий", 
     version="1.0.0"
 )
-
+app.add_middleware(GZipMiddleware, minimum_size=300)
 # Настройка CORS
 app.add_middleware(
     CORSMiddleware,
@@ -238,15 +240,15 @@ def get_schedule(
     return schedules
 
 
-@app.get("/schedule/{schedule_id}", response_model=ScheduleRead)
+@app.get("/schedule/{group_id}", response_model=ScheduleRead)
 def get_schedule_by_id(
-    schedule_id: int,
+    group_id: int,
     current_user: dict = Depends(get_current_user),
     authorization: str = Header(None)
 ):
-    schedule = database.get_schedule_by_id(schedule_id)
+    schedule = database.get_schedule_by_id(group_id)
     if not schedule:
-        raise HTTPException(status_code=404, detail=f"Расписание с ID {schedule_id} не найдено")
+        raise HTTPException(status_code=404, detail=f"Расписание с ID {group_id} не найдено")
     
     # Обогащаем данные расписания информацией о преподавателе и группе
     if authorization and authorization.startswith("Bearer "):

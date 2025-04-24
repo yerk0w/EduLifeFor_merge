@@ -14,7 +14,7 @@ const CourseCard = ({ course }) => {
   
   const handleCardClick = () => {
     // Navigate to the course detail page with the course ID
-    navigate(`/course/${course.id}`);
+    navigate(`/schedule`);
   };
   
   // Разделяем заголовок на две части, если это возможно

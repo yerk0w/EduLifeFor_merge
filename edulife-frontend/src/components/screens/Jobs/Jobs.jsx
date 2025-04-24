@@ -3,15 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { } from 'react-router-dom';
 import './Jobs.css';
 import Navbar from '../../common/Navbar';
-import googleLogo from '../../../assets/images/companies/google-logo.webp';
-import microsoftLogo from '../../../assets/images/companies/microsoft-logo.webp';
-import skyLogo from '../../../assets/images/companies/sky-logo.webp';
-import lsnLogo from '../../../assets/images/companies/lsn-logo.webp';
-import heartIcon from '../../../assets/images/heart-icon.webp';
-import heartFilledIcon from '../../../assets/images/heart-filled-icon.webp';
-import shareIcon from '../../../assets/images/share-icon.webp';
-import searchIcon from '../../../assets/images/search-icon.webp';
-import closeIcon from '../../../assets/images/close-icon.webp';
+import googleLogo from '../../../assets/images/companies/google-logo.png';
+import microsoftLogo from '../../../assets/images/companies/microsoft-logo.png';
+import skyLogo from '../../../assets/images/companies/sky-logo.png';
+import lsnLogo from '../../../assets/images/companies/lsn-logo.png';
+import heartIcon from '../../../assets/images/heart-icon.png';
+import heartFilledIcon from '../../../assets/images/heart-filled-icon.png';
+import shareIcon from '../../../assets/images/share-icon.png';
+import searchIcon from '../../../assets/images/search-icon.png';
+import closeIcon from '../../../assets/images/close-icon.png';
 
 
 const Jobs = () => {

@@ -137,7 +137,7 @@ def get_schedule(filters=None):
 
     return result
 
-def get_schedule_by_id(schedule_id):
+def get_schedule_by_id(group_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -152,10 +152,10 @@ def get_schedule_by_id(schedule_id):
         JOIN subjects subj ON s.subject_id = subj.id
         JOIN classrooms c ON s.classroom_id = c.id
         JOIN lesson_types lt ON s.lesson_type_id = lt.id
-        WHERE s.id = ?
+        WHERE s.group_id = ?
     """
 
-    cursor.execute(query, (schedule_id,))
+    cursor.execute(query, (group_id,))
     result = cursor.fetchone()
     conn.close()
 

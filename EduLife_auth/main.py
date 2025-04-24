@@ -8,8 +8,9 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 from pydantic import BaseModel
 import bcrypt
-
+from starlette.middleware.gzip import GZipMiddleware
 from routers import auth, users, teachers, students, groups, faculties
+
 
 # Настройки JWT
 SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key_for_development")
@@ -25,6 +26,8 @@ app = FastAPI(
     description="API для аутентификации и управления пользователями в EduLife",
     version="1.0.0"
 )
+# Добавляем middleware для сжатия ответов
+app.add_middleware(GZipMiddleware, minimum_size=100)
 
 # Настройка CORS для разрешения запросов между микросервисами
 app.add_middleware(

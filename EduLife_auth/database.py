@@ -891,3 +891,150 @@ def delete_faculty(faculty_id):
         raise ValueError(f"Ошибка при удалении факультета: {str(e)}")
     finally:
         conn.close()
+
+
+def get_all_departments():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT d.id, d.name, d.faculty_id, f.name as faculty_name, 
+               d.head_teacher_id, 
+               CASE WHEN t.id IS NOT NULL THEN u.full_name ELSE NULL END as head_teacher_name,
+               d.created_at
+        FROM departments d
+        JOIN faculties f ON d.faculty_id = f.id
+        LEFT JOIN teachers t ON d.head_teacher_id = t.id
+        LEFT JOIN users u ON t.user_id = u.id
+        ORDER BY d.name
+    """)
+    departments = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return departments
+
+def get_department_by_id(department_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT d.id, d.name, d.faculty_id, f.name as faculty_name, 
+               d.head_teacher_id, 
+               CASE WHEN t.id IS NOT NULL THEN u.full_name ELSE NULL END as head_teacher_name,
+               d.created_at
+        FROM departments d
+        JOIN faculties f ON d.faculty_id = f.id
+        LEFT JOIN teachers t ON d.head_teacher_id = t.id
+        LEFT JOIN users u ON t.user_id = u.id
+        WHERE d.id = ?
+    """, (department_id,))
+    department = cursor.fetchone()
+    conn.close()
+    if department:
+        return dict(department)
+    return None
+
+def create_department(department_data):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Проверяем существование факультета
+        cursor.execute("SELECT id FROM faculties WHERE id = ?", (department_data["faculty_id"],))
+        if not cursor.fetchone():
+            conn.close()
+            raise ValueError(f"Факультет с ID {department_data['faculty_id']} не существует")
+        
+        # Проверяем существование преподавателя, если указан
+        if department_data.get("head_teacher_id"):
+            cursor.execute("SELECT id FROM teachers WHERE id = ?", (department_data["head_teacher_id"],))
+            if not cursor.fetchone():
+                conn.close()
+                raise ValueError(f"Преподаватель с ID {department_data['head_teacher_id']} не существует")
+                
+        cursor.execute("""
+            INSERT INTO departments (name, faculty_id, head_teacher_id)
+            VALUES (?, ?, ?)
+        """, (
+            department_data["name"],
+            department_data["faculty_id"],
+            department_data.get("head_teacher_id")
+        ))
+        
+        department_id = cursor.lastrowid
+        conn.commit()
+        return department_id
+    except sqlite3.IntegrityError:
+        conn.rollback()
+        raise ValueError(f"Кафедра с названием '{department_data['name']}' уже существует")
+    finally:
+        conn.close()
+
+def update_department(department_id, department_data):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Проверяем существование кафедры
+        cursor.execute("SELECT id FROM departments WHERE id = ?", (department_id,))
+        if not cursor.fetchone():
+            conn.close()
+            raise ValueError(f"Кафедра с ID {department_id} не существует")
+            
+        # Проверяем существование факультета, если указан
+        if "faculty_id" in department_data:
+            cursor.execute("SELECT id FROM faculties WHERE id = ?", (department_data["faculty_id"],))
+            if not cursor.fetchone():
+                conn.close()
+                raise ValueError(f"Факультет с ID {department_data['faculty_id']} не существует")
+        
+        # Проверяем существование преподавателя, если указан
+        if department_data.get("head_teacher_id"):
+            cursor.execute("SELECT id FROM teachers WHERE id = ?", (department_data["head_teacher_id"],))
+            if not cursor.fetchone():
+                conn.close()
+                raise ValueError(f"Преподаватель с ID {department_data['head_teacher_id']} не существует")
+        
+        update_fields = []
+        update_values = []
+        
+        for field, value in department_data.items():
+            if field in ["name", "faculty_id", "head_teacher_id"]:
+                update_fields.append(f"{field} = ?")
+                update_values.append(value)
+        
+        if not update_fields:
+            return department_id
+        
+        update_values.append(department_id)
+        cursor.execute(f"""
+            UPDATE departments 
+            SET {', '.join(update_fields)}
+            WHERE id = ?
+        """, update_values)
+        
+        conn.commit()
+        return department_id
+    except sqlite3.IntegrityError:
+        conn.rollback()
+        raise ValueError(f"Кафедра с названием '{department_data.get('name')}' уже существует")
+    finally:
+        conn.close()
+
+def delete_department(department_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Проверяем, есть ли преподаватели, связанные с этой кафедрой
+        cursor.execute("SELECT COUNT(*) FROM teachers WHERE department_id = ?", (department_id,))
+        if cursor.fetchone()[0] > 0:
+            conn.close()
+            raise ValueError("Невозможно удалить кафедру, к которой привязаны преподаватели")
+        
+        cursor.execute("DELETE FROM departments WHERE id = ?", (department_id,))
+        if cursor.rowcount == 0:
+            conn.close()
+            return False
+        
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        raise ValueError(f"Ошибка при удалении кафедры: {str(e)}")
+    finally:
+        conn.close()

@@ -1,6 +1,6 @@
 // src/components/screens/Home.jsx
 import React from 'react';
-import startImage from '../../assets/images/start.webp';
+import startImage from '../../assets/images/start.png';
 import './Start.css';
 
 const Start = () => {

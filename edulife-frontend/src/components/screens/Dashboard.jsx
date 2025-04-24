@@ -7,8 +7,8 @@ import CourseCard from '../common/CourseCard';
 import apiService from '../../services/apiService';
 
 // Import images
-import avatarImage from '../../assets/images/avatar.webp';
-import notificationIcon from '../../assets/images/notification.webp';
+import avatarImage from '../../assets/images/avatar.png';
+import notificationIcon from '../../assets/images/notification.png';
 
 const Dashboard = () => {
   const navigate = useNavigate();

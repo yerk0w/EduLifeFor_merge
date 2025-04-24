@@ -12,7 +12,7 @@ const API_BASE_URL = {
 
 // Create an axios instance with default configuration
 const apiClient = axios.create({
-  timeout: 10000, // 10 seconds timeout
+  timeout: 50000, // 10 seconds timeout
   headers: {
     'Content-Type': 'application/json'
   }
@@ -190,6 +190,16 @@ login: async (username, password) => {
       try {
         console.log(`Requesting schedule for user ${userId} with role ${userRole}`);
         
+        // Используем непосредственно API департаментов для получения расписания пользователя
+        const response = await apiClient.get(`${API_BASE_URL.auth}/departments/user/${userId}/schedule`);
+        console.log(`Schedule response from department API:`, response.data);
+        
+        // Если API департаментов вернуло данные, используем их
+        if (response.data && Array.isArray(response.data)) {
+          return { schedule: response.data };
+        }
+        
+        // В качестве запасного варианта используем старый подход
         // Different parameters based on user role
         const params = {};
         if (userRole === 'teacher') {
@@ -204,58 +214,42 @@ login: async (username, password) => {
         }
         
         // Make the actual schedule request
-        const response = await apiClient.get(`${API_BASE_URL.raspis}/schedule`, {
+        const fallbackResponse = await apiClient.get(`${API_BASE_URL.raspis}/schedule`, {
           params: params
         });
         
-        console.log(`Schedule response:`, response.data);
-        return { schedule: response.data };
+        console.log(`Fallback schedule response:`, fallbackResponse.data);
+        return { schedule: fallbackResponse.data };
       } catch (error) {
         console.error(`Error fetching schedule for user ${userId}:`, error);
-        // Return empty schedule instead of failing
-        return { schedule: [] };
+        
+        try {
+          // В случае ошибки с API департаментов, попробуем прямой запрос
+          const params = {};
+          if (userRole === 'teacher') {
+            params.teacher_id = userId;
+          } else if (userRole === 'student') {
+            // Получаем группу студента
+            const studentResponse = await apiClient.get(`${API_BASE_URL.auth}/students/${userId}`);
+            if (studentResponse.data && studentResponse.data.length > 0) {
+              const groupId = studentResponse.data[0].group_id;
+              params.group_id = groupId;
+            }
+          }
+          
+          const fallbackResponse = await apiClient.get(`${API_BASE_URL.raspis}/schedule`, {
+            params: params
+          });
+          
+          return { schedule: fallbackResponse.data };
+        } catch (fallbackError) {
+          console.error('Fallback request also failed:', fallbackError);
+          // Return empty schedule if everything fails
+          return { schedule: [] };
+        }
       }
     },
-    
-    getScheduleById: async (scheduleId) => {
-      try {
-        const response = await apiClient.get(`${API_BASE_URL.raspis}/schedule/${scheduleId}`);
-        return response.data;
-      } catch (error) {
-        console.error(`Error fetching schedule ${scheduleId}:`, error);
-        throw error;
-      }
-    },
-    
-    createSchedule: async (scheduleData) => {
-      try {
-        const response = await apiClient.post(`${API_BASE_URL.raspis}/schedule`, scheduleData);
-        return response.data;
-      } catch (error) {
-        console.error('Error creating schedule:', error);
-        throw error;
-      }
-    },
-    
-    updateSchedule: async (scheduleId, scheduleData) => {
-      try {
-        const response = await apiClient.put(`${API_BASE_URL.raspis}/schedule/${scheduleId}`, scheduleData);
-        return response.data;
-      } catch (error) {
-        console.error(`Error updating schedule ${scheduleId}:`, error);
-        throw error;
-      }
-    },
-    
-    deleteSchedule: async (scheduleId) => {
-      try {
-        const response = await apiClient.delete(`${API_BASE_URL.raspis}/schedule/${scheduleId}`);
-        return response.data;
-      } catch (error) {
-        console.error(`Error deleting schedule ${scheduleId}:`, error);
-        throw error;
-      }
-    }
+
   },
   // Document Service APIs
   documents: {

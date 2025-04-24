@@ -1,7 +1,7 @@
 // src/components/screens/SplashScreen.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import flowerImage from '../../assets/images/flower.webp'; // Импортируем изображение
+import flowerImage from '../../assets/images/flower.png'; // Импортируем изображение
 import './SplashScreen.css';
 
 const SplashScreen = () => {
