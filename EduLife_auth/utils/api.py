@@ -2,6 +2,8 @@ import os
 import requests
 from typing import Dict, Any, Optional, List
 import json
+import database
+from database import create_user, get_user_by_username
 
 # Конфигурация
 API_TIMEOUT = 10  # Таймаут для API запросов (секунды)
@@ -81,6 +83,22 @@ def get_teacher_schedule(token: str, teacher_id: int) -> List[Dict[str, Any]]:
     url = f"{RASPIS_API_URL}/schedule"
     params = {"teacher_id": teacher_id}
     return make_api_request("get", url, token=token, params=params)
+
+async def get_subjects_by_teacher_id(teacher_id):
+    """Получает список предметов, которые ведет учитель по его ID"""
+    conn = database.get_db_connection
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT s.id, s.name
+            FROM teacher_subjects ts
+            JOIN subjects s ON ts.subject_id = s.id
+            WHERE ts.teacher_id = ?
+        """, (teacher_id,))
+        subjects = [dict(row) for row in cursor.fetchall()]
+        return subjects
+    finally:
+        conn.close()
 
 # API для управления документами
 def get_documents(token: str, user_id: Optional[int] = None) -> List[Dict[str, Any]]:

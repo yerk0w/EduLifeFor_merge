@@ -53,33 +53,34 @@ apiClient.interceptors.response.use(
 const apiService = {
   // Auth Service APIs
   auth: {
-    login: async (username, password) => {
-      try {
-        const response = await axios.post(`${API_BASE_URL.auth}/auth/login`,
-          new URLSearchParams({
-            'username': username,
-            'password': password
-          }),
-          {
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            }
-          }
-        );
-        
-        // Store the token in localStorage for future requests
-        if (response.data.access_token) {
-          localStorage.setItem('authToken', response.data.access_token);
-          localStorage.setItem('userId', response.data.user_id);
-          localStorage.setItem('userRole', response.data.role);
+login: async (username, password) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL.auth}/auth/login`,
+      new URLSearchParams({
+        'username': username,
+        'password': password
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
         }
-        
-        return response.data;
-      } catch (error) {
-        console.error('Login error:', error);
-        throw error;
       }
-    },
+    );
+    
+    // Store the token and user info in localStorage
+    if (response.data.access_token) {
+      localStorage.setItem('authToken', response.data.access_token);
+      localStorage.setItem('userId', response.data.user_id);
+      localStorage.setItem('username', response.data.username);
+      localStorage.setItem('userRole', response.data.role);
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
+},
     
     register: async (userData) => {
       try {
@@ -172,13 +173,47 @@ const apiService = {
   schedule: {
     getSchedule: async (filters = {}) => {
       try {
+        console.log(`Requesting schedule with filters:`, filters);
         const response = await apiClient.get(`${API_BASE_URL.raspis}/schedule`, {
           params: filters
         });
+        console.log(`Schedule response:`, response.data);
         return response.data;
       } catch (error) {
         console.error('Error fetching schedule:', error);
-        throw error;
+        // Return empty array instead of failing
+        return [];
+      }
+    },
+    
+    getScheduleForUser: async (userId, userRole) => {
+      try {
+        console.log(`Requesting schedule for user ${userId} with role ${userRole}`);
+        
+        // Different parameters based on user role
+        const params = {};
+        if (userRole === 'teacher') {
+          params.teacher_id = userId;
+        } else if (userRole === 'student') {
+          // First we need to get the student's group ID
+          const studentResponse = await apiClient.get(`${API_BASE_URL.auth}/students?user_id=${userId}`);
+          if (studentResponse.data && studentResponse.data.length > 0) {
+            const groupId = studentResponse.data[0].group_id;
+            params.group_id = groupId;
+          }
+        }
+        
+        // Make the actual schedule request
+        const response = await apiClient.get(`${API_BASE_URL.raspis}/schedule`, {
+          params: params
+        });
+        
+        console.log(`Schedule response:`, response.data);
+        return { schedule: response.data };
+      } catch (error) {
+        console.error(`Error fetching schedule for user ${userId}:`, error);
+        // Return empty schedule instead of failing
+        return { schedule: [] };
       }
     },
     
@@ -220,39 +255,8 @@ const apiService = {
         console.error(`Error deleting schedule ${scheduleId}:`, error);
         throw error;
       }
-    },
-    
-    getSubjects: async () => {
-      try {
-        const response = await apiClient.get(`${API_BASE_URL.raspis}/subjects`);
-        return response.data;
-      } catch (error) {
-        console.error('Error fetching subjects:', error);
-        throw error;
-      }
-    },
-    
-    getClassrooms: async () => {
-      try {
-        const response = await apiClient.get(`${API_BASE_URL.raspis}/classrooms`);
-        return response.data;
-      } catch (error) {
-        console.error('Error fetching classrooms:', error);
-        throw error;
-      }
-    },
-    
-    getLessonTypes: async () => {
-      try {
-        const response = await apiClient.get(`${API_BASE_URL.raspis}/lesson-types`);
-        return response.data;
-      } catch (error) {
-        console.error('Error fetching lesson types:', error);
-        throw error;
-      }
     }
   },
-  
   // Document Service APIs
   documents: {
     getDocuments: async (page = 1, limit = 10) => {

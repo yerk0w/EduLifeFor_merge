@@ -72,7 +72,7 @@ async def register_user(user_data: UserCreate):
     # Получаем роль студента
     conn = database.get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id FROM roles WHERE name = 'admin'")
+    cursor.execute("SELECT id FROM roles WHERE name = 'student'")
     admin_role = cursor.fetchone()
     conn.close()
 

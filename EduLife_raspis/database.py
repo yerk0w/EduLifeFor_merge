@@ -100,10 +100,10 @@ def get_schedule(filters=None):
     query = """
         SELECT
             s.id, s.date, s.time_start, s.time_end,
-            subj.name as subject_name,
+            s.subject_id, subj.name as subject_name,
             s.teacher_id, s.group_id,
-            c.name as classroom_name,
-            lt.name as lesson_type
+            s.classroom_id, c.name as classroom_name,
+            s.lesson_type_id, lt.name as lesson_type
         FROM schedule s
         JOIN subjects subj ON s.subject_id = subj.id
         JOIN classrooms c ON s.classroom_id = c.id

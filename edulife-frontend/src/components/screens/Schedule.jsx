@@ -13,10 +13,11 @@ const Schedule = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Get user ID from local storage
+  // Get user ID and role from local storage
   const userId = localStorage.getItem('userId');
+  const userRole = localStorage.getItem('userRole');
 
-  // Fetch user schedule from API
+  // Fetch schedule from API
   useEffect(() => {
     const fetchSchedule = async () => {
       if (!userId) {
@@ -27,11 +28,14 @@ const Schedule = () => {
       
       try {
         setLoading(true);
-        const response = await apiService.qr.getScheduleForUser(userId);
         
-        if (response && response.schedule) {
+        // Напрямую обращаемся к API расписания
+        // Используем любые доступные параметры фильтрации, не зависящие от роли пользователя
+        const response = await apiService.schedule.getSchedule({});
+        
+        if (response && Array.isArray(response)) {
           // Transform API response to our schedule item format
-          const transformedSchedule = response.schedule.map(item => ({
+          const transformedSchedule = response.map(item => ({
             id: item.id,
             title: item.subject_name,
             time: `${item.time_start}-${item.time_end}`,
@@ -41,17 +45,19 @@ const Schedule = () => {
             bgShape: getBgShape(item.lesson_type), // Background shape based on lesson type
             teacher: item.teacher_name,
             dayOfWeek: new Date(item.date).getDay(),
-            date: new Date(item.date).toLocaleDateString(),
+            date: formatDateString(item.date), // Форматируем дату правильно
             lessonType: item.lesson_type
           }));
           
           setScheduleData(transformedSchedule);
+          console.log("Successfully loaded schedule data:", transformedSchedule);
         } else {
+          console.log("Empty or invalid response from API:", response);
           setScheduleData([]);
         }
       } catch (err) {
         console.error('Error fetching schedule:', err);
-        setError('Ошибка при загрузке расписания');
+        setError(`Ошибка при загрузке расписания: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -60,8 +66,28 @@ const Schedule = () => {
     fetchSchedule();
   }, [userId]);
   
+  // Функция для правильного форматирования даты из API в формат dd.mm.yyyy
+  const formatDateString = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        // Если не удалось распарсить дату
+        return dateString;
+      }
+      
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${day}.${month}.${year}`;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString; // Возвращаем исходную строку, если произошла ошибка
+    }
+  };
+  
   // Helper function to get consistent color based on subject ID
-  const getRandomColor = (subjectId) => {
+  const getRandomColor = (subjectId = 0) => {
     const colors = [
       '#E1BEE7', // Light purple
       '#FF8A65', // Orange
@@ -71,15 +97,17 @@ const Schedule = () => {
       '#FF6B8B', // Pink
     ];
     // Use the subject ID to choose a color deterministically
-    return colors[subjectId % colors.length];
+    return colors[Math.abs(subjectId) % colors.length];
   };
   
   // Helper function to get background shape based on lesson type
   const getBgShape = (lessonType) => {
     const shapes = ['flower', 'leaf', 'blob'];
 
-    if (lessonType.includes('лекция')) return 'flower';
-    if (lessonType.includes('практика')) return 'leaf';
+    if (lessonType && typeof lessonType === 'string') {
+      if (lessonType.includes('лекция')) return 'flower';
+      if (lessonType.includes('практика')) return 'leaf';
+    }
     return 'blob'; // Default
   };
 
@@ -94,12 +122,13 @@ const Schedule = () => {
       currentDate.setDate(startDate.getDate() + weekIndex * 7);
 
       for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+        const date = new Date(currentDate);
         week.push({
           day: daysOfWeek[dayIndex],
-          date: currentDate.getDate(),
-          month: currentDate.getMonth() + 1, // Months start from 0
-          year: currentDate.getFullYear(),
-          fullDate: new Date(currentDate)
+          date: date.getDate(),
+          month: date.getMonth() + 1, // Months start from 0
+          year: date.getFullYear(),
+          fullDate: date
         });
         currentDate.setDate(currentDate.getDate() + 1);
       }
@@ -128,17 +157,39 @@ const Schedule = () => {
     const selectedDay = currentWeek[selectedDayIndex];
     const selectedDate = `${selectedDay.date}.${selectedDay.month < 10 ? '0' + selectedDay.month : selectedDay.month}.${selectedDay.year}`;
     
+    console.log("Looking for items with date:", selectedDate);
+    
     // Filter by day first
     let filtered = scheduleData.filter(item => {
-      // Format item.date to match selectedDate format (dd.mm.yyyy)
-      const itemDateParts = item.date.split('.');
-      const itemDate = `${itemDateParts[0]}.${itemDateParts[1]}.${itemDateParts[2]}`;
-      return itemDate === selectedDate;
+      if (!item.date) {
+        console.log("Item has no date:", item);
+        return false;
+      }
+      
+      console.log(`Comparing dates: Item date ${item.date} vs Selected date ${selectedDate}`);
+      
+      try {
+        // Проверяем, что item.date соответствует формату дд.мм.гггг
+        const itemDateParts = item.date.split('.');
+        if (itemDateParts.length !== 3) {
+          console.log("Item date format is invalid:", item.date);
+          return false;
+        }
+        
+        const itemDate = `${itemDateParts[0]}.${itemDateParts[1]}.${itemDateParts[2]}`;
+        return itemDate === selectedDate;
+      } catch (error) {
+        console.error("Error comparing dates:", error);
+        return false;
+      }
     });
+    
+    console.log("Filtered items for the selected date:", filtered);
     
     // Apply additional filter if needed
     if (filter === 'unread') {
       filtered = filtered.filter(item => item.tasks > 0);
+      console.log("After unread filter:", filtered);
     }
     
     return filtered;

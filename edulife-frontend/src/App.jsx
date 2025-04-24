@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import SplashScreen from './components/screens/SplashScreen';
@@ -13,7 +12,7 @@ import Profile from './components/screens/Profile';
 import Notifications from './components/screens/Notifications';
 import Settings from './components/screens/Settings';
 import CourseDetail from './components/screens/CourseDetail';
-import AdminPanel from './components/screens/AdminPanel';
+import AdminPanel from './components/screens/admin/AdminPanel';
 import Documents from './components/screens/Documents/Documents';
 import Jobs from './components/screens/Jobs/Jobs'
 import './App.css';

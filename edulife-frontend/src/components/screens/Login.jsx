@@ -11,27 +11,35 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
+  
+  try {
+    const response = await apiService.auth.login(username, password);
+    console.log('Login successful:', response);
     
-    try {
-      const response = await apiService.auth.login(username, password);
-      console.log('Login successful:', response);
-      
-      // Navigate to dashboard after successful login
+    // Redirect based on user role
+    const userRole = response.role || localStorage.getItem('userRole');
+    
+    if (userRole === 'admin') {
       navigate('/dashboard');
-    } catch (error) {
-      console.error('Login error:', error);
-      setError(
-        error.response?.data?.detail || 
-        'Не удалось войти. Проверьте учетные данные и повторите попытку.'
-      );
-    } finally {
-      setLoading(false);
+    } else if (userRole === 'teacher') {
+      navigate('/dashboard');
+    } else {
+      navigate('/dashboard');
     }
-  };
+  } catch (error) {
+    console.error('Login error:', error);
+    setError(
+      error.response?.data?.detail || 
+      'Не удалось войти. Проверьте учетные данные и повторите попытку.'
+    );
+  } finally {
+    setLoading(false);
+  }
+};
   
   const handleBack = () => {
     navigate(-1); // Return to previous page

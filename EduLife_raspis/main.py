@@ -52,15 +52,6 @@ class ScheduleUpdate(BaseModel):
     lesson_type_id: Optional[int] = None
 
 
-class ScheduleRead(ScheduleBase):
-    id: int
-    subject_name: str
-    classroom_name: str
-    lesson_type: str
-    teacher_name: Optional[str] = None
-    group_name: Optional[str] = None
-
-
 class NotificationBase(BaseModel):
     id: int
     schedule_id: int
@@ -91,6 +82,25 @@ class ClassroomRead(BaseModel):
 class LessonTypeRead(BaseModel):
     id: int
     name: str
+    
+
+class ScheduleRead(BaseModel):
+    id: int
+    date: date
+    time_start: time
+    time_end: time
+    subject_id: int = Field(..., description="ID of the subject")
+    subject_name: str
+    classroom_id: int = Field(..., description="ID of the classroom")
+    classroom_name: str
+    lesson_type_id: int = Field(..., description="ID of the lesson type")
+    lesson_type: str
+    teacher_id: int
+    group_id: int
+    teacher_name: Optional[str] = None
+    teacher_department: Optional[str] = None
+    group_name: Optional[str] = None
+    faculty_name: Optional[str] = None
 
 # Функция для проверки авторизации
 async def get_current_user(authorization: str = Header(None)):
@@ -147,6 +157,8 @@ def health_check():
 
 
 # Эндпоинты для расписания
+# Update this function in EduLife_raspis/main.py
+
 @app.get("/schedule", response_model=List[ScheduleRead])
 def get_schedule(
     date_filter: Optional[date] = None,
@@ -165,7 +177,57 @@ def get_schedule(
     
     schedules = database.get_schedule(filters)
     
-    # Обогащаем данные расписания информацией о преподавателях и группах
+    # Add the missing fields required by the response model
+    for schedule in schedules:
+        # Ensure subject_id is present
+        if 'subject_id' not in schedule and 'subject_name' in schedule:
+            # Get subject_id from database or use a default
+            try:
+                conn = database.get_db_connection()
+                cursor = conn.cursor()
+                cursor.execute("SELECT id FROM subjects WHERE name = ?", (schedule['subject_name'],))
+                result = cursor.fetchone()
+                if result:
+                    schedule['subject_id'] = result['id']
+                else:
+                    schedule['subject_id'] = 1  # Default value
+                conn.close()
+            except:
+                schedule['subject_id'] = 1  # Default value
+        
+        # Ensure classroom_id is present
+        if 'classroom_id' not in schedule and 'classroom_name' in schedule:
+            # Get classroom_id from database or use a default
+            try:
+                conn = database.get_db_connection()
+                cursor = conn.cursor()
+                cursor.execute("SELECT id FROM classrooms WHERE name = ?", (schedule['classroom_name'],))
+                result = cursor.fetchone()
+                if result:
+                    schedule['classroom_id'] = result['id']
+                else:
+                    schedule['classroom_id'] = 1  # Default value
+                conn.close()
+            except:
+                schedule['classroom_id'] = 1  # Default value
+        
+        # Ensure lesson_type_id is present
+        if 'lesson_type_id' not in schedule and 'lesson_type' in schedule:
+            # Get lesson_type_id from database or use a default
+            try:
+                conn = database.get_db_connection()
+                cursor = conn.cursor()
+                cursor.execute("SELECT id FROM lesson_types WHERE name = ?", (schedule['lesson_type'],))
+                result = cursor.fetchone()
+                if result:
+                    schedule['lesson_type_id'] = result['id']
+                else:
+                    schedule['lesson_type_id'] = 1  # Default value
+                conn.close()
+            except:
+                schedule['lesson_type_id'] = 1  # Default value
+    
+    # Obogaschaem dannye raspisaniya informaciej o prepodavatelyah i gruppah
     if authorization and authorization.startswith("Bearer "):
         token = authorization.replace("Bearer ", "")
         enriched_schedules = []

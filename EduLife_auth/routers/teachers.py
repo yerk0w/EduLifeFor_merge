@@ -33,6 +33,22 @@ class TeacherResponse(BaseModel):
     contact_info: str | None
     subjects: List[dict]
 
+async def get_subjects_by_teacher_id(teacher_id):
+    """Получает список предметов, которые ведет учитель по его ID"""
+    conn = database.get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT s.id, s.name
+            FROM teacher_subjects ts
+            JOIN subjects s ON ts.subject_id = s.id
+            WHERE ts.teacher_id = ?
+        """, (teacher_id,))
+        subjects = [dict(row) for row in cursor.fetchall()]
+        return subjects
+    finally:
+        conn.close()
+
 @router.get("/", response_model=List[TeacherResponse])
 async def get_teachers():
     """Получить список всех преподавателей"""
