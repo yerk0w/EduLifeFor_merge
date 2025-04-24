@@ -74,7 +74,7 @@ def health_check():
 @app.post("/qr", response_model=QRResponse)
 def qr_code(request: QRRequest, current_user: dict = Depends(get_current_user)):
     # Проверяем, что у пользователя есть права на создание QR-кода
-    if current_user["role_name"] not in ["admin", "teacher"]:
+    if current_user.get("role", "") not in ["admin", "teacher"]:
         raise HTTPException(status_code=403, detail="Недостаточно прав для создания QR-кода")
     
     token = generate_qr_token(
@@ -201,7 +201,7 @@ def get_attendance_stats(
     end_date: Optional[str] = None
 ):
     # Проверяем, что пользователь имеет права на просмотр статистики
-    if current_user["role_name"] not in ["admin", "teacher"]:
+    if current_user.get("role", "") not in ["admin", "teacher"]:
         raise HTTPException(status_code=403, detail="Недостаточно прав для просмотра статистики")
     
     stats = database.get_session_stats(start_date, end_date)

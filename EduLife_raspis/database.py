@@ -182,6 +182,16 @@ def create_schedule(schedule_data):
         conn.close()
         raise ValueError(f"Lesson type with id {schedule_data['lesson_type_id']} does not exist")
 
+    # Преобразуем time объекты в строки, если они таковыми являются
+    time_start = schedule_data['time_start']
+    time_end = schedule_data['time_end']
+    
+    # Проверяем, являются ли объекты типом datetime.time и преобразуем их в строки
+    if hasattr(time_start, 'strftime'):
+        time_start = time_start.strftime('%H:%M:%S')
+    if hasattr(time_end, 'strftime'):
+        time_end = time_end.strftime('%H:%M:%S')
+
     cursor.execute("""
         INSERT INTO schedule (
             date, time_start, time_end, subject_id, teacher_id,
@@ -189,8 +199,8 @@ def create_schedule(schedule_data):
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         schedule_data['date'],
-        schedule_data['time_start'],
-        schedule_data['time_end'],
+        time_start,  # Используем строку вместо объекта datetime.time
+        time_end,    # Используем строку вместо объекта datetime.time
         schedule_data['subject_id'],
         schedule_data['teacher_id'],
         schedule_data['group_id'],
@@ -200,6 +210,15 @@ def create_schedule(schedule_data):
 
     schedule_id = cursor.lastrowid
 
+    # Для json.dumps нам тоже нужно обновить данные в строковый формат
+    json_data = schedule_data.copy()
+    if hasattr(schedule_data['time_start'], 'strftime'):
+        json_data['time_start'] = time_start
+    if hasattr(schedule_data['time_end'], 'strftime'):
+        json_data['time_end'] = time_end
+    if hasattr(schedule_data['date'], 'isoformat'):
+        json_data['date'] = schedule_data['date'].isoformat()
+
     import json
     cursor.execute("""
         INSERT INTO notifications (
@@ -208,7 +227,7 @@ def create_schedule(schedule_data):
     """, (
         schedule_id,
         'create',
-        json.dumps(schedule_data)
+        json.dumps(json_data)
     ))
 
     conn.commit()

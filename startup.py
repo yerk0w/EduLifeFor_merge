@@ -32,7 +32,7 @@ services = [
     {
         "name": "Document Service",
         "path": "EduLife_Dock",
-        "command": "..\\venv\\Scripts\\activate.bat && python main.py",
+        "command": "..\\venv\\Scripts\\activate.bat && cd app && python main.py",
         "port": 8100,
         "process": None
     }

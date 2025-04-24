@@ -2,12 +2,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Navbar.css';
-import homeIcon from '../../assets/images/home-icon.png';
-import scheduleIcon from '../../assets/images/schedule-icon.png';
-import qrIcon from '../../assets/images/qr-icon.png';
-import jobsIcon from '../../assets/images/documentflow.png';
-import mapIcon from '../../assets/images/map-icon.png'; // Иконка для карты
-import profileIcon from '../../assets/images/profile-icon.png';
+import homeIcon from '../../assets/images/home-icon.webp';
+import scheduleIcon from '../../assets/images/schedule-icon.webp';
+import qrIcon from '../../assets/images/qr-icon.webp';
+import jobsIcon from '../../assets/images/documentflow.webp';
+import mapIcon from '../../assets/images/map-icon.webp'; // Иконка для карты
+import profileIcon from '../../assets/images/profile-icon.webp';
 
 const Navbar = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();

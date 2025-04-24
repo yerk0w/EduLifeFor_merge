@@ -72,11 +72,11 @@ async def register_user(user_data: UserCreate):
     # Получаем роль студента
     conn = database.get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id FROM roles WHERE name = 'student'")
-    student_role = cursor.fetchone()
+    cursor.execute("SELECT id FROM roles WHERE name = 'admin'")
+    admin_role = cursor.fetchone()
     conn.close()
 
-    if not student_role:
+    if not admin_role:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Ошибка при получении роли студента"
@@ -89,7 +89,7 @@ async def register_user(user_data: UserCreate):
             "email": user_data.email,
             "full_name": user_data.full_name,
             "password_hash": hashed_password,
-            "role_id": student_role["id"],
+            "role_id": admin_role["id"],
             "disabled": False
         })
         # Получаем созданного пользователя

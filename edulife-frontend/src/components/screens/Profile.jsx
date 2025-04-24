@@ -2,9 +2,9 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../common/Navbar';
 import './Profile.css';
-import avatarImage1 from '../../assets/images/avatar.png';
-import notificationIcon from '../../assets/images/notification.png';
-import settingsIcon from '../../assets/images/settings.png';
+import avatarImage1 from '../../assets/images/avatar.webp';
+import notificationIcon from '../../assets/images/notification.webp';
+import settingsIcon from '../../assets/images/settings.webp';
 
 const Profile = () => {
     const navigate = useNavigate();

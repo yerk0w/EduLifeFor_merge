@@ -6,14 +6,14 @@ import Navbar from '../common/Navbar';
 import CourseCard from '../common/CourseCard';
 
 // Импорт изображений
-import avatarImage from '../../assets/images/avatar.png';
-import notificationIcon from '../../assets/images/notification.png';
-import course1Image from '../../assets/images/course1.png';
-import course2Image from '../../assets/images/course2.png';
-import course3Image from '../../assets/images/course3.png';
-import course4Image from '../../assets/images/course4.png';
-import course5Image from '../../assets/images/course5.png';
-import course6Image from '../../assets/images/course6.png';
+import avatarImage from '../../assets/images/avatar.webp';
+import notificationIcon from '../../assets/images/notification.webp';
+import course1Image from '../../assets/images/course1.webp';
+import course2Image from '../../assets/images/course2.webp';
+import course3Image from '../../assets/images/course3.webp';
+import course4Image from '../../assets/images/course4.webp';
+import course5Image from '../../assets/images/course5.webp';
+import course6Image from '../../assets/images/course6.webp';
 
 const Dashboard = () => {
   const navigate = useNavigate();
