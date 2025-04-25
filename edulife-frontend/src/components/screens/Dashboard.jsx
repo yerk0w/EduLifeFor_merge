@@ -88,7 +88,6 @@ const Dashboard = () => {
     
     fetchUserData();
   }, [userId, userRole, navigate]);
-  
   // Helper function to get consistent color based on subject ID
   const getRandomColor = (subjectId) => {
     const colors = [
@@ -150,7 +149,6 @@ const Dashboard = () => {
         </div>
         <div className="notification-icon" onClick={handleNotifications}>
           <img src={notificationIcon} alt="Notifications" />
-          <div className="notification-badge">2</div>
         </div>
       </div>
       

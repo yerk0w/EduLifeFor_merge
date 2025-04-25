@@ -442,3 +442,20 @@ def get_lesson_types():
 
     conn.close()
     return result
+
+def get_notifications_by_group_id(group_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            id, schedule_id, change_type, previous_data, new_data, created_at
+        FROM notifications
+        WHERE target_group_id = ?
+        ORDER BY created_at
+    """, (group_id,))
+
+    result = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+
+    return result
