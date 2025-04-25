@@ -3,6 +3,7 @@ from fastapi import Form, File, UploadFile
 from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from sqlalchemy import desc
 
 from app.db.database import get_db
 from app.schemas.document import DocumentCreate, DocumentResponse, DocumentUpdate
@@ -10,6 +11,7 @@ from app.services.document import (
     get_documents, get_document, get_user_documents, create_document,
     update_document_status, create_document_with_file
 )
+from app.models.user import User
 from app.auth import get_current_user_from_auth, get_admin_user, get_teacher_user
 from app.config import DEMO_MODE
 
@@ -278,8 +280,8 @@ async def download_document(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Ошибка при скачивании документа: {str(e)}"
         )
-        
-        @router.post("/admin/send", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
+
+@router.post("/admin/send", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
 async def admin_send_document(
     title: str = Form(...),
     content: str = Form(...),

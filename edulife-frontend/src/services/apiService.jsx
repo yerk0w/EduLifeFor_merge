@@ -385,7 +385,7 @@ const apiService = {
   },
   // Document Service APIs
   documents: {
-    getDocuments: async (page = 1, limit = 10) => {
+    getDocuments: async (page = 1, limit = 100) => {
       try {
         // Проверка наличия токена
         const token = localStorage.getItem('authToken');
@@ -395,7 +395,7 @@ const apiService = {
         }
         
         // Используем URL с префиксом /api для прокси
-        const response = await apiClient.get(`/api/documents`, {
+        const response = await apiClient.get(`/api/documents/`, {
           params: { skip: (page - 1) * limit, limit },
           // Таймаут в 5 секунд для быстрого реагирования
           timeout: 5000
@@ -450,19 +450,51 @@ const apiService = {
     
     uploadDocument: async (formData) => {
       try {
-        const response = await apiClient.post(`/api/documents/upload`, formData, {
+        // Добавляем логирование для диагностики
+        console.log('Отправка документа, содержимое FormData:');
+        for (let pair of formData.entries()) {
+          console.log(pair[0] + ': ' + (pair[0] === 'file' ? pair[1].name : pair[1]));
+        }
+        
+        // Отправляем запрос с правильными заголовками
+        const response = await axios.post(`${API_BASE_URL.documents}/documents/upload`, formData, {
           headers: {
-            // При отправке FormData заголовок Content-Type будет установлен автоматически
-            // с правильным boundary для multipart/form-data
-            'Content-Type': undefined
+            // Не указываем Content-Type, чтобы axios автоматически установил с boundary
+            'Content-Type': undefined,
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
           }
         });
+        
         return response.data;
       } catch (error) {
-        console.error('Error uploading document:', error);
+        console.error('Ошибка при загрузке документа:', error);
+        
+        // Проверяем детали ошибки
+        if (error.response) {
+          // Ответ получен, но статус не 2xx
+          console.error('Статус ошибки:', error.response.status);
+          console.error('Данные ошибки:', error.response.data);
+          
+          // Для отладки - смотрим, какие заголовки были отправлены
+          console.log('Заголовки запроса:', error.config?.headers);
+        }
+        
+        // Если в localStorage установлен флаг demoMode, возвращаем фиктивный ответ
+        if (localStorage.getItem('demoMode') === 'true') {
+          console.log('Демо-режим: возвращаем фиктивный успешный ответ');
+          return {
+            id: Date.now(),
+            title: formData.get('title'),
+            content: formData.get('content'),
+            status: 'ожидает',
+            created_at: new Date().toISOString(),
+            file_path: '/static/uploads/demo-file.pdf'
+          };
+        }
+        
         throw error;
       }
-    },
+    },  
     
     updateDocumentStatus: async (documentId, status) => {
       try {
