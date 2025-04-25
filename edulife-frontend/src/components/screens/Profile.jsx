@@ -14,7 +14,7 @@ const Profile = () => {
     const [activeTooltip, setActiveTooltip] = useState(null);
     const chartRef = useRef(null);
     
-    // Стейт для пользовательских данных
+    // State for user data
     const [userInfo, setUserInfo] = useState(null);
     const [attendanceData, setAttendanceData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -28,54 +28,69 @@ const Profile = () => {
       birthDate: '',
       gender: '',
       city: '',
-      group: '',
+      cityId: null,
+      collegeId: null,
       college: '',
       email: '',
       phone: '',
       address: '',
-      telegram: ''
+      telegram: '',
+      group_name: ''
+
     });
-  
-    // Максимальное значение для графика
-    const maxValue = 100; // Максимальное значение - 100%
+
+    // State for cities and colleges
+    const [cities, setCities] = useState([]);
+    const [colleges, setColleges] = useState([]);
+    
+    // Maximum value for chart
+    const maxValue = 100; // Maximum value - 100%
     const timeRangeOptions = ['6 Months', '1 Year', 'All'];
     const [showTimeRangeDropdown, setShowTimeRangeDropdown] = useState(false);
     
-    // Получение данных пользователя при загрузке компонента
+    // Fetch user data on component mount
     useEffect(() => {
       const fetchUserData = async () => {
         try {
           setLoading(true);
           
-          // Получаем ID пользователя из localStorage
+          // Get user ID from localStorage
           const userId = localStorage.getItem('userId');
           if (!userId) {
-            throw new Error('Пользователь не авторизован');
+            throw new Error('User not authenticated');
           }
           
-          // Запрашиваем данные пользователя
-          const userResponse = await apiService.auth.getUserById(userId);
+          // Fetch cities and colleges
+          const citiesResponse = await apiService.auth.getCities();
+          setCities(citiesResponse || []);
+          
+          const collegesResponse = await apiService.auth.getColleges();
+          setColleges(collegesResponse || []);
+          
+          // Fetch user profile
+          const userResponse = await apiService.auth.getUserProfile(userId);
           
           if (!userResponse) {
-            throw new Error('Не удалось получить данные пользователя');
+            throw new Error('Failed to get user profile');
           }
           
           setUserInfo(userResponse);
           
-          // Инициализируем форму данными пользователя
+          // Initialize form with user data
           setFormData({
             fullName: userResponse.full_name || '',
             email: userResponse.email || '',
-            // Дополнительные поля могут быть получены из других источников или API
-            birthDate: '',
-            gender: '',
-            city: '',
-            college: '',
-            group: '',
-            faculty: '',
-            phone: '',
-            address: '',
-            telegram: ''
+            birthDate: userResponse.birth_date || '',
+            gender: userResponse.gender || '',
+            cityId: userResponse.city_id || null,
+            city: userResponse.city_name || '',
+            collegeId: userResponse.college_id || null,
+            college: userResponse.college_name || '',
+            phone: userResponse.phone_number || '',
+            address: '', // This field is not in the database yet
+            telegram: userResponse.telegram || '',
+            group_name: userResponse.group_name || '',
+            faculty_name: userResponse.faculty_name || ''
           });
 
           setAttendanceData([]);
@@ -97,6 +112,40 @@ const Profile = () => {
       setIsEditModalOpen(true);
     };
     
+    // Function to handle city selection changes
+    const handleCityChange = async (e) => {
+      const cityId = e.target.value ? parseInt(e.target.value) : null;
+      
+      setFormData({
+        ...formData,
+        cityId: cityId,
+        city: cityId ? cities.find(c => c.id === cityId)?.name || '' : '',
+        collegeId: null, // Reset college selection when city changes
+        college: ''
+      });
+      
+      // If a city is selected, fetch related colleges
+      if (cityId) {
+        try {
+          const collegesResponse = await apiService.auth.getColleges(cityId);
+          setColleges(collegesResponse || []);
+        } catch (error) {
+          console.error('Error fetching colleges for city:', error);
+        }
+      }
+    };
+    
+    // Function to handle college selection changes
+    const handleCollegeChange = (e) => {
+      const collegeId = e.target.value ? parseInt(e.target.value) : null;
+      
+      setFormData({
+        ...formData,
+        collegeId: collegeId,
+        college: collegeId ? colleges.find(c => c.id === collegeId)?.name || '' : ''
+      });
+    };
+    
     // Function to handle form input changes
     const handleInputChange = (e) => {
       const { name, value } = e.target;
@@ -111,43 +160,40 @@ const Profile = () => {
       e.preventDefault();
       
       try {
-        // Получаем ID пользователя из localStorage
+        // Get user ID from localStorage
         const userId = localStorage.getItem('userId');
         if (!userId) {
-          throw new Error('Пользователь не авторизован');
+          throw new Error('User not authenticated');
         }
         
-        // Подготавливаем данные для обновления
+        // Prepare data for update
         const updateData = {};
         
         if (editingSection === 'personal') {
-          // Для персональных данных
-          updateData.full_name = formData.fullName;
-          // Другие поля могут требовать отдельного API или эндпоинта
+          // For personal data
+          updateData.gender = formData.gender || null;
+          updateData.birth_date = formData.birthDate || null;
+          updateData.city_id = formData.cityId || null;
+          updateData.college_id = formData.collegeId || null;
         } else if (editingSection === 'contact') {
-          // Для контактных данных
-          updateData.email = formData.email;
-          // Другие поля также могут требовать отдельного API
+          // For contact data
+          updateData.email = formData.email || null;
+          updateData.phone_number = formData.phone || null;
+          updateData.telegram = formData.telegram || null;
         }
         
-        // Отправляем запрос на обновление данных
-        // Имитация обновления через консоль
-        console.log('Updating user data:', updateData);
+        // Send update request
+        const updatedProfile = await apiService.auth.updateUserProfile(userId, updateData);
         
-        // После успешного обновления, обновляем локальное состояние
-        setUserInfo(prev => ({
-          ...prev,
-          ...updateData,
-          full_name: updateData.full_name || prev.full_name,
-          email: updateData.email || prev.email
-        }));
+        // Update local state with new data
+        setUserInfo(updatedProfile);
         
-        // Закрываем модальное окно
+        // Close modal
         setIsEditModalOpen(false);
         
       } catch (err) {
         console.error('Error updating user data:', err);
-        alert('Ошибка при обновлении данных: ' + err.message);
+        alert('Error when updating data: ' + err.message);
       }
     };
     
@@ -160,7 +206,7 @@ const Profile = () => {
       setShowTimeRangeDropdown(false);
     };
     
-    // Обработчики для всплывающих подсказок
+    // Handlers for tooltips
     const handleBarClick = (index) => {
       if (activeTooltip === index) {
         setActiveTooltip(null);
@@ -181,7 +227,7 @@ const Profile = () => {
       navigate('/notifications');
     };
     
-    // Расчет общей статистики посещаемости
+    // Calculate total attendance stats
     const calculateTotalAttendance = () => {
       if (!attendanceData || attendanceData.length === 0) {
         return {
@@ -206,150 +252,150 @@ const Profile = () => {
     const totalAttendance = calculateTotalAttendance();
     
     const renderPortfolioTab = () => {
-        return (
-          <div className="profile-portfolio">
-            <div className="user-data-section">
-              <h3>Мои данные</h3>
+      return (
+        <div className="profile-portfolio">
+          <div className="user-data-section">
+            <h3>Мои данные</h3>
+            
+            {/* Personal data */}
+            <div className="user-data-card">
+              <div className="user-data-header">
+                <div className="user-data-title">Персональные данные</div>
+                <button className="user-data-edit-button" onClick={() => handleEditClick('personal')}>
+                  <svg className="user-data-edit-icon" viewBox="0 0 24 24">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                  </svg>
+                  Редактировать
+                </button>
+              </div>
               
-              {/* Персональные данные */}
-              <div className="user-data-card">
-                <div className="user-data-header">
-                  <div className="user-data-title">Персональные данные</div>
-                  <button className="user-data-edit-button" onClick={() => handleEditClick('personal')}>
-                    <svg className="user-data-edit-icon" viewBox="0 0 24 24">
-                      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                    </svg>
-                    Редактировать
-                  </button>
+              <div className="personal-data-list">
+                <div className="personal-data-item">
+                  <div className="personal-data-label">Полное имя</div>
+                  <div className="personal-data-value">
+                    {userInfo?.full_name || 'Не указано'}
+                  </div>
                 </div>
-                
-                <div className="personal-data-list">
-                  <div className="personal-data-item">
-                    <div className="personal-data-label">Полное имя</div>
-                    <div className="personal-data-value">
-                      {userInfo?.full_name || formData.fullName || 'Не указано'}
-                    </div>
+                <div className="personal-data-item">
+                  <div className="personal-data-label">Дата рождения</div>
+                  <div className="personal-data-value">
+                    {userInfo?.birth_date || 'Не указано'}
                   </div>
-                  <div className="personal-data-item">
-                    <div className="personal-data-label">Дата рождения</div>
-                    <div className="personal-data-value">
-                      {formData.birthDate || 'Не указано'}
-                    </div>
+                </div>
+                <div className="personal-data-item">
+                  <div className="personal-data-label">Пол</div>
+                  <div className="personal-data-value">
+                    {userInfo?.gender || 'Не указано'}
                   </div>
-                  <div className="personal-data-item">
-                    <div className="personal-data-label">Пол</div>
-                    <div className="personal-data-value">
-                      {formData.gender || 'Не указано'}
-                    </div>
+                </div>
+                <div className="personal-data-item">
+                  <div className="personal-data-label">Город</div>
+                  <div className="personal-data-value">
+                    {userInfo?.city_name || 'Не указано'}
                   </div>
-                  <div className="personal-data-item">
-                    <div className="personal-data-label">Город</div>
-                    <div className="personal-data-value">
-                      {formData.city || 'Не указано'}
-                    </div>
+                </div>
+                <div className="personal-data-item">
+                  <div className="personal-data-label">Колледж</div>
+                  <div className="personal-data-value">
+                    {userInfo?.college_name || 'Не указано'}
                   </div>
-                  <div className="personal-data-item">
-                    <div className="personal-data-label">Колледж</div>
-                    <div className="personal-data-value">
-                      {formData.college || 'Не указано'}
-                    </div>
+                </div>
+                <div className="personal-data-item">
+                  <div className="personal-data-label">Факультет</div>
+                  <div className="personal-data-value">
+                    {formData.faculty_name || 'Не указано'}
                   </div>
-                  <div className="personal-data-item">
-                    <div className="personal-data-label">Факультет</div>
-                    <div className="personal-data-value">
-                      {formData.faculty || 'Не указано'}
-                    </div>
-                  </div>
-                  <div className="personal-data-item">
-                    <div className="personal-data-label">Группа</div>
-                    <div className="personal-data-value">
-                      {formData.group || 'Не указано'}
-                    </div>
+                </div>
+                <div className="personal-data-item">
+                  <div className="personal-data-label">Группа</div>
+                  <div className="personal-data-value">
+                    {formData.group_name || 'Не указано'}
                   </div>
                 </div>
               </div>
+            </div>
+            
+            {/* Contact data */}
+            <div className="user-data-card">
+              <div className="user-data-header">
+                <div className="user-data-title">Контактные данные</div>
+                <button className="user-data-edit-button" onClick={() => handleEditClick('contact')}>
+                  <svg className="user-data-edit-icon" viewBox="0 0 24 24">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                  </svg>
+                  Редактировать
+                </button>
+              </div>
               
-              {/* Контактные данные */}
-              <div className="user-data-card">
-                <div className="user-data-header">
-                  <div className="user-data-title">Контактные данные</div>
-                  <button className="user-data-edit-button" onClick={() => handleEditClick('contact')}>
-                    <svg className="user-data-edit-icon" viewBox="0 0 24 24">
-                      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+              <div className="contact-data-list">
+                <div className="contact-data-item">
+                  <div className="contact-icon">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
                     </svg>
-                    Редактировать
-                  </button>
+                  </div>
+                  <div className="contact-info">
+                    <div className="contact-type">Email</div>
+                    <div className="contact-value verified">
+                      {userInfo?.email || 'Не указано'}
+                      <span className="verified-badge">Подтвержден</span>
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="contact-data-list">
-                  <div className="contact-data-item">
-                    <div className="contact-icon">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-                      </svg>
-                    </div>
-                    <div className="contact-info">
-                      <div className="contact-type">Email</div>
-                      <div className="contact-value verified">
-                        {userInfo?.email || formData.email || 'Не указано'}
-                        <span className="verified-badge">Подтвержден</span>
-                      </div>
+                <div className="contact-data-item">
+                  <div className="contact-icon">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                    </svg>
+                  </div>
+                  <div className="contact-info">
+                    <div className="contact-type">Телефон</div>
+                    <div className="contact-value">
+                      {userInfo?.phone_number || 'Не указано'}
                     </div>
                   </div>
-                  
-                  <div className="contact-data-item">
-                    <div className="contact-icon">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-                      </svg>
-                    </div>
-                    <div className="contact-info">
-                      <div className="contact-type">Телефон</div>
-                      <div className="contact-value">
-                        {formData.phone || 'Не указано'}
-                      </div>
+                </div>
+                
+                <div className="contact-data-item">
+                  <div className="contact-icon">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                    </svg>
+                  </div>
+                  <div className="contact-info">
+                    <div className="contact-type">Адрес</div>
+                    <div className="contact-value">
+                      {formData.address || 'Не указано'}
                     </div>
                   </div>
-                  
-                  <div className="contact-data-item">
-                    <div className="contact-icon">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                      </svg>
-                    </div>
-                    <div className="contact-info">
-                      <div className="contact-type">Адрес</div>
-                      <div className="contact-value">
-                        {formData.address || 'Не указано'}
-                      </div>
-                    </div>
+                </div>
+                
+                <div className="contact-data-item">
+                  <div className="contact-icon">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
                   </div>
-                  
-                  <div className="contact-data-item">
-                    <div className="contact-icon">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                      </svg>
-                    </div>
-                    <div className="contact-info">
-                      <div className="contact-type">Telegram</div>
-                      <div className="contact-value">
-                        {formData.telegram || 'Не указано'}
-                      </div>
+                  <div className="contact-info">
+                    <div className="contact-type">Telegram</div>
+                    <div className="contact-value">
+                      {userInfo?.telegram || 'Не указано'}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        );
+        </div>
+      );
     };
-      
+    
     const renderStatisticsTab = () => {
       return (
         <div className="profile-statistics">
           
-          {/* Кнопка Документооборот */}
+          {/* Document Flow Button */}
           <div className="document-flow-container">
             <button className="document-flow-button" onClick={() => navigate('/documents')}>
               <div className="document-flow-icon">
@@ -365,7 +411,7 @@ const Profile = () => {
             </button>
           </div>
           
-          {/* Блок Analytics */}
+          {/* Analytics card */}
           <div className="analytics-card">
             <div className="analytics-header">
               <h3>Аналитика посещаемости</h3>
@@ -585,13 +631,14 @@ const Profile = () => {
                         name="fullName" 
                         value={formData.fullName} 
                         onChange={handleInputChange} 
+                        disabled={true} // Name can only be changed during registration
                       />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Дата рождения</label>
                       <input 
                         className="form-input" 
-                        type="text" 
+                        type="date" 
                         name="birthDate" 
                         value={formData.birthDate} 
                         onChange={handleInputChange} 
@@ -613,23 +660,32 @@ const Profile = () => {
                     </div>
                     <div className="form-group">
                       <label className="form-label">Город</label>
-                      <input 
-                        className="form-input" 
-                        type="text" 
-                        name="city" 
-                        value={formData.city} 
-                        onChange={handleInputChange} 
-                      />
+                      <select
+                        className="form-select"
+                        name="cityId"
+                        value={formData.cityId || ''}
+                        onChange={handleCityChange}
+                      >
+                        <option value="">-- Выберите город --</option>
+                        {cities.map(city => (
+                          <option key={city.id} value={city.id}>{city.name}</option>
+                        ))}
+                      </select>
                     </div>
                     <div className="form-group">
                       <label className="form-label">Колледж</label>
-                      <input 
-                        className="form-input"
-                        type="text"
-                        name="college"
-                        value={formData.college}
-                        onChange={handleInputChange}
-                      />
+                      <select
+                        className="form-select"
+                        name="collegeId"
+                        value={formData.collegeId || ''}
+                        onChange={handleCollegeChange}
+                        disabled={!formData.cityId}
+                      >
+                        <option value="">-- Выберите колледж --</option>
+                        {colleges.map(college => (
+                          <option key={college.id} value={college.id}>{college.name}</option>
+                        ))}
+                      </select>
                     </div>
                   </>
                 ) : (
@@ -642,6 +698,7 @@ const Profile = () => {
                         name="email" 
                         value={formData.email} 
                         onChange={handleInputChange} 
+                        disabled={true} // Email can only be changed during registration
                       />
                     </div>
                     <div className="form-group">
@@ -652,6 +709,7 @@ const Profile = () => {
                         name="phone" 
                         value={formData.phone} 
                         onChange={handleInputChange} 
+                        placeholder="+7 (999) 123-45-67"
                       />
                     </div>
                     <div className="form-group">
@@ -672,6 +730,7 @@ const Profile = () => {
                         name="telegram" 
                         value={formData.telegram} 
                         onChange={handleInputChange} 
+                        placeholder="@username"
                       />
                     </div>
                   </>

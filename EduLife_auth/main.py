@@ -9,8 +9,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 import bcrypt
 from starlette.middleware.gzip import GZipMiddleware
-from routers import auth, users, teachers, students, groups, faculties
-
+from routers import auth, users, teachers, students, groups, faculties , profile
 
 # Настройки JWT
 SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key_for_development")
@@ -49,6 +48,7 @@ app.include_router(users.router)
 app.include_router(teachers.router)
 app.include_router(students.router)
 app.include_router(groups.router)
+app.include_router(profile.router)
 app.include_router(faculties.router)  # Добавлен маршрут для факультетов
 
 @app.get("/")

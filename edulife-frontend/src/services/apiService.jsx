@@ -49,38 +49,36 @@ apiClient.interceptors.response.use(
   }
 );
 
-// API Service object
 const apiService = {
-  // Auth Service APIs
   auth: {
-login: async (username, password) => {
-  try {
-    const response = await axios.post(`${API_BASE_URL.auth}/auth/login`,
-      new URLSearchParams({
-        'username': username,
-        'password': password
-      }),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+    login: async (username, password) => {
+      try {
+        const response = await axios.post(`${API_BASE_URL.auth}/auth/login`,
+          new URLSearchParams({
+            'username': username,
+            'password': password
+          }),
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }
+          }
+        );
+        
+        // Store the token and user info in localStorage
+        if (response.data.access_token) {
+          localStorage.setItem('authToken', response.data.access_token);
+          localStorage.setItem('userId', response.data.user_id);
+          localStorage.setItem('username', response.data.username);
+          localStorage.setItem('userRole', response.data.role);
         }
+        
+        return response.data;
+      } catch (error) {
+        console.error('Login error:', error);
+        throw error;
       }
-    );
-    
-    // Store the token and user info in localStorage
-    if (response.data.access_token) {
-      localStorage.setItem('authToken', response.data.access_token);
-      localStorage.setItem('userId', response.data.user_id);
-      localStorage.setItem('username', response.data.username);
-      localStorage.setItem('userRole', response.data.role);
-    }
-    
-    return response.data;
-  } catch (error) {
-    console.error('Login error:', error);
-    throw error;
-  }
-},
+    },
     
     register: async (userData) => {
       try {
@@ -116,9 +114,53 @@ login: async (username, password) => {
         console.error(`Error fetching user ${userId}:`, error);
         throw error;
       }
+    },
+    
+    // New profile-related methods
+    getUserProfile: async (userId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/profile/${userId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching user profile ${userId}:`, error);
+        throw error;
+      }
+    },
+    
+    updateUserProfile: async (userId, profileData) => {
+      try {
+        const response = await apiClient.put(`${API_BASE_URL.auth}/profile/${userId}`, profileData);
+        return response.data;
+      } catch (error) {
+        console.error(`Error updating user profile ${userId}:`, error);
+        throw error;
+      }
+    },
+    
+    getCities: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/profile/cities`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching cities:', error);
+        return [];
+      }
+    },
+    
+    getColleges: async (cityId = null) => {
+      try {
+        const url = cityId 
+          ? `${API_BASE_URL.auth}/profile/colleges?city_id=${cityId}`
+          : `${API_BASE_URL.auth}/profile/colleges`;
+        const response = await apiClient.get(url);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching colleges:', error);
+        return [];
+      }
     }
   },
-  
+
   // QR Service APIs
   qr: {
     generateQR: async (subjectId, shiftId, teacherId) => {

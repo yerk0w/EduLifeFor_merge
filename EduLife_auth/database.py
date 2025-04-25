@@ -180,11 +180,12 @@ def get_user_by_username(username):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT 
-            u.id, u.username, u.email, u.full_name, u.password_hash, 
+        SELECT
+            u.id, u.username, u.email, u.full_name, u.password_hash,
             u.role_id, r.name as role_name, u.disabled, u.created_at
         FROM users u
         JOIN roles r ON u.role_id = r.id
+        
         WHERE u.username = ?
     """, (username,))
     user = cursor.fetchone()
@@ -312,7 +313,6 @@ def delete_user(user_id):
     finally:
         conn.close()
 
-# Функции для работы с группами
 def get_all_groups():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -396,7 +396,6 @@ def delete_group(group_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        # Проверяем, есть ли студенты в этой группе
         cursor.execute("SELECT COUNT(*) FROM students WHERE group_id = ?", (group_id,))
         if cursor.fetchone()[0] > 0:
             conn.close()
@@ -411,7 +410,6 @@ def delete_group(group_id):
     finally:
         conn.close()
 
-# Функции для работы с учителями
 def get_all_teachers():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -599,7 +597,6 @@ def delete_teacher(teacher_id):
     finally:
         conn.close()
 
-# Функции для работы со студентами
 def get_all_students():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -746,8 +743,6 @@ def update_student(student_id, student_data):
     finally:
         conn.close()
 
-
-# Добавьте в database.py
 def get_all_users():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -790,8 +785,6 @@ def delete_student(student_id):
     finally:
         conn.close()
 
-
-# Функции для работы с факультетами
 def get_all_faculties():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -891,7 +884,6 @@ def delete_faculty(faculty_id):
         raise ValueError(f"Ошибка при удалении факультета: {str(e)}")
     finally:
         conn.close()
-
 
 def get_all_departments():
     conn = get_db_connection()
@@ -1038,3 +1030,107 @@ def delete_department(department_id):
         raise ValueError(f"Ошибка при удалении кафедры: {str(e)}")
     finally:
         conn.close()
+
+def get_cities():
+    """Get all cities from the database"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM cities ORDER BY name")
+    cities = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return cities
+
+def get_colleges(city_id=None):
+    """Get colleges, optionally filtered by city_id"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    if city_id:
+        cursor.execute("""
+            SELECT c.id, c.name, c.city_id, ci.name as city_name
+            FROM colleges c
+            JOIN cities ci ON c.city_id = ci.id
+            WHERE c.city_id = ?
+            ORDER BY c.name
+        """, (city_id,))
+    else:
+        cursor.execute("""
+            SELECT c.id, c.name, c.city_id, ci.name as city_name
+            FROM colleges c
+            JOIN cities ci ON c.city_id = ci.id
+            ORDER BY c.name
+        """)
+    
+    colleges = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return colleges
+
+def update_user_profile(user_id, profile_data):
+    """Update user profile with additional information"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        update_fields = []
+        update_values = []
+        
+        fields_to_check = [
+            "telegram", "birth_date", "phone_number", 
+            "gender", "city_id", "college_id"
+        ]
+        
+        for field in fields_to_check:
+            if field in profile_data and profile_data[field] is not None:
+                update_fields.append(f"{field} = ?")
+                update_values.append(profile_data[field])
+        
+        if not update_fields:
+            conn.close()
+            return user_id
+        
+        update_values.append(user_id)
+        cursor.execute(f"""
+            UPDATE users 
+            SET {', '.join(update_fields)}
+            WHERE id = ?
+        """, update_values)
+        
+        conn.commit()
+        return user_id
+    except sqlite3.Error as e:
+        conn.rollback()
+        raise ValueError(f"Error updating user profile: {e}")
+    finally:
+        conn.close()
+
+def get_user_profile(user_id):
+    """Get complete user profile including additional information"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT 
+            u.id, u.username, u.email, u.full_name,
+            u.role_id, r.name as role_name, u.disabled,
+            u.telegram, u.birth_date, u.phone_number, u.gender,
+            u.city_id, c.name as city_name,
+            u.college_id, col.name as college_name,
+            u.created_at,
+            g.name as group_name,
+            fff.name as faculty_name
+        FROM users u
+        JOIN roles r ON u.role_id = r.id
+        LEFT JOIN cities c ON u.city_id = c.id
+        LEFT JOIN colleges col ON u.college_id = col.id
+        LEFT JOIN students s ON u.id = s.user_id
+        LEFT JOIN groups g ON s.group_id = g.id
+        LEFT JOIN faculties fff ON g.faculty_id = fff.id
+        WHERE u.id = ?
+    """, (user_id,))
+    
+    user = cursor.fetchone()
+    conn.close()
+    
+    if user:
+        return dict(user)
+    return None
