@@ -13,7 +13,7 @@ const Notifications = () => {
   return (
     <div className="notifications-screen">
       <div className="notifications-header">
-        <button className="back-button" onClick={handleBack}>
+        <button className="back-button5" onClick={handleBack}>
           &lt;
         </button>
         <h1>Уведомления</h1>

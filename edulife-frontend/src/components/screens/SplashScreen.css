@@ -2,7 +2,7 @@
 .splash-screen {
     width: 100%;
     height: 100%;
-    background-color: var(--primary-color);
+    background-color: #D2FF1F;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -13,7 +13,7 @@
   .logo {
     font-size: var(--font-size-logo);
     font-weight: 600;
-    color: var(--text-color);
+    color: black;
     z-index: 10;
     font-family: var(--font-primary);
     letter-spacing: 1px;

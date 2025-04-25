@@ -1,73 +1,119 @@
 /* src/components/common/Navbar.css */
 .navbar {
-    position: fixed;
-    bottom: 20px;
-    left: 10px;
-    right: 10px;
-    height: 64px;
-    background-color: #2D2D2D;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    border-radius: 500px;
-    z-index: 100;
-    max-width: 768px;
-    margin: 0 auto;
-    
+  position: fixed;
+  bottom: 20px;
+  left: 10px;
+  right: 10px;
+  height: 64px;
+  background-color: var(--card-background);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-radius: 500px;
+  z-index: 100;
+  max-width: 768px;
+  margin: 0 auto;
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.navbar-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.navbar-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--secondary-text);
+  transition: color 0.2s ease;
+}
+
+/* Добавлено: Специальные стили для иконок с внутренними SVG-путями */
+.navbar-icon path,
+.navbar-icon line,
+.navbar-icon circle,
+.navbar-icon rect,
+.navbar-icon polyline,
+.navbar-icon polygon {
+  stroke: var(--secondary-text) !important;
+  transition: stroke 0.2s ease;
+}
+
+.navbar-item.active .navbar-icon {
+  color: var(--primary-color);
+}
+
+/* Добавлено: Активное состояние для SVG-путей */
+.navbar-item.active .navbar-icon path,
+.navbar-item.active .navbar-icon line,
+.navbar-item.active .navbar-icon circle,
+.navbar-item.active .navbar-icon rect,
+.navbar-item.active .navbar-icon polyline,
+.navbar-item.active .navbar-icon polygon {
+  stroke: var(--primary-color) !important;
+}
+
+/* Добавлено: Специальный стиль для иконок, которые используют fill вместо stroke */
+.navbar-icon[fill]:not([fill="none"]),
+.navbar-icon path[fill]:not([fill="none"]) {
+  fill: var(--secondary-text) !important;
+  transition: fill 0.2s ease;
+}
+
+.navbar-item.active .navbar-icon[fill]:not([fill="none"]),
+.navbar-item.active .navbar-icon path[fill]:not([fill="none"]) {
+  fill: var(--primary-color) !important;
+}
+
+/* Адаптивные стили */
+@media screen and (max-width: 320px) {
+  .navbar {
+    height: 56px;
   }
   
   .navbar-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
   }
   
-  .navbar-item img {
-    width: 24px;
-    height: 24px;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
+  .navbar-icon {
+    width: 20px;
+    height: 20px;
   }
-  
-  .navbar-item.active img {
-    opacity: 1;
-  }
-  
-  /* Адаптивные стили */
-  @media screen and (max-width: 320px) {
-    .navbar {
-      height: 56px;
-    }
-    
-    .navbar-item {
-      width: 40px;
-      height: 40px;
-    }
-    
-    .navbar-item img {
-      width: 20px;
-      height: 20px;
-    }
-  }
-  
-/* Продолжение src/components/common/Navbar.css */
+}
+
 @media screen and (min-width: 768px) {
-    .navbar {
-      height: 72px;
-    }
-    
-    .navbar-item {
-      width: 56px;
-      height: 56px;
-    }
-    
-    .navbar-item img {
-      width: 28px;
-      height: 28px;
-    }
+  .navbar {
+    height: 72px;
   }
   
+  .navbar-item {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .navbar-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Добавлено: Эффект нажатия для лучшего UX */
+.navbar-item:active {
+  transform: scale(0.9);
+}
+
+/* Добавлено: Плавное увеличение активной иконки */
+.navbar-item.active {
+  transform: translateY(-5px);
+}
+
+/* Добавлено: Улучшенная тень для навбара в темной теме */
+[data-theme="dark"] .navbar {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}

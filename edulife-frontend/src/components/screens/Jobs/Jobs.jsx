@@ -3,14 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { } from 'react-router-dom';
 import './Jobs.css';
 import Navbar from '../../common/Navbar';
+import { AiFillHeart } from 'react-icons/ai'; // Заполненное сердечко
+import { FiShare2 } from 'react-icons/fi';
+import { FaSearch } from "react-icons/fa";
 import googleLogo from '../../../assets/images/companies/google-logo.png';
 import microsoftLogo from '../../../assets/images/companies/microsoft-logo.png';
 import skyLogo from '../../../assets/images/companies/sky-logo.png';
 import lsnLogo from '../../../assets/images/companies/lsn-logo.png';
-import heartIcon from '../../../assets/images/heart-icon.png';
-import heartFilledIcon from '../../../assets/images/heart-filled-icon.png';
-import shareIcon from '../../../assets/images/share-icon.png';
-import searchIcon from '../../../assets/images/search-icon.png';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import closeIcon from '../../../assets/images/close-icon.png';
 
 
@@ -166,17 +166,26 @@ const Jobs = () => {
         </div>
       ) : (
         <div className="jobs-header">
-          <button 
-            className={`favorite-button ${showFavorites ? 'active' : ''}`}
-            onClick={toggleFavoritesView}
-          >
-            <img src={showFavorites ? heartFilledIcon : heartIcon} alt="Favorites" />
-          </button>
-          <h1 className="header-title">Вакансий</h1>
-          <button className="search-button" onClick={toggleSearch}>
-            <img src={searchIcon} alt="Search" />
-          </button>
-        </div>
+      {/* Кнопка "Нравится" */}
+      <button
+        className={`favorite-button ${showFavorites ? 'active' : ''}`}
+        onClick={toggleFavoritesView}
+      >
+        {showFavorites ? (
+          <AiFillHeart size={24} color="red" />
+        ) : (
+          <AiFillHeart size={24} color="var(--text-color)" />
+        )}
+      </button>
+
+      {/* Заголовок */}
+      <h1 className="header-title">Вакансий</h1>
+
+      {/* Кнопка поиска */}
+      <button className="search-button" onClick={toggleSearch}>
+        <FaSearch size={24} color="var(--text-color)" />
+      </button>
+    </div>
       )}
 
       {!showSearch && (
@@ -225,21 +234,22 @@ const Jobs = () => {
                 </div>
                 
                 <div className="job-actions">
+                <button 
+                  className="favorite-job-button"
+                  onClick={() => toggleFavorite(job.id)}
+                >
+                  {favorites[job.id] ? (
+                    <AiFillHeart size={20} color="red" /> // Заполненное сердечко
+                  ) : (
+                    <AiFillHeart size={20} color="var(--text-color)" /> // Пустое сердечко
+                  )}
+                </button>
                   <button 
-                    className="favorite-job-button"
-                    onClick={() => toggleFavorite(job.id)}
-                  >
-                    <img 
-                      src={favorites[job.id] ? heartFilledIcon : heartIcon} 
-                      alt="Favorite" 
-                    />
-                  </button>
-                  <button 
-                    className="share-job-button"
-                    onClick={() => shareJob(job)}
-                  >
-                    <img src={shareIcon} alt="Share" />
-                  </button>
+                  className="share-job-button"
+                  onClick={() => shareJob(job)}
+                >
+                  <FiShare2 size={20} color="var(--text-color)" /> {/* Используем React Icon */}
+                </button>
                 </div>
               </div>
             </div>

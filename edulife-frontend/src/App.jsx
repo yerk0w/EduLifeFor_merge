@@ -16,6 +16,7 @@ import CourseDetail from './components/screens/CourseDetail';
 import AdminPanel from './components/screens/AdminPanel';
 import Documents from './components/screens/Documents/Documents';
 import Jobs from './components/screens/Jobs/Jobs'
+import TeacherPanel from './components/screens/TeacherPanel';
 import './App.css';
 const courses = [
   {
@@ -187,6 +188,7 @@ const App = () => {
           <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/documents" element={<Documents/>} />
           <Route path="/jobs" element={<Jobs/>} />
+          <Route path='/teacher-panel' element={<TeacherPanel/>} />
           {/* Добавьте другие маршруты здесь */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

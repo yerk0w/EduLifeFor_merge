@@ -3,6 +3,7 @@ import React, { useState, useRef} from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../common/Navbar';
 import './CourseDetail.css';
+import { MdArrowBack } from 'react-icons/md';
 
 const CourseDetail = ({ courses }) => {
   const { id } = useParams();
@@ -164,7 +165,7 @@ const CourseDetail = ({ courses }) => {
         <h3>Тест по материалу</h3>
         {course.homework.map((question, index) => (
           <div key={index} className="quiz-question">
-            <div className="question-text">{index + 1}. {question.question}</div>
+            <div className="question-text2">{index + 1}. {question.question}</div>
             <div className="question-options">
               {question.options.map((option, optIndex) => (
                 <label key={optIndex} className="option-label">
@@ -188,11 +189,9 @@ const CourseDetail = ({ courses }) => {
   return (
     <div className="course-detail-screen">
       <div className="course-detail-header">
-        <button className="back-button" onClick={handleBack}>
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" fill="white" />
-          </svg>
-        </button>
+      <button className="back-button2" onClick={handleBack}>
+      <MdArrowBack size={24}  /> {/* Используем React Icon */}
+    </button>
         <h1 className="header-title">О предмете</h1>
         <div className="header-spacer"></div>
       </div>

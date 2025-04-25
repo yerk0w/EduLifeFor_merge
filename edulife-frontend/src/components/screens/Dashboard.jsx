@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 import Navbar from '../common/Navbar';
 import CourseCard from '../common/CourseCard';
+import { FaBell } from 'react-icons/fa';
 
 // Импорт изображений
 import avatarImage from '../../assets/images/avatar.png';
-import notificationIcon from '../../assets/images/notification.png';
 import course1Image from '../../assets/images/course1.png';
 import course2Image from '../../assets/images/course2.png';
 import course3Image from '../../assets/images/course3.png';
@@ -15,9 +15,12 @@ import course4Image from '../../assets/images/course4.png';
 import course5Image from '../../assets/images/course5.png';
 import course6Image from '../../assets/images/course6.png';
 
-const Dashboard = () => {
+const Dashboard = ({ userName = 'Jane' }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
+  const handleProfileClick = () => {
+    navigate('/profile'); // Переход на страницу профиля
+  };
   
   // Пример данных для карточек курсов с использованием импортированных изображений
   const scheduleData = [
@@ -92,22 +95,27 @@ const Dashboard = () => {
     <div className="dashboard-screen">
       {/* Верхняя часть с аватаром и приветствием */}
       <div className="dashboard-header">
-        <div className="user-info">
-          <div className="avatar-container">
-            <img src={avatarImage} alt="User avatar" className="avatar-image" />
-            <div className="online-indicator"></div>
-          </div>
-          <p className="greeting">Hello, Jane</p>
-        </div>
-        <div className="notification-icon" onClick={handleNotifications}>
-          <img src={notificationIcon} alt="Notifications" />
-          <div className="notification-badge">2</div>
-        </div>
+      {/* Информация о пользователе */}
+      <div className="user-info">
+      <div className="avatar-container">
+        <img src={avatarImage} alt="User avatar" className="avatar-image" />
+        <div className="online-indicator"></div>
       </div>
+      <p className="greeting" onClick={handleProfileClick}>
+         <span className="user-name3">{userName}</span>
+      </p>
+    </div>
+
+      {/* Иконка уведомлений */}
+      <div className="notification-icon" onClick={handleNotifications}>
+        <FaBell size={24} color="var(--text-color)" /> {/* Иконка уведомлений */}
+        <div className="notification-badge2"></div>
+      </div>
+    </div>
       
       {/* Секция расписания */}
       <div className="section">
-        <h2 className="section-title">Расписание</h2>
+        <h2 className="section-title2">Расписание</h2>
         <div className="course-cards-container">
           {scheduleData.map(course => (
             <CourseCard key={course.id} course={course} />
@@ -117,7 +125,7 @@ const Dashboard = () => {
       
       {/* Секция стажировки */}
       <div className="section">
-        <h2 className="section-title">Стажировка</h2>
+        <h2 className="section-title2">Стажировка</h2>
         <div className="course-cards-container">
           {internshipData.map(course => (
             <CourseCard key={course.id} course={course} />
@@ -127,7 +135,7 @@ const Dashboard = () => {
       
       {/* Секция популярных курсов */}
       <div className="section">
-        <h2 className="section-title">Популярно</h2>
+        <h2 className="section-title2">Популярно</h2>
         <div className="course-cards-container">
           {popularData.map(course => (
             <CourseCard key={course.id} course={course} />

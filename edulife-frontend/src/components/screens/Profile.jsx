@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../common/Navbar';
 import './Profile.css';
 import avatarImage1 from '../../assets/images/avatar.png';
-import notificationIcon from '../../assets/images/notification.png';
-import settingsIcon from '../../assets/images/settings.png';
+import { FaCog, FaBell } from 'react-icons/fa';
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -411,45 +410,49 @@ const Profile = () => {
     
     return (
       <div className="profile-screen">
-        <div className="profile-header">
-          <button className="header-icon-button" onClick={handleSettings}>
-            <img src={settingsIcon} alt="Settings" />
-          </button>
-          <h1>Мой профиль</h1>
-          <button className="header-icon-button" onClick={handleNotifications}>
-            <img src={notificationIcon} alt="Notifications" />
-            <div className="notification-badge">2</div>
-          </button>
+      {/* Заголовок профиля */}
+      <div className="profile-header">
+        <button className="header-icon-button" onClick={handleSettings}>
+          <FaCog size={24} color="var(--text-color)" /> {/* Иконка настроек */}
+        </button>
+        <h1>Мой профиль</h1>
+        <button className="header-icon-button" onClick={handleNotifications}>
+          <FaBell size={24} color="var(--text-color)" /> {/* Иконка уведомлений */}
+          <div className="notification-badge"></div>
+        </button>
+      </div>
+
+      {/* Информация о пользователе */}
+      <div className="profile-user-info">
+        <div className="avatar1-container">
+          <img src={avatarImage1} alt="User avatar" className="avatar1-image" />
+          <div className="avatar-border"></div>
         </div>
+        <h2 className="user-name2">Jane Soci</h2>
+      </div>
         
-        <div className="profile-user-info">
-          <div className="avatar1-container">
-            <img src={avatarImage1} alt="User avatar" className="avatar1-image" />
-            <div className="avatar-border"></div>
-          </div>
-          <h2 className="user-name">Jane Soci</h2>
-        </div>
-        
-        <div className="profile-tabs">
-          <button 
-            className={`tab-button ${activeTab === 'statistics' ? 'active' : ''}`}
-            onClick={() => handleTabChange('statistics')}
-          >
-            Statistics
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'portfolio' ? 'active' : ''}`}
-            onClick={() => handleTabChange('portfolio')}
-          >
-            Мои данные
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'reviews' ? 'active' : ''}`}
-            onClick={() => handleTabChange('reviews')}
-          >
-            Reviews
-          </button>
-        </div>
+
+      {/* Кнопки вкладок */}
+      <div className="profile-tabs">
+        <button
+          className={`tab-button ${activeTab === 'statistics' ? 'active' : ''}`}
+          onClick={() => handleTabChange('statistics')}
+        >
+          Statistics
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'portfolio' ? 'active' : ''}`}
+          onClick={() => handleTabChange('portfolio')}
+        >
+          Мои данные
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'reviews' ? 'active' : ''}`}
+          onClick={() => handleTabChange('reviews')}
+        >
+          Reviews
+        </button>
+      </div>
         
         <div className="profile-content">
           {renderTabContent()}
