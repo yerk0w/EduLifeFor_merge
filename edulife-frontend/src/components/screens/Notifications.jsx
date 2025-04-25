@@ -136,7 +136,16 @@ const Notifications = () => {
       </div>
       
       {loading ? (
-        <div className="loading-indicator">Загрузка уведомлений...</div>
+        <div className="loading-indicator">
+          <div class="loader">
+            <div class="loader__bar"></div>
+            <div class="loader__bar"></div>
+            <div class="loader__bar"></div>
+            <div class="loader__bar"></div>
+            <div class="loader__bar"></div>
+            <div class="loader__ball"></div>
+          </div>
+        </div>
       ) : error ? (
         <div className="error-message">{error}</div>
       ) : notifications.length === 0 ? (

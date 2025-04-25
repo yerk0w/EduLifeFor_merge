@@ -1,5 +1,7 @@
+# app/security/jwt.py
+
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
@@ -42,6 +44,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        # Сначала пробуем локальную проверку токена
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:

@@ -1,3 +1,5 @@
+# app/main.py
+
 import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -50,6 +52,18 @@ def read_root():
     """
     return RedirectResponse(url="/static/index.html")
 
+@app.get("/health")
+def health_check():
+    """
+    Проверка здоровья сервиса
+    """
+    return {
+        "status": "ok",
+        "service": "document_service",
+        "version": "0.2.0"
+    }
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", "8100"))
+    uvicorn.run(app, host="0.0.0.0", port=port)

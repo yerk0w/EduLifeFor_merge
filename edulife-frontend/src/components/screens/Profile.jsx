@@ -540,7 +540,16 @@ const Profile = () => {
     if (loading) {
       return (
         <div className="profile-screen">
-          <div className="loading-message">Загрузка данных...</div>
+          <div className="loading-message">
+          <div class="loader">
+            <div class="loader__bar"></div>
+            <div class="loader__bar"></div>
+            <div class="loader__bar"></div>
+            <div class="loader__bar"></div>
+            <div class="loader__bar"></div>
+            <div class="loader__ball"></div>
+          </div>
+          </div>
         </div>
       );
     }

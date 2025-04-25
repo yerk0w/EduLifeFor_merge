@@ -200,7 +200,14 @@ const Schedule = () => {
 
       {loading ? (
         <div className="loading-container">
-          <p>Загрузка расписания...</p>
+          <div class="loader">
+            <div class="loader__bar"></div>
+            <div class="loader__bar"></div>
+            <div class="loader__bar"></div>
+            <div class="loader__bar"></div>
+            <div class="loader__bar"></div>
+            <div class="loader__ball"></div>
+          </div>
         </div>
       ) : error ? (
         <div className="error-container">

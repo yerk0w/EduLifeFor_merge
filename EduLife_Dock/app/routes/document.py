@@ -1,11 +1,17 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+# app/routes/document.py
+
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.schemas.document import DocumentCreate, DocumentResponse, DocumentUpdate
-from app.services.document import get_documents, get_document, get_user_documents, create_document, update_document_status
-from app.security.jwt import get_current_active_user, get_admin_user, get_current_user
+from app.services.document import (
+    get_documents, get_document, get_user_documents, create_document, 
+    update_document_status
+)
+from app.security.jwt import get_current_active_user, get_admin_user, get_current_user, oauth2_scheme
+from app.auth_integration import oauth2_scheme
 from app.models.user import User
 
 router = APIRouter(
@@ -14,7 +20,7 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
-def create_document_route(
+async def create_document_route(
     document: DocumentCreate, 
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
@@ -25,7 +31,7 @@ def create_document_route(
     return create_document(db=db, document=document, user_id=current_user.id)
 
 @router.get("/", response_model=List[DocumentResponse])
-def read_documents(
+async def read_documents(
     skip: int = 0, 
     limit: int = 100, 
     db: Session = Depends(get_db),
@@ -46,7 +52,7 @@ def read_documents(
     return documents
 
 @router.get("/all", response_model=List[DocumentResponse])
-def read_all_documents(
+async def read_all_documents(
     skip: int = 0, 
     limit: int = 100, 
     db: Session = Depends(get_db),
@@ -64,7 +70,7 @@ def read_all_documents(
     return documents
 
 @router.get("/{document_id}", response_model=DocumentResponse)
-def read_document(
+async def read_document(
     document_id: int, 
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
@@ -86,7 +92,7 @@ def read_document(
     return db_document
 
 @router.patch("/{document_id}/review", response_model=DocumentResponse)
-def review_document(
+async def review_document(
     document_id: int, 
     document_update: DocumentUpdate, 
     db: Session = Depends(get_db),

@@ -1,22 +1,21 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import React, { Suspense, lazy } from 'react';
-
 
 import SplashScreen from './components/screens/SplashScreen';
 
-const Start = lazy(() => import('./components/screens/Start'));
-const Logreg = lazy(() => import('./components/screens/LogReg'));
-const Login = lazy(() => import('./components/screens/Login'));
-const Register = lazy(() => import('./components/screens/Register'));
-const Dashboard = lazy(() => import('./components/screens/Dashboard'));
-const Schedule = lazy(() => import('./components/screens/Schedule'));
-const QRCode = lazy(() => import('./components/screens/QRCode'));
-const Profile = lazy(() => import('./components/screens/Profile'));
-const Notifications = lazy(() => import('./components/screens/Notifications'));
-const Settings = lazy(() => import('./components/screens/Settings'));
-const AdminPanel = lazy(() => import('./components/screens/admin/AdminPanel'));
-const Documents = lazy(() => import('./components/screens/Documents/Documents'));
-const Jobs = lazy(() => import('./components/screens/Jobs/Jobs'));
+import Start from './components/screens/Start';
+import Logreg from './components/screens/LogReg';
+import Login from './components/screens/Login';
+import Register from './components/screens/Register';
+import Dashboard from './components/screens/Dashboard';
+import Schedule from './components/screens/Schedule';
+import QRCode from './components/screens/QRCode';
+import Profile from './components/screens/Profile';
+import Notifications from './components/screens/Notifications';
+import Settings from './components/screens/Settings';
+import AdminPanel from './components/screens/admin/AdminPanel';
+import Documents from './components/screens/Documents/Documents';
+import Jobs from './components/screens/Jobs/Jobs';
+
 import './App.css';
 
 const App = () => {

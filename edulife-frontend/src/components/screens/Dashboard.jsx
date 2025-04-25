@@ -113,7 +113,16 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="dashboard-screen">
-        <div className="loading-indicator">Loading...</div>
+        <div className="loading-indicator">
+        <div class="loader">
+          <div class="loader__bar"></div>
+          <div class="loader__bar"></div>
+          <div class="loader__bar"></div>
+          <div class="loader__bar"></div>
+          <div class="loader__bar"></div>
+          <div class="loader__ball"></div>
+        </div>
+        </div>
       </div>
     );
   }

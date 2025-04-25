@@ -1,7 +1,6 @@
-// src/components/screens/SplashScreen.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import flowerImage from '../../assets/images/flower.png'; // Импортируем изображение
+import flowerImage from '../../assets/images/flower.png';
 import './SplashScreen.css';
 
 const SplashScreen = () => {
@@ -30,9 +29,7 @@ const SplashScreen = () => {
       <div className={`flower-container top-left ${animationStarted ? 'animate' : ''}`}>
         <img src={flowerImage} alt="" className="flower-image" />
       </div>
-      
       <h1 className="logo">EduLife</h1>
-      
       <div className={`flower-container bottom-right ${animationStarted ? 'animate' : ''}`}>
         <img src={flowerImage} alt="" className="flower-image" />
       </div>
