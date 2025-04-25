@@ -222,18 +222,57 @@ def create_schedule(schedule_data):
     import json
     cursor.execute("""
         INSERT INTO notifications (
-            schedule_id, change_type, new_data
-        ) VALUES (?, ?, ?)
+            schedule_id, change_type, new_data, target_group_id
+        ) VALUES (?, ?, ?, ?)
     """, (
         schedule_id,
         'create',
-        json.dumps(json_data)
+        json.dumps(json_data),
+        schedule_data['group_id']  # Сохраняем ID группы
     ))
-
+    
     conn.commit()
     conn.close()
-
+    
     return schedule_id
+
+def delete_schedule(schedule_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Получаем текущие данные расписания, чтобы сохранить group_id
+    cursor.execute("""
+        SELECT
+            date, time_start, time_end, subject_id, teacher_id,
+            group_id, classroom_id, lesson_type_id
+        FROM schedule
+        WHERE id = ?
+    """, (schedule_id,))
+
+    current_data = cursor.fetchone()
+    if not current_data:
+        conn.close()
+        raise ValueError(f"Schedule with id {schedule_id} does not exist")
+    
+    # Получаем group_id для сохранения в target_group_id
+    target_group_id = current_data['group_id']
+    
+    import json
+    cursor.execute("""
+        INSERT INTO notifications (
+            schedule_id, change_type, previous_data, target_group_id
+        ) VALUES (?, ?, ?, ?)
+    """, (
+        schedule_id,
+        'delete',
+        json.dumps(dict(current_data)),
+        target_group_id  # Сохраняем ID группы в target_group_id
+    ))
+    
+    cursor.execute("DELETE FROM schedule WHERE id = ?", (schedule_id,))
+    conn.commit()
+    conn.close()
+    return True
 
 def update_schedule(schedule_id, schedule_data):
     conn = get_db_connection()
@@ -251,6 +290,12 @@ def update_schedule(schedule_id, schedule_data):
     if not current_data:
         conn.close()
         raise ValueError(f"Schedule with id {schedule_id} does not exist")
+    
+    # Получаем target_group_id
+    # Если в обновлении меняется группа, используем новую group_id
+    # Иначе используем текущую group_id из расписания
+    target_group_id = schedule_data.get('group_id', current_data['group_id'])
+    
     if 'subject_id' in schedule_data:
         cursor.execute("SELECT id FROM subjects WHERE id = ?", (schedule_data['subject_id'],))
         if not cursor.fetchone():
@@ -283,6 +328,7 @@ def update_schedule(schedule_id, schedule_data):
     if not update_fields:
         conn.close()
         return schedule_id
+    
     cursor.execute(f"""
         UPDATE schedule
         SET {', '.join(update_fields)}
@@ -292,13 +338,14 @@ def update_schedule(schedule_id, schedule_data):
     import json
     cursor.execute("""
         INSERT INTO notifications (
-            schedule_id, change_type, previous_data, new_data
-        ) VALUES (?, ?, ?, ?)
+            schedule_id, change_type, previous_data, new_data, target_group_id
+        ) VALUES (?, ?, ?, ?, ?)
     """, (
         schedule_id,
         'update',
         json.dumps(dict(current_data)),
-        json.dumps(schedule_data)
+        json.dumps(schedule_data),
+        target_group_id  # Сохраняем ID группы в target_group_id
     ))
 
     conn.commit()
@@ -306,36 +353,6 @@ def update_schedule(schedule_id, schedule_data):
 
     return schedule_id
 
-def delete_schedule(schedule_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT
-            date, time_start, time_end, subject_id, teacher_id,
-            group_id, classroom_id, lesson_type_id
-        FROM schedule
-        WHERE id = ?
-    """, (schedule_id,))
-
-    current_data = cursor.fetchone()
-    if not current_data:
-        conn.close()
-        raise ValueError(f"Schedule with id {schedule_id} does not exist")
-    import json
-    cursor.execute("""
-        INSERT INTO notifications (
-            schedule_id, change_type, previous_data
-        ) VALUES (?, ?, ?)
-    """, (
-        schedule_id,
-        'delete',
-        json.dumps(dict(current_data))
-    ))
-    cursor.execute("DELETE FROM schedule WHERE id = ?", (schedule_id,))
-    conn.commit()
-    conn.close()
-    return True
 
 def get_pending_notifications():
     conn = get_db_connection()

@@ -191,6 +191,7 @@ def generate_create_notification_message(schedule_data):
     return message
 
 
+
 def generate_update_notification_message(previous_data, new_data):
     """Генерирует сообщение об изменении занятия"""
     prev_formatted = format_schedule_data(json.loads(previous_data) if isinstance(previous_data, str) else previous_data)
@@ -276,97 +277,39 @@ def process_notifications():
     
     for notification in notifications:
         try:
-            schedule_id = notification['schedule_id']
-            change_type = notification['change_type']
+            # Получаем ID группы из уведомления
+            target_group_id = notification.get('target_group_id')
             
-            # Получаем данные о расписании
-            if change_type == 'create':
-                # Для новых занятий
-                message = generate_create_notification_message(notification['new_data'])
-                subject = "Новое занятие добавлено в расписание"
-                
-                # Получаем данные о преподавателе и группе
-                schedule_data = json.loads(notification['new_data'])
-                teacher_info = get_teacher_info(schedule_data['teacher_id'])
-                group_info = get_group_info(schedule_data['group_id'])
-                
-                # Отправляем уведомление преподавателю
-                if teacher_info.get('email'):
-                    send_email_notification(teacher_info['email'], subject, message)
-                
-                # Отправляем уведомления студентам группы
-                students = get_group_students(schedule_data['group_id'])
+            # Если target_group_id не указан, получаем его из данных расписания
+            if not target_group_id:
+                if notification['change_type'] == 'create' and notification['new_data']:
+                    data = json.loads(notification['new_data'])
+                    target_group_id = data.get('group_id')
+                elif notification['previous_data']:
+                    data = json.loads(notification['previous_data'])
+                    target_group_id = data.get('group_id')
+
+            if target_group_id:
+                students = get_group_students(target_group_id)
+                teacher_id = None
+                if notification['change_type'] == 'create' and notification['new_data']:
+                    data = json.loads(notification['new_data'])
+                    teacher_id = data.get('teacher_id')
+                elif notification['previous_data']:
+                    data = json.loads(notification['previous_data'])
+                    teacher_id = data.get('teacher_id')
+                if teacher_id:
+                    teacher_info = get_teacher_info(teacher_id)
                 for student in students:
-                    if student.get('email'):
-                        send_email_notification(student['email'], subject, message)
-                    
-                    # Если у студентов есть Telegram ID, отправляем им тоже
-                    if student.get('telegram_id'):
-                        send_telegram_notification(student['telegram_id'], message)
-                
-            elif change_type == 'update':
-                # Для обновленных занятий
-                message = generate_update_notification_message(
-                    notification['previous_data'], 
-                    notification['new_data']
-                )
-                subject = "Изменения в расписании"
-                
-                # Получаем данные о преподавателе и группе из предыдущих данных
-                prev_data = json.loads(notification['previous_data'])
-                teacher_info = get_teacher_info(prev_data['teacher_id'])
-                group_info = get_group_info(prev_data['group_id'])
-                
-                # Отправляем уведомление преподавателю
-                if teacher_info.get('email'):
-                    send_email_notification(teacher_info['email'], subject, message)
-                
-                # Отправляем уведомления студентам группы
-                students = get_group_students(prev_data['group_id'])
-                for student in students:
-                    if student.get('email'):
-                        send_email_notification(student['email'], subject, message)
-                    
-                    # Если у студентов есть Telegram ID, отправляем им тоже
-                    if student.get('telegram_id'):
-                        send_telegram_notification(student['telegram_id'], message)
-                
-            elif change_type == 'delete':
-                # Для удаленных занятий
-                message = generate_delete_notification_message(notification['previous_data'])
-                subject = "Отмена занятия"
-                
-                # Получаем данные о преподавателе и группе из предыдущих данных
-                prev_data = json.loads(notification['previous_data'])
-                teacher_info = get_teacher_info(prev_data['teacher_id'])
-                group_info = get_group_info(prev_data['group_id'])
-                
-                # Отправляем уведомление преподавателю
-                if teacher_info.get('email'):
-                    send_email_notification(teacher_info['email'], subject, message)
-                
-                # Отправляем уведомления студентам группы
-                students = get_group_students(prev_data['group_id'])
-                for student in students:
-                    if student.get('email'):
-                        send_email_notification(student['email'], subject, message)
-                    
-                    # Если у студентов есть Telegram ID, отправляем им тоже
-                    if student.get('telegram_id'):
-                        send_telegram_notification(student['telegram_id'], message)
-            
-            # Добавляем ID уведомления в список обработанных
-            processed_notifications.append(notification['id'])
-            
+                    processed_notifications.append(notification['id'])
+
         except Exception as e:
             print(f"Ошибка при обработке уведомления #{notification['id']}: {e}")
-    
-    # Отмечаем обработанные уведомления как отправленные
+
     if processed_notifications:
         database.mark_notifications_as_sent(processed_notifications)
-        print(f"Успешно обработано и отправлено {len(processed_notifications)} уведомлений")
-
+    print(f"Успешно отправлено {len(processed_notifications)} уведомлений")
 
 if __name__ == "__main__":
-    # Этот скрипт можно запускать отдельно для обработки всех непрочитанных уведомлений
+
     process_notifications()

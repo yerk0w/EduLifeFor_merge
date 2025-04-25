@@ -291,6 +291,48 @@ const apiService = {
         }
       }
     },
+    getNotifications: async (groupId = null) => {
+      try {
+        let endpoint = `${API_BASE_URL.raspis}/notifications`;
+        
+        // Если указан ID группы, получаем уведомления только для этой группы
+        if (groupId) {
+          endpoint = `${API_BASE_URL.raspis}/notifications/group/${groupId}`;
+        } else {
+          // Для студента автоматически получаем его группу
+          const userRole = localStorage.getItem('userRole');
+          const userId = localStorage.getItem('userId');
+          
+          if (userRole === 'student' && userId) {
+            try {
+              const studentInfo = await apiClient.get(`${API_BASE_URL.auth}/students/${userId}`);
+              if (studentInfo.data && studentInfo.data.group_id) {
+                endpoint = `${API_BASE_URL.raspis}/notifications/group/${studentInfo.data.group_id}`;
+              }
+            } catch (error) {
+              console.error('Error fetching student group info:', error);
+            }
+          }
+        }
+        
+        const response = await apiClient.get(endpoint);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        return [];
+      }
+    },
+    
+    // Метод для отметки уведомления как прочитанного
+    markNotificationRead: async (notificationId) => {
+      try {
+        const response = await apiClient.put(`${API_BASE_URL.raspis}/notifications/${notificationId}/mark-read`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error marking notification ${notificationId} as read:`, error);
+        return false;
+      }
+    }
 
   },
   // Document Service APIs

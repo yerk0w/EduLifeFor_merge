@@ -58,3 +58,126 @@
     font-size: 12px;
     color: #999;
   }
+  .notification-detail-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .notification-detail-content {
+    background: white;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .notification-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .notification-detail-header h2 {
+    margin: 0;
+    font-size: 20px;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 5px;
+  }
+  
+  .notification-detail-body {
+    padding: 20px;
+  }
+  
+  .notification-info h3 {
+    margin-top: 0;
+    color: #333;
+  }
+  
+  .notification-fields {
+    margin-bottom: 20px;
+  }
+  
+  .field-row {
+    display: flex;
+    margin-bottom: 10px;
+  }
+  
+  .field-name {
+    font-weight: bold;
+    min-width: 150px;
+    color: #555;
+  }
+  
+  .field-value {
+    flex: 1;
+  }
+  
+  .changes-list {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+  }
+  
+  .change-item {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #eee;
+  }
+  
+  .change-values {
+    margin-left: 10px;
+    margin-top: 5px;
+  }
+  
+  .previous-value {
+    color: #d32f2f;
+    text-decoration: line-through;
+    margin-bottom: 5px;
+  }
+  
+  .current-value {
+    color: #2e7d32;
+  }
+  
+  .label {
+    font-weight: bold;
+    margin-right: 5px;
+  }
+  
+  .notification-time {
+    padding: 10px 20px;
+    text-align: right;
+    color: #777;
+    font-size: 12px;
+    border-top: 1px solid #eee;
+  }
+  
+  /* Стили для типов уведомлений */
+  .notification-info.create h3 {
+    color: #2e7d32;
+  }
+  
+  .notification-info.update h3 {
+    color: #1976d2;
+  }
+  
+  .notification-info.delete h3 {
+    color: #d32f2f;
+  }

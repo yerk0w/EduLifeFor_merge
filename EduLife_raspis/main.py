@@ -8,7 +8,7 @@ from datetime import date, time, datetime
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 import json
-from api_integration import verify_token, get_teacher_info, get_group_info, send_schedule_notifications, enrich_schedule_data
+from api_integration import verify_token, get_teacher_info, get_group_info, send_schedule_notifications, enrich_schedule_data,get_student_by_user_id
 
 # Настройка порта
 PORT = int(os.getenv("PORT", "8090"))
@@ -278,7 +278,6 @@ async def create_schedule(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @app.put("/schedule/{schedule_id}", response_model=dict)
 async def update_schedule(
     schedule_id: int,
@@ -387,6 +386,81 @@ async def trigger_notifications(
     
     return {"message": "Отправка уведомлений запущена в фоновом режиме"}
 
+@app.get("/notifications/group/{group_id}", response_model=List[NotificationBase])
+def get_notifications_by_group(
+    group_id: int,
+    current_user: dict = Depends(get_current_user),
+    authorization: str = Header(None)
+):
+    """Получение уведомлений только для конкретной группы"""
+    
+    if authorization is None or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Не предоставлен токен авторизации")
+    
+    token = authorization.replace("Bearer ", "")
+    
+    # Для студента проверяем, что он входит в эту группу
+    if current_user["role"] == "student":
+        # Получаем информацию о студенте из сервиса авторизации
+        student_info = get_student_by_user_id(current_user["id"], token)
+        
+        if not student_info or student_info.get("group_id") != group_id:
+            raise HTTPException(status_code=403, detail="У вас нет доступа к уведомлениям этой группы")
+    
+    # Для преподавателя можно проверить, ведет ли он занятия у этой группы
+    # Для этого можно использовать текущее расписание
+    elif current_user["role"] == "teacher":
+        # Получаем расписание преподавателя
+        teacher_schedules = database.get_schedule({"teacher_id": current_user["id"]})
+        
+        # Проверяем, есть ли у преподавателя занятия с этой группой
+        has_access = any(schedule["group_id"] == group_id for schedule in teacher_schedules)
+        
+        if not has_access:
+            raise HTTPException(status_code=403, detail="У вас нет доступа к уведомлениям этой группы")
+    
+    # Получаем уведомления для группы
+    return database.get_notifications_by_group_id(group_id)
+
+# В функции send_notifications в main.py
+async def send_notifications(background_tasks: BackgroundTasks, token: str):
+    notifications = database.get_pending_notifications()
+    if not notifications:
+        return
+
+    # Отправляем уведомления через интеграционный слой
+    for notification in notifications:
+        print(f"Отправка уведомления #{notification['id']}: {notification['change_type']} для расписания #{notification['schedule_id']}")
+        
+        # Получаем ID группы из уведомления или из данных расписания
+        target_group_id = notification.get('target_group_id')
+        
+        if not target_group_id and notification.get('new_data'):
+            try:
+                new_data = json.loads(notification['new_data'])
+                target_group_id = new_data.get('group_id')
+            except json.JSONDecodeError:
+                pass
+                
+        if not target_group_id and notification.get('previous_data'):
+            try:
+                previous_data = json.loads(notification['previous_data'])
+                target_group_id = previous_data.get('group_id')
+            except json.JSONDecodeError:
+                pass
+        
+        # Если определили целевую группу, отправляем уведомление ей
+        if target_group_id:
+            notification['target_group_id'] = target_group_id
+            
+        # Отправляем уведомление
+        send_schedule_notifications(notification, token)
+
+    # Отмечаем уведомления как отправленные
+    notification_ids = [n['id'] for n in notifications]
+    database.mark_notifications_as_sent(notification_ids)
+
+    print(f"Успешно отправлено {len(notifications)} уведомлений")
 
 if __name__ == "__main__":
     import uvicorn

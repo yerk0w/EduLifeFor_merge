@@ -92,6 +92,15 @@ def get_students_from_group(group_id: int, token: str) -> List[Dict[str, Any]]:
     except APIError:
         return []
 
+def get_student_by_user_id(user_id: int, token: str) -> Dict[str, Any]:
+    """Получает информацию о студенте по ID пользователя из сервиса авторизации"""
+    url = f"{AUTH_API_URL}/students/{user_id}"
+    try:
+        return make_api_request("get", url, token=token)
+    except APIError as e:
+        print(f"Ошибка при получении информации о студенте: {e}")
+        return {}
+
 # Методы для обогащения данных расписания
 def enrich_schedule_data(schedule_item: Dict[str, Any], token: str) -> Dict[str, Any]:
     """
@@ -121,25 +130,65 @@ def send_schedule_notifications(notification_data: Dict[str, Any], token: str) -
     через сервис авторизации
     """
     try:
-        # Получаем данные о расписании
-        schedule_data = notification_data.get("new_data", {})
-        group_id = schedule_data.get("group_id")
-        teacher_id = schedule_data.get("teacher_id")
+        # Получаем ID группы из уведомления или данных расписания
+        target_group_id = notification_data.get('target_group_id')
         
-        # Получаем список студентов группы для отправки уведомлений
-        students = []
-        if group_id:
-            students = get_students_from_group(group_id, token)
+        # Если target_group_id не указан, получаем его из данных расписания
+        if not target_group_id:
+            if notification_data.get('change_type') == 'create' and notification_data.get('new_data'):
+                new_data = notification_data.get('new_data')
+                if isinstance(new_data, str):
+                    try:
+                        new_data = json.loads(new_data)
+                    except json.JSONDecodeError:
+                        pass
+                target_group_id = new_data.get('group_id')
+            elif notification_data.get('previous_data'):
+                prev_data = notification_data.get('previous_data')
+                if isinstance(prev_data, str):
+                    try:
+                        prev_data = json.loads(prev_data)
+                    except json.JSONDecodeError:
+                        pass
+                target_group_id = prev_data.get('group_id')
         
-        # Получаем данные преподавателя
-        teacher_info = {}
-        if teacher_id:
-            teacher_info = get_teacher_info(teacher_id, token)
-        
-        # Здесь можно реализовать логику отправки уведомлений
-        # через сервис авторизации с использованием данных о пользователях
-        
-        return True
+        # Если определили ID группы, отправляем уведомление только студентам этой группы
+        if target_group_id:
+            # Получаем список студентов группы для отправки уведомлений
+            students = get_students_from_group(target_group_id, token)
+            
+            # Также получаем преподавателя, который ведет занятия
+            teacher_id = None
+            if notification_data.get('change_type') == 'create' and notification_data.get('new_data'):
+                new_data = notification_data.get('new_data')
+                if isinstance(new_data, str):
+                    try:
+                        new_data = json.loads(new_data)
+                    except json.JSONDecodeError:
+                        pass
+                teacher_id = new_data.get('teacher_id')
+            elif notification_data.get('previous_data'):
+                prev_data = notification_data.get('previous_data')
+                if isinstance(prev_data, str):
+                    try:
+                        prev_data = json.loads(prev_data)
+                    except json.JSONDecodeError:
+                        pass
+                teacher_id = prev_data.get('teacher_id')
+            
+            # Получаем данные преподавателя
+            teacher_info = {}
+            if teacher_id:
+                teacher_info = get_teacher_info(teacher_id, token)
+            
+            # Здесь можно реализовать логику отправки уведомлений
+            # студентам группы и преподавателю через сервис авторизации
+            
+            return True
+        else:
+            print("Не удалось определить целевую группу для уведомления")
+            return False
+            
     except Exception as e:
         print(f"Ошибка при отправке уведомлений о расписании: {str(e)}")
         return False
