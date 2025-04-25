@@ -23,15 +23,15 @@ const ScheduleItem = ({ item }) => {
         {expanded && (
           <div className="schedule-item-details">
             <div className="detail-item">
-              <span className="detail-label">Преподаватель:</span>
+              <span className="detail-labels">Преподаватель:</span>
               <span className="detail-value">{item.teacher || 'Не указан'}</span>
             </div>
             <div className="detail-item">
-              <span className="detail-label">Тип занятия:</span>
+              <span className="detail-labels">Тип занятия:</span>
               <span className="detail-value">{item.lessonType || 'Не указан'}</span>
             </div>
             <div className="detail-item">
-              <span className="detail-label">Дата:</span>
+              <span className="detail-labels">Дата:</span>
               <span className="detail-value">{item.date}</span>
             </div>
           </div>

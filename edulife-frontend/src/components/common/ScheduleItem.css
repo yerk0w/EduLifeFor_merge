@@ -49,9 +49,10 @@
     margin-bottom: 8px;
   }
   
-  .detail-label {
+  .detail-labels {
     font-weight: 600;
     margin-right: 4px;
+    color: black;
   }
   
   .tasks-list {

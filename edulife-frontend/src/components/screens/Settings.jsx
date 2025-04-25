@@ -162,19 +162,6 @@ const Settings = () => {
                 <label htmlFor="push-toggle" className="toggle-label"></label>
               </div>
             </div>
-            <div className="settings-item">
-              <div className="settings-item-label">Email-уведомления</div>
-              <div className="settings-item-toggle">
-                <input
-                  type="checkbox"
-                  id="email-toggle"
-                  className="toggle-input"
-                  checked={emailNotifications}
-                  onChange={() => setEmailNotifications(!emailNotifications)}
-                />
-                <label htmlFor="email-toggle" className="toggle-label"></label>
-              </div>
-            </div>
           </div>
         </div>
 

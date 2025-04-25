@@ -584,7 +584,7 @@ const Profile = () => {
             <img src={avatarImage1} alt="User avatar" className="avatar1-image" />
             <div className="avatar-border"></div>
           </div>
-          <h2 className="user-name">{userInfo?.full_name || 'Пользователь'}</h2>
+          <h2 className="user-name2">{userInfo?.full_name || 'Пользователь'}</h2>
           {userInfo?.role_name && (
             <p className="user-role">{userInfo.role_name === 'admin' ? 'Администратор' :
                                       userInfo.role_name === 'teacher' ? 'Преподаватель' :

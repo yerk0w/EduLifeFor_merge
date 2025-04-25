@@ -241,20 +241,6 @@ const Schedule = () => {
           <div className="schedule-content">
             <div className="schedule-content-header">
               <h2>Предметы</h2>
-              <div className="filter-tabs">
-                <button 
-                  className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
-                  onClick={() => setFilter('all')}
-                >
-                  All
-                </button>
-                <button 
-                  className={`filter-tab ${filter === 'unread' ? 'active' : ''}`}
-                  onClick={() => setFilter('unread')}
-                >
-                  Unread
-                </button>
-              </div>
             </div>
 
             <div className="schedule-items">

@@ -57,11 +57,11 @@ const handleLogin = async (e) => {
         
         <form className="login-form" onSubmit={handleLogin}>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Username</label>
             <input
               type="text"
               id="email"
-              placeholder="careerplace@gmail.com"
+              placeholder="careerplace"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required

@@ -44,7 +44,7 @@
   }
   .start-screen h1 {
     margin-bottom: var(--spacing-lg);
-    color: var(--text-color);
+    color: var(--text-color2);
     font-size: var(--font-size-xl);
   }
   

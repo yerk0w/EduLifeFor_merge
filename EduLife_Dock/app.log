@@ -31,3 +31,10 @@
 2025-04-25 19:57:18,856 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
 2025-04-25 19:57:56,967 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
 2025-04-25 19:58:01,120 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-26 01:42:46,002 - app.auth - WARNING - РћС€РёР±РєР° РїСЂРё РѕР±СЂР°С‰РµРЅРёРё Рє auth-СЃРµСЂРІРёСЃСѓ: HTTPConnectionPool(host='localhost', port=8070): Read timed out. (read timeout=5)
+2025-04-26 01:42:46,011 - app.auth - ERROR - РћС€РёР±РєР° РїСЂРё Р»РѕРєР°Р»СЊРЅРѕР№ РїСЂРѕРІРµСЂРєРµ С‚РѕРєРµРЅР°: Signature verification failed.
+2025-04-26 01:42:51,054 - app.auth - WARNING - РћС€РёР±РєР° РїСЂРё РѕР±СЂР°С‰РµРЅРёРё Рє auth-СЃРµСЂРІРёСЃСѓ: HTTPConnectionPool(host='localhost', port=8070): Read timed out. (read timeout=5)
+2025-04-26 01:42:51,055 - app.auth - ERROR - РћС€РёР±РєР° РїСЂРё Р»РѕРєР°Р»СЊРЅРѕР№ РїСЂРѕРІРµСЂРєРµ С‚РѕРєРµРЅР°: Signature verification failed.
+2025-04-26 03:08:06,985 - app.routes.document - ERROR - РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё РґРѕРєСѓРјРµРЅС‚РѕРІ РѕС‚ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°: name 'Document' is not defined
+2025-04-26 03:08:06,996 - app.routes.document - ERROR - РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё РґРѕРєСѓРјРµРЅС‚РѕРІ РѕС‚ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°: name 'Document' is not defined
+2025-04-26 03:09:10,838 - app.routes.document - ERROR - РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё РґРѕРєСѓРјРµРЅС‚РѕРІ РѕС‚ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°: name 'Document' is not defined

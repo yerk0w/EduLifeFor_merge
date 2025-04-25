@@ -11,7 +11,7 @@ import osvobozhdenie from '../../../assets/documents/заявление на о�
 const Documents = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const [activeTab, setActiveTab] = useState(3);
+  const [activeTab, setActiveTab] = useState(5);
   
   // Состояния для документов и шаблонов
   const [templates, setTemplates] = useState([]);

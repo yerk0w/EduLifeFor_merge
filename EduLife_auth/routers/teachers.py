@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import database
 from utils.security import get_current_user, check_admin_role
 from utils.api import get_all_subjects
+from typing import Optional
 
 router = APIRouter(
     prefix="/teachers",
@@ -31,7 +32,7 @@ class TeacherResponse(BaseModel):
     department_name: str
     position: str
     contact_info: str | None
-    subjects: List[dict]
+    subjects: Optional[List[dict]] = []
 
 async def get_subjects_by_teacher_id(teacher_id):
     """Получает список предметов, которые ведет учитель по его ID"""

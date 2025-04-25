@@ -328,6 +328,38 @@ async def delete_schedule(
 def get_subjects(current_user: dict = Depends(get_current_user)):
     return database.get_subjects()
 
+@app.get("/subjects/{subject_id}", response_model=SubjectRead)
+def get_subject_by_id(
+    subject_id: int,
+    current_user: dict = Depends(get_current_user)
+):
+    subject = database.get_subject_by_id(subject_id)
+    if not subject:
+        raise HTTPException(status_code=404, detail=f"Предмет с ID {subject_id} не найден")
+    return subject
+
+@app.put("/subjects/{subject_id}", response_model=dict)
+def update_subject(
+    subject_id: int,
+    subject: SubjectBase,
+    current_user: dict = Depends(get_admin_user)
+):
+    try:
+        database.update_subject(subject_id, subject.name)
+        return {"message": "Предмет успешно обновлен"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@app.delete("/subjects/{subject_id}", response_model=dict)
+def delete_subject(
+    subject_id: int,
+    current_user: dict = Depends(get_admin_user)
+):
+    try:
+        database.delete_subject(subject_id)
+        return {"message": f"Предмет с ID {subject_id} успешно удален"}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 @app.post("/subjects", response_model=dict)
 def create_subject(
@@ -357,6 +389,38 @@ def create_classroom(
         return {"id": classroom_id, "message": "Аудитория успешно создана"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/classrooms/{classroom_id}", response_model=ClassroomRead)
+def get_classroom_by_id(
+    classroom_id: int,
+    current_user: dict = Depends(get_current_user)
+):
+    classroom = database.get_classroom_by_id(classroom_id)
+    if not classroom:
+        raise HTTPException(status_code=404, detail=f"Аудитория с ID {classroom_id} не найдена")
+    return classroom
+@app.put("/classrooms/{classroom_id}", response_model=dict)
+def update_classroom(
+    classroom_id: int,
+    classroom: ClassroomBase,
+    current_user: dict = Depends(get_admin_user)
+):
+    try:
+        database.update_classroom(classroom_id, classroom.name)
+        return {"message": "Аудитория успешно обновлена"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+@app.delete("/classrooms/{classroom_id}", response_model=dict)
+def delete_classroom(
+    classroom_id: int,
+    current_user: dict = Depends(get_admin_user)
+):
+    try:
+        database.delete_classroom(classroom_id)
+        return {"message": f"Аудитория с ID {classroom_id} успешно удалена"}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+# Эндпоинты для управления типами занятий
 
 
 # Эндпоинт для получения типов занятий

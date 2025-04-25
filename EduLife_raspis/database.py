@@ -388,6 +388,8 @@ def mark_notifications_as_sent(notification_ids):
     conn.commit()
     conn.close()
 
+#управление предметами
+
 def get_subjects():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -395,6 +397,60 @@ def get_subjects():
     result = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return result
+
+def get_subject_by_id(subject_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM subjects WHERE id = ?", (subject_id,))
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return dict(result)
+    return None
+
+def get_subject_by_name(subject_name):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM subjects WHERE name = ?", (subject_name,))
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return dict(result)
+    return None
+
+def delete_subject(subject_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id FROM subjects WHERE id = ?", (subject_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise ValueError(f"Subject with id {subject_id} does not exist")
+
+    cursor.execute("DELETE FROM subjects WHERE id = ?", (subject_id,))
+    conn.commit()
+    conn.close()
+    return True
+
+def update_subject(subject_id, new_name):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id FROM subjects WHERE id = ?", (subject_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise ValueError(f"Subject with id {subject_id} does not exist")
+
+    cursor.execute("SELECT id FROM subjects WHERE name = ?", (new_name,))
+    if cursor.fetchone():
+        conn.close()
+        raise ValueError(f"Subject with name '{new_name}' already exists")
+
+    cursor.execute("UPDATE subjects SET name = ? WHERE id = ?", (new_name, subject_id))
+    conn.commit()
+    conn.close()
+    return True
+
 
 def create_subject(name):
     conn = get_db_connection()
@@ -418,6 +474,8 @@ def get_classrooms():
     conn.close()
     return result
 
+#управление аудиторией
+
 def create_classroom(name):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -432,6 +490,51 @@ def create_classroom(name):
         raise ValueError(f"Classroom with name '{name}' already exists")
     finally:
         conn.close()
+
+def get_classroom_by_id(classroom_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM classrooms WHERE id = ?", (classroom_id,))
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return dict(result)
+    return None
+
+def delete_classroom(classroom_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id FROM classrooms WHERE id = ?", (classroom_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise ValueError(f"Classroom with id {classroom_id} does not exist")
+
+    cursor.execute("DELETE FROM classrooms WHERE id = ?", (classroom_id,))
+    conn.commit()
+    conn.close()
+    return True
+
+def update_classroom(classroom_id, new_name):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id FROM classrooms WHERE id = ?", (classroom_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise ValueError(f"Classroom with id {classroom_id} does not exist")
+
+    cursor.execute("SELECT id FROM classrooms WHERE name = ?", (new_name,))
+    if cursor.fetchone():
+        conn.close()
+        raise ValueError(f"Classroom with name '{new_name}' already exists")
+
+    cursor.execute("UPDATE classrooms SET name = ? WHERE id = ?", (new_name, classroom_id))
+    conn.commit()
+    conn.close()
+    return True
+
+#управление типами занятий
 
 def get_lesson_types():
     conn = get_db_connection()

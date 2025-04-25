@@ -23,7 +23,7 @@
     font-family: var(--font-primary, 'Oddval', sans-serif);
     font-size: var(--font-size-xl, 24px);
     font-weight: 600;
-    color: var(--text-color, #333333);
+    color: var(--text-color2, #333333);
     margin-bottom: var(--spacing-xl, 32px);
   }
   

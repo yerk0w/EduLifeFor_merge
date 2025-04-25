@@ -37,7 +37,7 @@ const App = () => {
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/documents" element={<Documents/>} />
           <Route path="/jobs" element={<Jobs/>} />
-          <Route path='/teacher-panel' element={<TeacherPanel/>} />
+          <Route path='/teacher' element={<TeacherPanel/>} />
           {/* Добавьте другие маршруты здесь */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
