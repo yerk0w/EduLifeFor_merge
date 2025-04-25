@@ -30,7 +30,7 @@ const AdminDashboard = ({ stats }) => {
               </svg>
             }
             value={stats.totalCourses}
-            label="Всего курсов"
+            label="Расписания"
           />
         </div>
         
