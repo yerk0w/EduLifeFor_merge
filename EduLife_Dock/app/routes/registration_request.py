@@ -9,8 +9,7 @@ import os
 from app.db.database import get_db
 from app.schemas.registration_request import RegistrationRequestResponse, RegistrationRequestUpdate
 from app.services.registration_request import get_registration_requests, get_registration_request, get_pending_registration_requests, update_registration_request_status
-from app.security.jwt import get_admin_user, oauth2_scheme
-from app.models.user import User
+from app.auth import get_admin_user, oauth2_scheme
 
 router = APIRouter(
     prefix="/registration-requests",
@@ -25,7 +24,7 @@ def read_registration_requests(
     skip: int = 0, 
     limit: int = 100, 
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_admin_user)
+    current_user = Depends(get_admin_user)
 ):
     """
     Получение всех заявок на регистрацию (только для администраторов)
@@ -37,7 +36,7 @@ def read_pending_requests(
     skip: int = 0, 
     limit: int = 100, 
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_admin_user)
+    current_user = Depends(get_admin_user)
 ):
     """
     Получение заявок на регистрацию в статусе "ожидает" (только для администраторов)
@@ -48,7 +47,7 @@ def read_pending_requests(
 def read_registration_request(
     request_id: int, 
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_admin_user)
+    current_user = Depends(get_admin_user)
 ):
     """
     Получение заявки на регистрацию по ID (только для администраторов)
@@ -82,7 +81,7 @@ def update_request_status(
     request_update: RegistrationRequestUpdate,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_admin_user),
+    current_user = Depends(get_admin_user),
     token: str = Depends(oauth2_scheme)
 ):
     """

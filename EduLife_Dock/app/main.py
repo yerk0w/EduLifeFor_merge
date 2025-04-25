@@ -1,4 +1,5 @@
 # app/main.py
+# Update main.py to ensure we're properly serving static files for uploads
 
 import os
 from fastapi import FastAPI, Request
@@ -12,13 +13,15 @@ from app.db.database import engine
 from app.models import document, user, registration_request, template
 from app.routes import router
 
-# Создаем директории для статических файлов и шаблонов
+# Create directories for static files and templates
 STATIC_DIR = Path("app/static")
 TEMPLATES_DIR = Path("app/static/templates")
+UPLOADS_DIR = Path("app/static/uploads")  # Add directory for document uploads
 os.makedirs(STATIC_DIR, exist_ok=True)
 os.makedirs(TEMPLATES_DIR, exist_ok=True)
+os.makedirs(UPLOADS_DIR, exist_ok=True)  # Create uploads directory
 
-# Создаем таблицы в БД
+# Create database tables
 document.Base.metadata.create_all(bind=engine)
 user.Base.metadata.create_all(bind=engine)
 registration_request.Base.metadata.create_all(bind=engine)
@@ -27,40 +30,40 @@ template.Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="Document Service API",
     description="API для микросервиса документооборота с поддержкой ролей",
-    version="0.2.0",
+    version="0.3.0",  # Updated version
 )
 
-# Настройка CORS
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # In production, replace with specific origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Подключаем статические файлы
+# Mount static files
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-# Подключаем роуты
+# Include routes
 app.include_router(router)
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     """
-    Перенаправление на статическую страницу
+    Redirect to static page
     """
     return RedirectResponse(url="/static/index.html")
 
 @app.get("/health")
 def health_check():
     """
-    Проверка здоровья сервиса
+    Health check for service
     """
     return {
         "status": "ok",
         "service": "document_service",
-        "version": "0.2.0"
+        "version": "0.3.0"
     }
 
 if __name__ == "__main__":

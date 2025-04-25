@@ -1,3 +1,6 @@
+# app/models/document.py
+# Update the Document model to include file path
+
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Text, DateTime, Enum, ForeignKey
 from sqlalchemy.sql import func
@@ -23,3 +26,36 @@ class Document(Base):
     
     # Тип шаблона (если документ создан на основе шаблона)
     template_type = Column(String(50), nullable=True)
+    
+    # Путь к файлу документа
+    file_path = Column(String(255), nullable=True)
+
+
+# app/schemas/document.py
+# Update the document schema to include file path
+
+from datetime import datetime
+from typing import Optional, Literal, Annotated
+from pydantic import BaseModel, Field, StringConstraints
+
+class DocumentBase(BaseModel):
+    title: Annotated[str, StringConstraints(min_length=1, max_length=100)]
+    content: Annotated[str, StringConstraints(min_length=1)]
+    template_type: Optional[str] = None
+
+class DocumentCreate(DocumentBase):
+    pass
+
+class DocumentUpdate(BaseModel):
+    status: Literal["ожидает", "одобрено", "отклонено"]
+
+class DocumentResponse(DocumentBase):
+    id: int
+    created_at: datetime
+    status: str
+    author_id: int
+    author_name: str  # Добавляем имя автора для удобства
+    file_path: Optional[str] = None  # Путь к файлу
+
+    class Config:
+        from_attributes = True

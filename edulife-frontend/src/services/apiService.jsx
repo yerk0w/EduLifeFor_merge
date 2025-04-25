@@ -435,7 +435,7 @@ documents: {
       throw error;
     }
   },
-
+  
   deleteDocument: async (documentId) => {
     try {
       const response = await apiClient.delete(`${API_BASE_URL.dock}/documents/${documentId}`);
@@ -458,6 +458,93 @@ documents: {
     }
   }
 },
+},
+documents: {
+  getDocuments: async (page = 1, limit = 10) => {
+    try {
+      // Check if token exists
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.log('No auth token available, returning empty document list');
+        return [];
+      }
+      
+      const response = await apiClient.get(`${API_BASE_URL.dock}/documents`, {
+        params: { skip: (page - 1) * limit, limit }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      // Return empty array instead of throwing
+      return [];
+    }
+  },
+  
+  getTemplates: async () => {
+    try {
+      const response = await apiClient.get(`${API_BASE_URL.dock}/templates`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+      // Return empty array instead of throwing
+      return [];
+    }
+  },
+
+  getDocumentById: async (documentId) => {
+    try {
+      const response = await apiClient.get(`${API_BASE_URL.dock}/documents/${documentId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching document ${documentId}:`, error);
+      throw error;
+    }
+  },
+  
+  createDocument: async (documentData) => {
+    try {
+      const response = await apiClient.post(`${API_BASE_URL.dock}/documents`, documentData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating document:', error);
+      throw error;
+    }
+  },
+  
+  updateDocumentStatus: async (documentId, status) => {
+    try {
+      const response = await apiClient.patch(`${API_BASE_URL.dock}/documents/${documentId}/review`, {
+        status: status
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating document status ${documentId}:`, error);
+      throw error;
+    }
+  },
+
+  downloadTemplate: async (templateId) => {
+    try {
+      // Using direct fetch with blob response type for file download
+      const token = localStorage.getItem('authToken');
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      
+      const response = await fetch(`${API_BASE_URL.dock}/templates/${templateId}/download`, {
+        headers: headers,
+        method: 'GET'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to download template: ${response.statusText}`);
+      }
+      
+      return response.blob();
+    } catch (error) {
+      console.error(`Error downloading template ${templateId}:`, error);
+      throw error;
+    }
+  }
 },
   
   // Integration Service APIs

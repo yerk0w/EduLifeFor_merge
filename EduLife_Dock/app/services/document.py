@@ -1,9 +1,80 @@
+from fastapi import UploadFile, File, Form, HTTPException, status
+import os
+import uuid
+from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
+import shutil
 
 from app.models.document import Document
 from app.models.user import User
 from app.schemas.document import DocumentCreate, DocumentUpdate
+from app.config import STATIC_DIR
+
+
+
+UPLOADS_DIR = os.path.join(STATIC_DIR, "uploads")
+os.makedirs(UPLOADS_DIR, exist_ok=True)
+
+
+async def create_document_with_file(
+    db: Session, 
+    title: str,
+    content: str,
+    file: UploadFile,
+    user_id: int,
+    template_type: str = None
+):
+    """
+    Create a new document with an uploaded file
+    """
+    # Validate user exists
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден"
+        )
+    
+    # Validate file is PDF
+    if not file.filename.endswith('.pdf'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Файл должен быть в формате PDF"
+        )
+    
+    # Generate unique filename
+    file_ext = os.path.splitext(file.filename)[1]
+    unique_filename = f"{uuid.uuid4().hex}{file_ext}"
+    file_location = os.path.join(UPLOADS_DIR, unique_filename)
+    
+    # Save file
+    try:
+        with open(file_location, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ошибка при сохранении файла: {str(e)}"
+        )
+    
+    # Create database record
+    db_document = Document(
+        title=title,
+        content=content,
+        author_id=user_id,
+        template_type=template_type,
+        file_path=f"/static/uploads/{unique_filename}"
+    )
+    
+    db.add(db_document)
+    db.commit()
+    db.refresh(db_document)
+    
+    # Set author_name for response
+    db_document.author_name = user.full_name
+    
+    return db_document
 
 def get_documents(db: Session, skip: int = 0, limit: int = 100):
     """
