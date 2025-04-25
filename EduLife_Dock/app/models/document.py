@@ -1,6 +1,3 @@
-# app/models/document.py
-# Update the Document model to include file path
-
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Text, DateTime, Enum, ForeignKey
 from sqlalchemy.sql import func
@@ -22,14 +19,19 @@ class Document(Base):
     
     # Связь с пользователем-автором
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    author = relationship("User", back_populates="documents")
+    author = relationship("User", foreign_keys=[author_id], back_populates="created_documents")
+    received_documents = relationship("Document", foreign_keys="Document.recipient_id", back_populates="recipient")
+    
+    # Связь с пользователем-получателем (для документов, отправленных администратором)
+    recipient_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    recipient = relationship("User", foreign_keys=[recipient_id], back_populates="received_documents")
+    created_documents = relationship("Document", foreign_keys="Document.author_id", back_populates="author")
     
     # Тип шаблона (если документ создан на основе шаблона)
     template_type = Column(String(50), nullable=True)
     
     # Путь к файлу документа
     file_path = Column(String(255), nullable=True)
-
 
 # app/schemas/document.py
 # Update the document schema to include file path

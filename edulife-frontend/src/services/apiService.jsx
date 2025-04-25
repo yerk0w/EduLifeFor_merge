@@ -116,6 +116,43 @@ const apiService = {
       localStorage.removeItem('userId');
       localStorage.removeItem('userRole');
     },
+
+
+    getStudents: async () => {
+      try {
+        const response = await apiClient.get(`/api/students`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching students:', error);
+        return [];
+      }
+    },
+    
+    // Отправка документа студенту (для админов)
+    sendDocumentToStudent: async (formData) => {
+      try {
+        const response = await apiClient.post(`/api/documents/admin/send`, formData, {
+          headers: {
+            'Content-Type': undefined
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error sending document to student:', error);
+        throw error;
+      }
+    },
+    
+    // Получение документов, отправленных администратором текущему пользователю
+    getAdminDocuments: async () => {
+      try {
+        const response = await apiClient.get(`/api/documents/admin/received`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching admin documents:', error);
+        return [];
+      }
+    },
     
     getUserById: async (userId) => {
       try {
@@ -347,8 +384,6 @@ const apiService = {
 
   },
   // Document Service APIs
-// Обновленные методы для документов в apiService.jsx
-documents: {
   documents: {
     getDocuments: async (page = 1, limit = 10) => {
       try {
@@ -359,7 +394,8 @@ documents: {
           return [];
         }
         
-        const response = await apiClient.get(`${API_BASE_URL.dock}/documents`, {
+        // Используем URL с префиксом /api для прокси
+        const response = await apiClient.get(`/api/documents`, {
           params: { skip: (page - 1) * limit, limit },
           // Таймаут в 5 секунд для быстрого реагирования
           timeout: 5000
@@ -382,12 +418,9 @@ documents: {
           return [];
         }
         
-        const response = await apiClient.get(`${API_BASE_URL.dock}/templates`, {
-          // Таймаут в 5 секунд для быстрого реагирования
-          timeout: 5000
-        });
-        
-        return Array.isArray(response.data) ? response.data : [];
+        // Используем URL с префиксом /api для прокси
+        const response = await apiClient.get(`/api/templates`);
+        return response.data;
       } catch (error) {
         console.error('Error fetching templates:', error);
         // Возвращаем пустой массив вместо ошибки
@@ -395,158 +428,93 @@ documents: {
       }
     },
   
-  
-  getDocumentById: async (documentId) => {
-    try {
-      const response = await apiClient.get(`${API_BASE_URL.dock}/documents/${documentId}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching document ${documentId}:`, error);
-      throw error;
-    }
-  },
-  
-  createDocument: async (documentData) => {
-    try {
-      // Проверяем, является ли documentData экземпляром FormData
-      let headers = {};
-      if (documentData instanceof FormData) {
-        headers = {
-          'Content-Type': 'multipart/form-data'
-        };
+    getDocumentById: async (documentId) => {
+      try {
+        const response = await apiClient.get(`/api/documents/${documentId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching document ${documentId}:`, error);
+        throw error;
       }
-      
-      const response = await apiClient.post(`${API_BASE_URL.dock}/documents`, documentData, { 
-        headers 
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error creating document:', error);
-      throw error;
-    }
-  },
-  
-  updateDocument: async (documentId, documentData) => {
-    try {
-      const response = await apiClient.put(`${API_BASE_URL.dock}/documents/${documentId}`, documentData);
-      return response.data;
-    } catch (error) {
-      console.error(`Error updating document ${documentId}:`, error);
-      throw error;
-    }
-  },
-  
-  deleteDocument: async (documentId) => {
-    try {
-      const response = await apiClient.delete(`${API_BASE_URL.dock}/documents/${documentId}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error deleting document ${documentId}:`, error);
-      throw error;
-    }
-  },
-  downloadTemplate: async (templateId) => {
-    try {
-      const response = await apiClient.get(`${API_BASE_URL.dock}/templates/${templateId}/download`, {
-        responseType: 'blob'
-      });
-      
-      return response.data;
-    } catch (error) {
-      console.error(`Error downloading template ${templateId}:`, error);
-      throw error;
-    }
-  }
-},
-},
-documents: {
-  getDocuments: async (page = 1, limit = 10) => {
-    try {
-      // Check if token exists
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        console.log('No auth token available, returning empty document list');
-        return [];
+    },
+    
+    createDocument: async (documentData) => {
+      try {
+        const response = await apiClient.post(`/api/documents`, documentData);
+        return response.data;
+      } catch (error) {
+        console.error('Error creating document:', error);
+        throw error;
       }
-      
-      const response = await apiClient.get(`${API_BASE_URL.dock}/documents`, {
-        params: { skip: (page - 1) * limit, limit }
-      });
-      
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching documents:', error);
-      // Return empty array instead of throwing
-      return [];
-    }
-  },
+    },
+    
+    uploadDocument: async (formData) => {
+      try {
+        const response = await apiClient.post(`/api/documents/upload`, formData, {
+          headers: {
+            // При отправке FormData заголовок Content-Type будет установлен автоматически
+            // с правильным boundary для multipart/form-data
+            'Content-Type': undefined
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error uploading document:', error);
+        throw error;
+      }
+    },
+    
+    updateDocumentStatus: async (documentId, status) => {
+      try {
+        const response = await apiClient.patch(`/api/documents/${documentId}/review`, {
+          status: status
+        });
+        return response.data;
+      } catch (error) {
+        console.error(`Error updating document status ${documentId}:`, error);
+        throw error;
+      }
+    },
   
-  getTemplates: async () => {
-    try {
-      const response = await apiClient.get(`${API_BASE_URL.dock}/templates`);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching templates:', error);
-      // Return empty array instead of throwing
-      return [];
+    downloadTemplate: async (templateId) => {
+      try {
+        // Using blob response type for file download
+        const response = await apiClient.get(`/api/templates/${templateId}/download`, {
+          responseType: 'blob'
+        });
+        
+        return response.data;
+      } catch (error) {
+        console.error(`Error downloading template ${templateId}:`, error);
+        throw error;
+      }
+    },
+    
+    downloadDocument: async (documentId) => {
+      try {
+        // Сначала получаем информацию о пути к файлу
+        const response = await apiClient.get(`/api/documents/${documentId}/download`);
+        
+        if (response.data && response.data.file_path) {
+          // Затем используем полный URL для получения содержимого
+          const fileUrl = `/api${response.data.file_path}`;
+          const fileResponse = await fetch(fileUrl);
+          
+          if (!fileResponse.ok) {
+            throw new Error(`Failed to download document: ${fileResponse.statusText}`);
+          }
+          
+          return fileResponse.blob();
+        } else {
+          throw new Error('Document file path not found');
+        }
+      } catch (error) {
+        console.error(`Error downloading document ${documentId}:`, error);
+        throw error;
+      }
     }
   },
 
-  getDocumentById: async (documentId) => {
-    try {
-      const response = await apiClient.get(`${API_BASE_URL.dock}/documents/${documentId}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching document ${documentId}:`, error);
-      throw error;
-    }
-  },
-  
-  createDocument: async (documentData) => {
-    try {
-      const response = await apiClient.post(`${API_BASE_URL.dock}/documents`, documentData);
-      return response.data;
-    } catch (error) {
-      console.error('Error creating document:', error);
-      throw error;
-    }
-  },
-  
-  updateDocumentStatus: async (documentId, status) => {
-    try {
-      const response = await apiClient.patch(`${API_BASE_URL.dock}/documents/${documentId}/review`, {
-        status: status
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Error updating document status ${documentId}:`, error);
-      throw error;
-    }
-  },
-
-  downloadTemplate: async (templateId) => {
-    try {
-      // Using direct fetch with blob response type for file download
-      const token = localStorage.getItem('authToken');
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-      
-      const response = await fetch(`${API_BASE_URL.dock}/templates/${templateId}/download`, {
-        headers: headers,
-        method: 'GET'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to download template: ${response.statusText}`);
-      }
-      
-      return response.blob();
-    } catch (error) {
-      console.error(`Error downloading template ${templateId}:`, error);
-      throw error;
-    }
-  }
-},
-  
   // Integration Service APIs
   integration: {
     createAttendanceReport: async (groupId, startDate, endDate) => {

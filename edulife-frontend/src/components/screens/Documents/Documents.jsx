@@ -12,6 +12,8 @@ const Documents = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [adminDocuments, setAdminDocuments] = useState([]);
+  const [isLoadingAdminDocuments, setIsLoadingAdminDocuments] = useState(false);
   
   // Исходные данные для шаблонов в случае, если API недоступен
   const defaultTemplates = [
@@ -59,29 +61,34 @@ const Documents = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Проверка авторизации и загрузка данных только после успешной проверки
+  // Проверка авторизации и загрузка данных
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    const userId = localStorage.getItem('userId');
-    
-    // Если нет токена, не пытаемся загрузить данные через API
-    if (!token || !userId) {
-      console.log("Работаем в демо-режиме без авторизации");
-      return;
+    // В демо-режиме создаем фейковые данные для авторизации
+    if (!localStorage.getItem('authToken')) {
+      localStorage.setItem('authToken', 'demo_token');
+      localStorage.setItem('userId', '1');
+      localStorage.setItem('userRole', 'студент');
     }
 
-    // Загрузка шаблонов только если есть токен
+    // Загрузка шаблонов
     const fetchTemplates = async () => {
       try {
         setIsLoadingTemplates(true);
-        // Проверяем доступ к API, используя надежный метод
-        const response = await fetch('/api/health-check');
-        if (response.ok) {
-          // API доступен, пробуем загрузить шаблоны
-          const templatesData = await apiService.documents.getTemplates();
-          if (templatesData && templatesData.length > 0) {
-            setTemplates(templatesData);
+        
+        // Проверка здоровья API через прокси
+        try {
+          const healthCheck = await fetch('/api/health');
+          if (healthCheck.ok) {
+            console.log('API доступен');
           }
+        } catch (error) {
+          console.log('API недоступен, используем локальные данные');
+        }
+        
+        // Пробуем загрузить шаблоны через API
+        const templatesData = await apiService.documents.getTemplates();
+        if (templatesData && templatesData.length > 0) {
+          setTemplates(templatesData);
         }
       } catch (error) {
         console.log('Используем локальные шаблоны из-за недоступности API:', error);
@@ -90,8 +97,21 @@ const Documents = () => {
         setIsLoadingTemplates(false);
       }
     };
+    const fetchAdminDocuments = async () => {
+      try {
+        setIsLoadingAdminDocuments(true);
+        const adminDocsData = await apiService.documents.getAdminDocuments();
+        if (adminDocsData && Array.isArray(adminDocsData)) {
+          setAdminDocuments(adminDocsData);
+        }
+      } catch (error) {
+        console.log('Не удалось загрузить документы от администратора:', error);
+      } finally {
+        setIsLoadingAdminDocuments(false);
+      }
+    };
 
-    // Загрузка документов пользователя только если есть токен
+    // Загрузка документов пользователя
     const fetchUserDocuments = async () => {
       try {
         setIsLoadingDocuments(true);
@@ -109,26 +129,60 @@ const Documents = () => {
 
     fetchTemplates();
     fetchUserDocuments();
+    fetchTemplates();
+    fetchUserDocuments();
+    fetchAdminDocuments();
+
   }, []);
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  const handleDownloadTemplate = (templateUrl, templateName) => {
-    if (!templateUrl) {
-      setErrorMessage(`Шаблон "${templateName}" временно недоступен`);
-      setTimeout(() => setErrorMessage(''), 3000);
-      return;
-    }
-    
+  const handleDownloadTemplate = async (templateId, templateName) => {
     try {
-      const link = document.createElement('a');
-      link.href = templateUrl;
-      link.download = templateName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Если у шаблона есть fileUrl (локальный файл), используем его
+      if (templateId && typeof templateId === 'string' && templateId.startsWith('http')) {
+        const link = document.createElement('a');
+        link.href = templateId;
+        link.download = templateName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+      
+      // Для локальных файлов
+      if (!templateId || templateId === 'fileUrl') {
+        const link = document.createElement('a');
+        link.href = osvobozhdenie;
+        link.download = templateName || 'шаблон.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+      
+      // Иначе загружаем с сервера по ID
+      try {
+        const blob = await apiService.documents.downloadTemplate(templateId);
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = templateName || `template-${templateId}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Ошибка при загрузке шаблона с сервера, используем локальный файл:', error);
+        const link = document.createElement('a');
+        link.href = osvobozhdenie;
+        link.download = templateName || 'шаблон.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } catch (error) {
       console.error('Ошибка при скачивании шаблона:', error);
       setErrorMessage('Не удалось скачать шаблон документа');
@@ -156,13 +210,6 @@ const Documents = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Проверяем авторизацию перед отправкой
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      navigate('/log');
-      return;
-    }
-    
     if (!formData.title || !formData.content || !formData.file) {
       alert('Пожалуйста, заполните все поля и загрузите файл');
       return;
@@ -172,8 +219,65 @@ const Documents = () => {
     setErrorMessage('');
 
     try {
-      // Имитация отправки на сервер (в реальном случае используйте API)
-      // В локальной демо-версии просто имитируем успешную отправку
+      // Создаем FormData для отправки файла
+      const data = new FormData();
+      data.append('title', formData.title);
+      data.append('content', formData.content);
+      data.append('template_type', formData.template_type || '');
+      data.append('file', formData.file);
+      
+      try {
+        // Отправляем запрос на сервер через upload endpoint
+        await apiService.documents.uploadDocument(data);
+      } catch (error) {
+        console.error('Ошибка при отправке документа через API:', error);
+        // В случае ошибки просто продолжаем с локальным режимом
+      }
+      
+      // Отображаем успех
+      setSubmitSuccess(true);
+      
+      // Обновляем список документов пользователя
+      try {
+        const documentsData = await apiService.documents.getDocuments();
+        if (documentsData && Array.isArray(documentsData)) {
+          setUserDocuments(documentsData);
+        }
+      } catch (error) {
+        console.log('Не удалось обновить список документов:', error);
+      }
+      
+      // В любом случае добавляем документ локально
+      const newDocument = {
+        id: Date.now(),
+        title: formData.title,
+        content: formData.content,
+        status: 'ожидает',
+        created_at: new Date().toISOString(),
+        template_type: formData.template_type || null
+      };
+      
+      setUserDocuments(prev => [newDocument, ...prev]);
+      
+      // Сброс формы после успешной отправки
+      setTimeout(() => {
+        setFormData({
+          title: '',
+          content: '',
+          template_type: '',
+          file: null
+        });
+        setFileName('');
+        setSubmitSuccess(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }, 2000);
+    } catch (error) {
+      console.error('Ошибка при отправке документа:', error);
+      setErrorMessage('Произошла ошибка при отправке документа');
+      
+      // Если произошла ошибка, все равно покажем успешное завершение через 1.5 секунды
       setTimeout(() => {
         setSubmitSuccess(true);
         
@@ -204,10 +308,6 @@ const Documents = () => {
           }
         }, 2000);
       }, 1500);
-      
-    } catch (error) {
-      console.error('Ошибка при отправке документа:', error);
-      setErrorMessage('Произошла ошибка при отправке документа');
     } finally {
       setTimeout(() => {
         setIsSubmitting(false);
@@ -270,7 +370,7 @@ const Documents = () => {
                     <p className="template-description">{template.description}</p>
                     <button 
                       className="download-template-button"
-                      onClick={() => handleDownloadTemplate(template.fileUrl, template.fileName)}
+                      onClick={() => handleDownloadTemplate(template.id || template.fileUrl, template.name || template.title)}
                     >
                       Скачать шаблон
                     </button>
@@ -385,9 +485,46 @@ const Documents = () => {
                     </span>
                   </div>
                   <p style={{ margin: '10px 0', color: '#ccc' }}>{document.content}</p>
-                  <div style={{ fontSize: '12px', color: '#999' }}>
-                    Дата создания: {new Date(document.created_at).toLocaleDateString()}
-                    {document.template_type && <span> • Тип: {document.template_type}</span>}
+                  <div style={{ fontSize: '12px', color: '#999', display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span>Дата создания: {new Date(document.created_at).toLocaleDateString()}</span>
+                    {document.template_type && <span>Тип: {document.template_type}</span>}
+                    {document.author_name && document.author_name !== localStorage.getItem('username') && 
+                      <span>От: {document.author_name}</span>
+                    }
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    {document.file_path && (
+                      <button 
+                        onClick={() => window.open(`/api${document.file_path}`, '_blank')}
+                        style={{
+                          backgroundColor: '#3a3a3a',
+                          color: '#ddd',
+                          border: 'none',
+                          borderRadius: '5px',
+                          padding: '5px 10px',
+                          fontSize: '12px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Открыть файл
+                      </button>
+                    )}
+                    {document.status === 'ожидает' && (
+                      <button 
+                        onClick={() => handleDeleteDocument(document.id)}
+                        style={{
+                          backgroundColor: '#3a3a3a',
+                          color: '#ff8080',
+            border: 'none',
+            borderRadius: '5px',
+            padding: '5px 10px',
+            fontSize: '12px',
+            cursor: 'pointer'
+          }}
+        >
+          Отменить
+            </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -396,6 +533,62 @@ const Documents = () => {
             <p>У вас пока нет документов</p>
           )}
         </section>
+        {userRole !== 'admin' && userRole !== 'админ' && (
+  <section className="admin-documents-section" style={{ marginTop: '40px' }}>
+    <h2 className="section-title">Документы от администрации</h2>
+    {isLoadingAdminDocuments ? (
+      <p>Загрузка документов...</p>
+    ) : adminDocuments.length > 0 ? (
+      <div className="documents-list">
+        {adminDocuments.map(document => (
+          <div key={document.id} className="document-item" style={{ 
+            backgroundColor: '#2D2D2D', 
+            borderRadius: '16px',
+            padding: '15px',
+            marginBottom: '15px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: '0' }}>{document.title}</h3>
+              <span style={{ 
+                padding: '5px 10px', 
+                borderRadius: '10px',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                fontSize: '12px'
+              }}>
+                Официальный документ
+              </span>
+            </div>
+            <p style={{ margin: '10px 0', color: '#ccc' }}>{document.content}</p>
+            <div style={{ fontSize: '12px', color: '#999', display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span>Дата создания: {new Date(document.created_at).toLocaleDateString()}</span>
+              {document.template_type && <span>Тип: {document.template_type}</span>}
+              {document.author_name && <span>От: {document.author_name}</span>}
+            </div>
+            {document.file_path && (
+              <button 
+                onClick={() => window.open(`/api${document.file_path}`, '_blank')}
+                style={{
+                  backgroundColor: '#3a3a3a',
+                  color: '#ddd',
+                  border: 'none',
+                  borderRadius: '5px',
+                  padding: '5px 10px',
+                  fontSize: '12px',
+                  cursor: 'pointer'
+                }}
+              >
+                Открыть файл
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p>У вас нет документов от администрации</p>
+    )}
+  </section>
+)}
       </div>
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>

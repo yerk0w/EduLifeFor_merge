@@ -15,6 +15,10 @@ from app.security.password import get_password_hash
 from app.config import AUTH_SERVICE_URL, ACCESS_TOKEN_EXPIRE_MINUTES
 import requests
 import os
+import logging
+
+# Настройка логирования
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/auth",
@@ -35,17 +39,20 @@ async def login_for_access_token(
     # Если локальная аутентификация не удалась, пробуем через auth-сервис
     if not user:
         try:
+            logger.info(f"Попытка аутентификации через auth-сервис для пользователя {form_data.username}")
             # Пробуем авторизоваться через сервис аутентификации
             auth_response = requests.post(
                 f"{AUTH_SERVICE_URL}/auth/login",
                 data={
                     "username": form_data.username,
                     "password": form_data.password
-                }
+                },
+                timeout=5  # Небольшой таймаут для быстрого ответа
             )
             
             if auth_response.status_code == 200:
                 auth_data = auth_response.json()
+                logger.info(f"Успешная аутентификация через auth-сервис для пользователя {form_data.username}")
                 
                 # Получаем или создаем пользователя в локальной БД
                 user = await sync_user_from_auth(
@@ -65,9 +72,9 @@ async def login_for_access_token(
                     "access_token": auth_data["access_token"],
                     "token_type": auth_data["token_type"]
                 }
-        except Exception as e:
-            # Если не удалось авторизоваться через auth-сервис, выдаем стандартную ошибку
-            pass
+        except requests.RequestException as e:
+            # В случае ошибки подключения к auth-сервису логируем и продолжаем
+            logger.warning(f"Не удалось подключиться к auth-сервису: {str(e)}")
     
     # Если и локальная, и удаленная аутентификация не удались
     if not user:
@@ -98,6 +105,7 @@ async def register_user(
     Регистрация нового пользователя через auth-сервис
     """
     try:
+        logger.info(f"Попытка регистрации пользователя {username} через auth-сервис")
         # Пробуем зарегистрировать пользователя через auth-сервис
         auth_response = requests.post(
             f"{AUTH_SERVICE_URL}/auth/register",
@@ -106,11 +114,13 @@ async def register_user(
                 "email": email,
                 "full_name": full_name,
                 "password": password
-            }
+            },
+            timeout=5  # Небольшой таймаут для быстрого ответа
         )
         
         if auth_response.status_code == 200:
             auth_user = auth_response.json()
+            logger.info(f"Успешная регистрация пользователя {username} через auth-сервис")
             
             # Создаем пользователя в локальной БД
             user_data = {
@@ -131,6 +141,7 @@ async def register_user(
         else:
             # Возвращаем ошибку из auth-сервиса
             auth_error = auth_response.json()
+            logger.error(f"Ошибка регистрации через auth-сервис: {auth_error}")
             raise HTTPException(
                 status_code=auth_response.status_code,
                 detail=auth_error.get("detail", "Ошибка регистрации")
