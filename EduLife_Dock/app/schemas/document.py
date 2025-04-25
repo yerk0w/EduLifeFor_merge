@@ -18,7 +18,9 @@ class DocumentResponse(DocumentBase):
     created_at: datetime
     status: str
     author_id: int
-    author_name: str  # Добавляем имя автора для удобства
+    author_name: str  # Added author name for convenience
+    recipient_id: Optional[int] = None
+    file_path: Optional[str] = None  # Document file path
 
     class Config:
         from_attributes = True

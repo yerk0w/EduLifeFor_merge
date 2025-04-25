@@ -17,22 +17,19 @@ class Document(Base):
         default="ожидает",
     )
     
-    # Связь с пользователем-автором
+    # Relationship with the user who created the document (author)
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     author = relationship("User", foreign_keys=[author_id], back_populates="created_documents")
     
-    # Связь с пользователем-получателем (для документов, отправленных администратором)
+    # Relationship with the recipient user (for documents sent by admin)
     recipient_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     recipient = relationship("User", foreign_keys=[recipient_id], back_populates="received_documents")
     
-    # Тип шаблона (если документ создан на основе шаблона)
+    # Template type (if document was created from a template)
     template_type = Column(String(50), nullable=True)
     
-    # Путь к файлу документа
+    # Document file path
     file_path = Column(String(255), nullable=True)
-
-# app/schemas/document.py
-# Update the document schema to include file path
 
 from datetime import datetime
 from typing import Optional, Literal, Annotated

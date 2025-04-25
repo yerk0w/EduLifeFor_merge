@@ -1,3 +1,4 @@
+
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
 from sqlalchemy.sql import func
@@ -8,32 +9,40 @@ from app.db.database import Base
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)  # Обратите внимание на удаление index=True для совместимости
+    id = Column(Integer, primary_key=True)  # Removed index=True for compatibility
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     full_name = Column(String(100), nullable=False)
-    hashed_password = Column(String(255), nullable=True)  # Может быть NULL для пользователей из auth-сервиса
+    hashed_password = Column(String(255), nullable=True)  # May be NULL for users from auth-service
     role = Column(
         Enum("студент", "преподаватель", "админ", name="role_enum"),
         default="студент",
     )
-    is_active = Column(Boolean, default=True)  # Изменено значение по умолчанию на True для автосоздания
+    is_active = Column(Boolean, default=True)  # Changed default to True for auto-creation
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    # Дополнительная информация из auth-сервиса
-    auth_id = Column(Integer, nullable=True)  # ID пользователя в auth-сервисе
+    # Additional information from auth-service
+    auth_id = Column(Integer, nullable=True)  # User ID in auth-service
     telegram = Column(String(100), nullable=True)
     phone_number = Column(String(20), nullable=True)
     faculty_name = Column(String(100), nullable=True)
     group_name = Column(String(50), nullable=True)
     department_name = Column(String(100), nullable=True)
-    position = Column(String(100), nullable=True)  # Для преподавателей
+    position = Column(String(100), nullable=True)  # For teachers
     
-    # Связи с другими таблицами
-    documents = relationship("Document", back_populates="author", cascade="all, delete-orphan")
+    # Relationships with other tables - fixed to avoid ambiguity
+    # Documents created by this user
+    created_documents = relationship("Document", 
+                                    foreign_keys="Document.author_id", 
+                                    back_populates="author")
+    
+    # Documents received by this user
+    received_documents = relationship("Document", 
+                                     foreign_keys="Document.recipient_id", 
+                                     back_populates="recipient")
+    
+    # Registration requests from this user
     registration_requests = relationship("RegistrationRequest", back_populates="user")
-    created_documents = relationship("Document", foreign_keys='Document.creator_id', back_populates="creator")
-    received_documents = relationship("Document", foreign_keys='Document.recipient_id', back_populates="recipient")
 
 from fastapi import UploadFile, File, Form, HTTPException, status
 import os

@@ -398,7 +398,7 @@ const apiService = {
         const response = await apiClient.get(`${API_BASE_URL.dock}/documents/`, {
           params: { skip: (page - 1) * limit, limit },
           // Таймаут в 5 секунд для быстрого реагирования
-          timeout: 5000
+          timeout: 50000
         });
         
         return Array.isArray(response.data) ? response.data : [];

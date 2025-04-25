@@ -10,3 +10,24 @@
 2025-04-25 19:45:42,673 - app.routes.document - ERROR - Ошибка при загрузке документа: Class <class 'app.models.document.Document'> does not have a mapped column named 'recipient_id'
 2025-04-25 19:48:43,390 - app.routes.document - INFO - Загрузка документа: My Document Title от пользователя 2
 2025-04-25 19:48:43,396 - app.routes.document - ERROR - Ошибка при загрузке документа: Could not determine join condition between parent/child tables on relationship User.documents - there are multiple foreign key paths linking the tables.  Specify the 'foreign_keys' argument, providing a list of those columns which should be counted as containing a foreign key reference to the parent table.
+2025-04-25 19:53:03,576 - app.routes.document - INFO - Загрузка документа: My Document Title от пользователя 2
+2025-04-25 19:53:03,595 - app.services.document - INFO - User with ID 2 not found in document database. Creating record.
+2025-04-25 19:53:03,602 - app.services.document - WARNING - Attempt to upload unsupported file format: openapi (1).json
+2025-04-25 19:53:13,957 - app.routes.document - INFO - Загрузка документа: My Document Title от пользователя 2
+2025-04-25 19:53:13,960 - app.services.document - INFO - User with ID 2 not found in document database. Creating record.
+2025-04-25 19:53:13,965 - app.services.document - INFO - Saving file заявление на освобождение от занятий НОВАЯ ФОРМА.pdf as 8921980b4385469c930802e7c76452f3.pdf
+2025-04-25 19:53:13,968 - app.services.document - INFO - Creating document record in DB: My Document Title from user 2
+2025-04-25 19:53:31,841 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-25 19:53:36,015 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-25 19:54:04,045 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-25 19:54:08,168 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-25 19:54:25,609 - app.routes.document - INFO - Загрузка документа: ррр от пользователя 2
+2025-04-25 19:54:25,612 - app.services.document - INFO - Saving file заявление на освобождение от занятий НОВАЯ ФОРМА.pdf as b962d755f19043ae93f8adccea8e6b04.pdf
+2025-04-25 19:54:25,615 - app.services.document - INFO - Creating document record in DB: ррр from user 2
+2025-04-25 19:55:47,249 - app.routes.document - INFO - Загрузка документа: оо от пользователя 2
+2025-04-25 19:55:47,252 - app.services.document - INFO - Saving file заявление на освобождение от занятий НОВАЯ ФОРМА.pdf as 15421ca09fba4b3d98a8d8f26b2ac8d2.pdf
+2025-04-25 19:55:47,255 - app.services.document - INFO - Creating document record in DB: оо from user 2
+2025-04-25 19:57:16,787 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-25 19:57:18,856 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-25 19:57:56,967 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-25 19:58:01,120 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
