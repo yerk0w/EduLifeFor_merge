@@ -129,7 +129,7 @@
   
   .form-group label {
     font-size: 14px;
-    color: #CCC;
+    color: var(--primary-color);
   }
   
   .form-group input,

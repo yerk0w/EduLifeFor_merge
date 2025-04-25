@@ -2,8 +2,8 @@
 .profile-screen {
   width: 100%;
   height: 100%;
-  background-color: #1A1A1A;
-  color: white;
+  background-color: var(--app-background);
+  color: var(--text-color);
   padding: 16px;
   padding-bottom: 80px;
   overflow-y: auto;
@@ -34,28 +34,34 @@
   justify-content: center;
   cursor: pointer;
   position: relative;
+  color: var(--text-color);
 }
 
-.header-icon-button img {
-  width: 24px;
-  height: 24px;
+.header-icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  position: relative;
 }
 
 .notification-badge {
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 16px;
-  height: 16px;
-  background-color: #D2FF1F;
+  top: 13px;
+  right: 12px;
+  background-color: var(--primary-color2);
+  color: white;
+  font-size: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: bold;
-  color: black;
+  padding: 4px 6px;
+  transform: translate(50%, -50%);
 }
+
 
 .profile-user-info {
   display: flex;
@@ -76,7 +82,7 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  background-color: white;
+  background-color: var(--background-color);
 }
 
 .avatar-border {
@@ -85,21 +91,21 @@
   left: -5px;
   right: -5px;
   bottom: -5px;
-  border: 2px solid #D2FF1F;
+  border: 2px solid var(--primary-color2);
   border-radius: 50%;
 }
 
-.user-name {
+.user-name2 {
   font-family: var(--font-primary, 'Oddval', sans-serif);
   font-size: 24px;
   font-weight: 600;
-  color: #9C7AE2; /* Фиолетовый цвет */
+  color: var(--primary-color); /* Фиолетовый цвет оставляем для обеих тем */
   margin: 0;
 }
 
 .profile-tabs {
   display: flex;
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 30px;
   padding: 4px;
   margin-bottom: 24px;
@@ -109,7 +115,7 @@
   flex: 1;
   background: transparent;
   border: none;
-  color: white;
+  color: var(--text-color);
   padding: 12px;
   font-family: var(--font-primary, 'Oddval', sans-serif);
   font-size: 14px;
@@ -120,8 +126,8 @@
 }
 
 .tab-button.active {
-  background-color: #D2FF1F;
-  color: black;
+  background-color: var(--primary-color2);
+  color: var(--primary-color3);
   font-weight: 600;
 }
 
@@ -137,7 +143,7 @@
 }
 
 .document-card {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   display: flex;
@@ -148,7 +154,7 @@
 .document-icon {
   width: 48px;
   height: 48px;
-  background-color: #D2FF1F;
+  background-color: var(--primary-color);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -159,6 +165,7 @@
 .document-icon img {
   width: 24px;
   height: 24px;
+  filter: var(--icon-filter);
 }
 
 .document-info {
@@ -168,11 +175,12 @@
 .document-name {
   font-weight: 600;
   margin-bottom: 4px;
+  color: var(--text-color);
 }
 
 .document-views {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 .document-actions {
@@ -183,22 +191,24 @@
 .action-button {
   width: 40px;
   height: 40px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  color: var(--text-color);
 }
 
 .action-button img {
   width: 20px;
   height: 20px;
+  filter: var(--icon-filter);
 }
 
 .analytics-card {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   overflow: hidden;
@@ -216,12 +226,13 @@
   font-size: 18px;
   font-weight: 600;
   margin: 0;
+  color: var(--text-color);
 }
 
 .time-range-selector {
   position: relative;
-  background-color: #D2FF1F;
-  color: black;
+  background-color: var(--primary-color2);
+  color: var(--primary-color3);
   padding: 6px 12px;
   border-radius: 16px;
   font-size: 12px;
@@ -242,10 +253,10 @@
   top: 100%;
   right: 0;
   margin-top: 8px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 8px;
   width: 120px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px var(--shadow-color);
   z-index: 20;
   overflow: hidden;
 }
@@ -253,19 +264,21 @@
 .dropdown-item {
   padding: 10px 12px;
   font-size: 12px;
-  color: white;
+  color: var(--text-color);
   transition: background-color 0.2s ease;
 }
 
 .dropdown-item:hover {
-  background-color: #4A4A4A;
+  background-color: var(--border-color);
 }
+
 ::-webkit-scrollbar {
   display: none;
 }
+
 .dropdown-item.active {
-  background-color: #D2FF1F;
-  color: black;
+  background-color: var(--primary-color2);
+  color: var(--button-text);
 }
 
 /* Стили для графика месяцев */
@@ -296,7 +309,7 @@
 .chart-bar-container {
   width: 6px;
   height: 160px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 3px;
   display: flex;
   align-items: flex-end;
@@ -311,6 +324,7 @@
 .chart-bar-container.active .chart-bar-handle {
   opacity: 1;
 }
+
 .edit-modal-overlay {
   position: fixed;
   top: 0;
@@ -326,14 +340,14 @@
 }
 
 .edit-modal {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
   padding: 20px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 25px var(--shadow-color);
   animation: modalSlideIn 0.3s ease-out;
 }
 
@@ -354,19 +368,19 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #3A3A3A;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .edit-modal-title {
   font-size: 18px;
   font-weight: 600;
-  color: white;
+  color: var(--text-color);
 }
 
 .edit-modal-close {
   background: transparent;
   border: none;
-  color: #999;
+  color: var(--secondary-text);
   font-size: 24px;
   cursor: pointer;
   width: 30px;
@@ -379,8 +393,8 @@
 }
 
 .edit-modal-close:hover {
-  background-color: #3A3A3A;
-  color: white;
+  background-color: var(--border-color);
+  color: var(--text-color);
 }
 
 .edit-form {
@@ -397,31 +411,31 @@
 
 .form-label {
   font-size: 14px;
-  color: #CCC;
+  color: var(--secondary-text);
 }
 
 .form-input {
-  background-color: #3A3A3A;
-  border: 1px solid #4A4A4A;
+  background-color: var(--border-color);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 14px;
-  color: white;
+  color: var(--text-color);
   transition: border-color 0.2s ease;
 }
 
 .form-input:focus {
-  border-color: #D2FF1F;
+  border-color: var(--primary-color);
   outline: none;
 }
 
 .form-select {
-  background-color: #3A3A3A;
-  border: 1px solid #4A4A4A;
+  background-color: var(--border-color);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 14px;
-  color: white;
+  color: var(--text-color);
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23999'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -429,7 +443,7 @@
 }
 
 .form-select:focus {
-  border-color: #D2FF1F;
+  border-color: var(--primary-color);
   outline: none;
 }
 
@@ -451,26 +465,27 @@
 
 .form-button.cancel {
   background-color: transparent;
-  color: #CCC;
-  border: 1px solid #3A3A3A;
+  color: var(--secondary-text);
+  border: 1px solid var(--border-color);
 }
 
 .form-button.save {
-  background-color: #D2FF1F;
-  color: black;
+  background-color: var(--primary-color);
+  color: var(--button-text);
   border: none;
 }
 
 .form-button.cancel:hover {
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
 }
 
 .form-button.save:hover {
   background-color: #c0ee0e;
 }
+
 .chart-bar {
   width: 100%;
-  background-color: #D2FF1F;
+  background-color: var(--primary-color);
   border-radius: 3px;
   transition: height 0.3s ease;
   position: relative;
@@ -490,7 +505,7 @@
   left: -2px;
   right: -2px;
   height: 8px;
-  background-color: white;
+  background-color: var(--text-color);
   border-radius: 4px;
   opacity: 0;
   transition: opacity 0.2s ease;
@@ -502,7 +517,7 @@
 
 .chart-label {
   font-size: 10px;
-  color: #999;
+  color: var(--secondary-text);
   white-space: nowrap;
   text-align: center;
 }
@@ -514,10 +529,10 @@
 /* Стили для всплывающих подсказок по месяцам */
 .chart-tooltip {
   position: absolute;
-  background-color: #333;
+  background-color: var(--card-background);
   border-radius: 8px;
   padding: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px var(--shadow-color);
   z-index: 10;
   width: 150px;
   pointer-events: none;
@@ -550,7 +565,7 @@
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid #333;
+  border-top: 6px solid var(--card-background);
 }
 
 .tooltip-content {
@@ -562,7 +577,7 @@
   font-weight: 600;
   font-size: 12px;
   margin-bottom: 5px;
-  color: white;
+  color: var(--text-color);
   text-align: center;
 }
 
@@ -583,7 +598,7 @@
 }
 
 .tooltip-present {
-  color: #D2FF1F;
+  color: var(--primary-color);
 }
 
 .tooltip-absent {
@@ -593,22 +608,23 @@
 .tooltip-vacation {
   color: #5AC8FA;
 }
+
 .document-flow-container {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
   display: flex;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .document-flow-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #D2FF1F;
-  color: #1A1A1A;
+  background-color: var(--primary-color2);
+  color: var(--primary-color3);
   border: none;
   border-radius: 12px;
   padding: 14px 24px;
@@ -642,12 +658,13 @@
 .document-flow-icon svg {
   width: 24px;
   height: 24px;
-  color: #1A1A1A;
+  color: var(--primary-color3);
 }
+
 .tooltip-rate {
   font-size: 11px;
   font-weight: 600;
-  color: white;
+  color: var(--text-color);
   text-align: center;
   margin-top: 5px;
 }
@@ -658,7 +675,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 16px;
-  border-top: 1px solid #3A3A3A;
+  border-top: 1px solid var(--border-color);
 }
 
 .attendance-days {
@@ -669,7 +686,7 @@
 
 .days-present {
   font-size: 12px;
-  color: #D2FF1F;
+  color: var(--primary-color);
   white-space: nowrap;
 }
 
@@ -687,14 +704,14 @@
 
 .rate-label {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
   white-space: nowrap;
 }
 
 .rate-value {
   font-size: 18px;
   font-weight: 600;
-  color: #D2FF1F;
+  color: var(--primary-color);
 }
 
 /* Стили для вкладки Reviews */
@@ -710,7 +727,7 @@
   font-weight: 600;
   margin: 0;
   margin-bottom: 16px;
-  color: white;
+  color: var(--text-color);
 }
 
 /* Стили для секции промокодов */
@@ -721,7 +738,7 @@
 }
 
 .promo-item {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   display: flex;
@@ -734,12 +751,12 @@
 
 .promo-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .promo-code {
-  background-color: #D2FF1F;
-  color: black;
+  background-color: var(--primary-color2);
+  color: var(--primary-color3);
   padding: 8px 12px;
   border-radius: 8px;
   font-weight: 600;
@@ -788,18 +805,19 @@
 .promo-description {
   font-weight: 600;
   margin-bottom: 4px;
-  color: white;
+  color: var(--text-color);
 }
 
 .promo-validity {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 .promo-copy-button {
-  background-color: #3A3A3A;
+  background-color: var(--primary-color2);
   border: none;
-  color: white;
+  font-family: var(--font-primary, 'Oddval', sans-serif);
+  color: var(--primary-color3);
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 12px;
@@ -808,12 +826,12 @@
 }
 
 .promo-copy-button:hover {
-  background-color: #4A4A4A;
+  background-color: var(--border-color);
 }
 
 .promo-copy-button:active {
-  background-color: #D2FF1F;
-  color: black;
+  background-color: var(--primary-color);
+  color: var(--button-text);
   animation: pulse 0.3s ease-in-out;
 }
 
@@ -848,7 +866,7 @@
 
 .attendance-stat {
   flex: 1;
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   text-align: center;
@@ -857,19 +875,19 @@
 
 .attendance-stat:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .attendance-value {
   font-size: 24px;
   font-weight: 600;
-  color: #D2FF1F;
+  color: var(--primary-color);
   margin-bottom: 8px;
 }
 
 .attendance-label {
   font-size: 12px;
-  color: #CCC;
+  color: var(--secondary-text);
 }
 
 /* Стили для вкладки Portfolio (Мои данные) */
@@ -891,11 +909,11 @@
   font-weight: 600;
   margin: 0;
   margin-bottom: 16px;
-  color: white;
+  color: var(--text-color);
 }
 
 .user-data-card {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   display: flex;
@@ -912,13 +930,13 @@
 .user-data-title {
   font-weight: 600;
   font-size: 16px;
-  color: white;
+  color: var(--text-color);
 }
 
 .user-data-edit-button {
   background-color: transparent;
   border: none;
-  color: #D2FF1F;
+  color: var(--primary-color);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -936,7 +954,7 @@
 .user-data-edit-icon {
   width: 14px;
   height: 14px;
-  fill: #D2FF1F;
+  fill: var(--primary-color);
 }
 
 /* Персональные данные */
@@ -954,12 +972,12 @@
 
 .personal-data-label {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 .personal-data-value {
   font-size: 14px;
-  color: white;
+  color: var(--text-color);
 }
 
 /* Контактные данные */
@@ -978,7 +996,7 @@
 .contact-icon {
   width: 32px;
   height: 32px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -988,7 +1006,7 @@
 .contact-icon svg {
   width: 18px;
   height: 18px;
-  fill: #D2FF1F;
+  fill: var(--primary-color);
 }
 
 .contact-info {
@@ -997,13 +1015,13 @@
 
 .contact-type {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
   margin-bottom: 4px;
 }
 
 .contact-value {
   font-size: 14px;
-  color: white;
+  color: var(--text-color);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1033,7 +1051,7 @@
 .education-icon {
   width: 32px;
   height: 32px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1043,7 +1061,7 @@
 .education-icon svg {
   width: 18px;
   height: 18px;
-  fill: #D2FF1F;
+  fill: var(--primary-color);
 }
 
 .education-info {
@@ -1053,19 +1071,19 @@
 .education-name {
   font-size: 14px;
   font-weight: 600;
-  color: white;
+  color: var(--text-color);
   margin-bottom: 4px;
 }
 
 .education-details {
   font-size: 12px;
-  color: #CCC;
+  color: var(--secondary-text);
   margin-bottom: 4px;
 }
 
 .education-period {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 /* Опыт работы */
@@ -1084,7 +1102,7 @@
 .experience-icon {
   width: 32px;
   height: 32px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1094,7 +1112,7 @@
 .experience-icon svg {
   width: 18px;
   height: 18px;
-  fill: #D2FF1F;
+  fill: var(--primary-color);
 }
 
 .experience-info {
@@ -1104,19 +1122,19 @@
 .experience-position {
   font-size: 14px;
   font-weight: 600;
-  color: white;
+  color: var(--text-color);
   margin-bottom: 4px;
 }
 
 .experience-company {
   font-size: 12px;
-  color: #CCC;
+  color: var(--secondary-text);
   margin-bottom: 4px;
 }
 
 .experience-period {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 /* Навыки и интересы */
@@ -1137,13 +1155,13 @@
   padding: 6px 12px;
   border-radius: 16px;
   font-size: 12px;
-  background-color: #3A3A3A;
-  color: white;
+  background-color: var(--border-color);
+  color: var(--text-color);
 }
 
 .skill-tag.primary {
-  background-color: #D2FF1F;
-  color: black;
+  background-color: var(--primary-color);
+  color: var(--button-text);
 }
 
 /* Настройки аккаунта */
@@ -1166,13 +1184,13 @@
 .setting-name {
   font-size: 14px;
   font-weight: 600;
-  color: white;
+  color: var(--text-color);
   margin-bottom: 4px;
 }
 
 .setting-description {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 .setting-toggle {
@@ -1195,7 +1213,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   transition: .4s;
   border-radius: 20px;
 }
@@ -1207,13 +1225,13 @@
   width: 16px;
   left: 2px;
   bottom: 2px;
-  background-color: white;
+  background-color: var(--text-color);
   transition: .4s;
   border-radius: 50%;
 }
 
 .toggle-input:checked + .toggle-slider {
-  background-color: #D2FF1F;
+  background-color: var(--primary-color);
 }
 
 .toggle-input:checked + .toggle-slider:before {
@@ -1339,7 +1357,7 @@
   
   .promo-code:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px var(--shadow-color);
   }
 }
 @media screen and (min-width: 768px) {
@@ -1646,13 +1664,13 @@
 
 .month-name {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 .month-year {
   font-size: 14px;
   font-weight: 600;
-  color: white;
+  color: var(--text-color);
 }
 
 /* Стили для подписей месяцев */
@@ -1665,7 +1683,7 @@
 
 .month-label {
   font-size: 10px;
-  color: #999;
+  color: var(--secondary-text);
   text-align: center;
   flex: 1;
   max-width: 24px;
@@ -1694,7 +1712,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 15px;
-  border-top: 1px solid #3A3A3A;
+  border-top: 1px solid var(--border-color);
   margin-top: 15px;
 }
 
@@ -1706,7 +1724,7 @@
 
 .total-present {
   font-size: 12px;
-  color: #D2FF1F;
+  color: var(--primary-color);
   white-space: nowrap;
 }
 
@@ -1719,19 +1737,19 @@
 .total-rate {
   font-size: 18px;
   font-weight: 600;
-  color: #D2FF1F;
+  color: var(--primary-color);
   text-align: right;
 }
 
 .total-rate-label {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
   text-align: right;
 }
 
 /* Стили для показа посещаемости по месяцам */
 .month-attendance-container {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   margin-top: 24px;
@@ -1749,6 +1767,7 @@
   font-size: 18px;
   font-weight: 600;
   margin: 0;
+  color: var(--text-color);
 }
 
 .month-attendance-chart {
@@ -1763,18 +1782,18 @@
   display: flex;
   justify-content: space-between;
   padding-top: 16px;
-  border-top: 1px solid #3A3A3A;
+  border-top: 1px solid var(--border-color);
 }
 
 .month-attendance-average {
   font-size: 18px;
   font-weight: 600;
-  color: #D2FF1F;
+  color: var(--primary-color);
 }
 
 .month-attendance-label {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 /* Стили для компактного отображения статистики */
@@ -1793,7 +1812,7 @@
 }
 
 .compact-stats-label {
-  color: #999;
+  color: var(--secondary-text);
   margin-right: 10px;
 }
 
@@ -1802,7 +1821,7 @@
 }
 
 .compact-stats-value.present {
-  color: #D2FF1F;
+  color: var(--primary-color);
 }
 
 .compact-stats-value.absent {
@@ -1810,12 +1829,12 @@
 }
 
 .compact-stats-value.rate {
-  color: white;
+  color: var(--text-color);
 }
 
 /* Стили для календаря посещаемости */
 .attendance-calendar {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   margin-top: 16px;
@@ -1831,7 +1850,7 @@
 .calendar-title {
   font-weight: 600;
   font-size: 16px;
-  color: white;
+  color: var(--text-color);
 }
 
 .calendar-navigation {
@@ -1842,25 +1861,25 @@
 .calendar-nav-button {
   width: 30px;
   height: 30px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: white;
+  color: var(--text-color);
   font-size: 14px;
 }
 
 .calendar-nav-button:hover {
-  background-color: #4A4A4A;
+  background-color: var(--border-color);
 }
 
 .calendar-month {
   font-weight: 500;
   font-size: 14px;
-  color: white;
+  color: var(--text-color);
   min-width: 100px;
   text-align: center;
 }
@@ -1874,7 +1893,7 @@
 .calendar-weekday {
   text-align: center;
   font-size: 10px;
-  color: #999;
+  color: var(--secondary-text);
   padding: 4px 0;
 }
 
@@ -1884,14 +1903,14 @@
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  color: white;
+  color: var(--text-color);
   border-radius: 50%;
   position: relative;
 }
 
 .calendar-day.present {
   background-color: rgba(210, 255, 31, 0.2);
-  color: #D2FF1F;
+  color: var(--primary-color);
 }
 
 .calendar-day.absent {
@@ -1900,11 +1919,11 @@
 }
 
 .calendar-day.today {
-  border: 2px solid #D2FF1F;
+  border: 2px solid var(--primary-color);
 }
 
 .calendar-day.other-month {
-  color: #666;
+  color: var(--secondary-text);
 }
 
 .calendar-day::after {
@@ -1919,7 +1938,7 @@
 }
 
 .calendar-day.present::after {
-  background-color: #D2FF1F;
+  background-color: var(--primary-color);
 }
 
 .calendar-day.absent::after {
@@ -1928,7 +1947,7 @@
 
 /* Стили для графика посещаемости по дням недели */
 .attendance-weekday-chart {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   margin-top: 16px;
@@ -1952,25 +1971,25 @@
 
 .weekday-bar {
   width: 12px;
-  background-color: #D2FF1F;
+  background-color: var(--primary-color);
   border-radius: 6px;
   transition: height 0.3s ease;
 }
 
 .weekday-label {
   font-size: 10px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 .weekday-value {
   font-size: 10px;
-  color: #D2FF1F;
+  color: var(--primary-color);
   font-weight: 600;
 }
 
 /* Стили для рейтинга и уровня пользователя */
 .user-level-container {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   margin-top: 16px;
@@ -1986,7 +2005,7 @@
 .level-title {
   font-weight: 600;
   font-size: 16px;
-  color: white;
+  color: var(--text-color);
 }
 
 .level-badge {
@@ -2004,7 +2023,7 @@
 
 .level-progress-bar {
   height: 8px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -2021,7 +2040,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 10px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 .level-benefits {
@@ -2031,7 +2050,7 @@
 .level-benefits-title {
   font-weight: 500;
   font-size: 14px;
-  color: white;
+  color: var(--text-color);
   margin-bottom: 8px;
 }
 
@@ -2046,7 +2065,7 @@
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: #CCC;
+  color: var(--secondary-text);
 }
 
 .benefit-icon {
@@ -2133,7 +2152,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2167,20 +2186,20 @@
 
 .badge-name {
   font-size: 12px;
-  color: white;
+  color: var(--text-color);
   text-align: center;
   font-weight: 500;
 }
 
 .badge-date {
   font-size: 10px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 /* Стили для вкладок внутри Reviews */
 .reviews-tabs {
   display: flex;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 20px;
   padding: 4px;
   margin-bottom: 16px;
@@ -2190,7 +2209,7 @@
   flex: 1;
   background: transparent;
   border: none;
-  color: white;
+  color: var(--text-color);
   padding: 8px 12px;
   font-size: 12px;
   font-weight: 500;
@@ -2200,8 +2219,8 @@
 }
 
 .reviews-tab-button.active {
-  background-color: #D2FF1F;
-  color: black;
+  background-color: var(--primary-color);
+  color: var(--button-text);
   font-weight: 600;
 }
 
@@ -2213,7 +2232,7 @@
 }
 
 .review-item {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -2221,7 +2240,7 @@
 
 .review-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .review-header {
@@ -2242,7 +2261,7 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
 }
 
 .review-author-info {
@@ -2253,12 +2272,12 @@
 .review-author-name {
   font-weight: 600;
   font-size: 14px;
-  color: white;
+  color: var(--text-color);
 }
 
 .review-date {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 .review-rating {
@@ -2272,19 +2291,19 @@
 }
 
 .star-icon.empty {
-  color: #666;
+  color: var(--secondary-text);
 }
 
 .review-content {
   font-size: 14px;
-  color: #CCC;
+  color: var(--secondary-text);
   line-height: 1.5;
   margin-bottom: 12px;
 }
 
 .review-course {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -2293,7 +2312,7 @@
 .review-course-icon {
   width: 14px;
   height: 14px;
-  fill: #999;
+  fill: var(--secondary-text);
 }
 
 /* Стили для секции достижений в посещаемости */
@@ -2303,7 +2322,7 @@
   overflow-x: auto;
   padding: 4px;
   scrollbar-width: thin;
-  scrollbar-color: #3A3A3A #2D2D2D;
+  scrollbar-color: var(--border-color) var(--card-background);
 }
 
 .attendance-achievements::-webkit-scrollbar {
@@ -2311,18 +2330,18 @@
 }
 
 .attendance-achievements::-webkit-scrollbar-track {
-  background: #2D2D2D;
+  background: var(--card-background);
   border-radius: 3px;
 }
 
 .attendance-achievements::-webkit-scrollbar-thumb {
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 3px;
 }
 
 .attendance-achievement {
   min-width: 120px;
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   display: flex;
@@ -2350,19 +2369,19 @@
 .achievement-title {
   font-weight: 600;
   font-size: 14px;
-  color: white;
+  color: var(--text-color);
   text-align: center;
 }
 
 .achievement-description {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
   text-align: center;
 }
 
 /* Стили для секции статистики */
 .stats-container {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
 }
@@ -2379,7 +2398,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 12px;
   transition: transform 0.2s ease;
 }
@@ -2391,18 +2410,18 @@
 .stat-value {
   font-size: 20px;
   font-weight: 600;
-  color: #D2FF1F;
+  color: var(--primary-color);
 }
 
 .stat-label {
   font-size: 12px;
-  color: #CCC;
+  color: var(--secondary-text);
   text-align: center;
 }
 
 /* Стили для секции истории посещений */
 .attendance-history {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
 }
@@ -2417,12 +2436,12 @@
 .history-title {
   font-weight: 600;
   font-size: 16px;
-  color: white;
+  color: var(--text-color);
 }
 
 .history-filter {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -2432,7 +2451,7 @@
 .history-filter-icon {
   width: 14px;
   height: 14px;
-  fill: #999;
+  fill: var(--secondary-text);
 }
 
 .history-list {
@@ -2446,7 +2465,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid #3A3A3A;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .history-item:last-child {
@@ -2455,7 +2474,7 @@
 
 .history-date {
   font-size: 14px;
-  color: white;
+  color: var(--text-color);
 }
 
 .history-status {
@@ -2465,8 +2484,8 @@
 }
 
 .history-status.present {
-  background-color: #D2FF1F;
-  color: black;
+  background-color: var(--primary-color);
+  color: var(--button-text);
 }
 
 .history-status.absent {
@@ -2481,7 +2500,7 @@
 
 /* Стили для секции бонусов */
 .bonuses-container {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
 }
@@ -2496,7 +2515,7 @@
 .bonuses-title {
   font-weight: 600;
   font-size: 16px;
-  color: white;
+  color: var(--text-color);
 }
 
 .bonuses-points {
@@ -2508,13 +2527,13 @@
 .points-icon {
   width: 20px;
   height: 20px;
-  fill: #D2FF1F;
+  fill: var(--primary-color);
 }
 
 .points-value {
   font-weight: 600;
   font-size: 16px;
-  color: #D2FF1F;
+  color: var(--primary-color);
 }
 
 .bonuses-list {
@@ -2524,7 +2543,7 @@
 }
 
 .bonus-item {
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 12px;
   padding: 12px;
   display: flex;
@@ -2541,17 +2560,17 @@
 .bonus-title {
   font-weight: 600;
   font-size: 14px;
-  color: white;
+  color: var(--text-color);
 }
 
 .bonus-cost {
   font-size: 12px;
-  color: #D2FF1F;
+  color: var(--primary-color);
 }
 
 .bonus-description {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 /* Медиа-запросы для планшетов и десктопов */
@@ -2632,7 +2651,7 @@
 }
 
 .course-item {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -2640,7 +2659,7 @@
 
 .course-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .course-header {
@@ -2653,7 +2672,7 @@
 .course-name {
   font-weight: 600;
   font-size: 16px;
-  color: white;
+  color: var(--text-color);
 }
 
 .course-status {
@@ -2664,8 +2683,8 @@
 }
 
 .course-status.active {
-  background-color: #D2FF1F;
-  color: black;
+  background-color: var(--primary-color);
+  color: var(--button-text);
 }
 
 .course-status.completed {
@@ -2683,7 +2702,7 @@
   justify-content: space-between;
   margin-bottom: 12px;
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 .course-duration, .course-lessons {
@@ -2695,7 +2714,7 @@
 .course-duration svg, .course-lessons svg {
   width: 14px;
   height: 14px;
-  fill: #999;
+  fill: var(--secondary-text);
 }
 
 .course-progress {
@@ -2707,14 +2726,14 @@
 .progress-bar {
   flex: 1;
   height: 8px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background-color: #D2FF1F;
+  background-color: var(--primary-color);
   border-radius: 4px;
   transition: width 0.5s ease;
 }
@@ -2726,7 +2745,7 @@
 .progress-text {
   font-size: 12px;
   font-weight: 600;
-  color: #D2FF1F;
+  color: var(--primary-color);
   min-width: 36px;
   text-align: right;
 }
@@ -2743,7 +2762,7 @@
 }
 
 .certificate-item {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   display: flex;
@@ -2754,13 +2773,13 @@
 
 .certificate-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .certificate-icon {
   width: 48px;
   height: 48px;
-  background-color: #D2FF1F;
+  background-color: var(--primary-color);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -2775,12 +2794,12 @@
 .certificate-name {
   font-weight: 600;
   margin-bottom: 4px;
-  color: white;
+  color: var(--text-color);
 }
 
 .certificate-date {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 .certificate-actions {
@@ -2791,7 +2810,7 @@
 .certificate-button {
   width: 36px;
   height: 36px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border: none;
   border-radius: 50%;
   display: flex;
@@ -2802,13 +2821,13 @@
 }
 
 .certificate-button:hover {
-  background-color: #4A4A4A;
+  background-color: var(--border-color);
 }
 
 .certificate-button svg {
   width: 18px;
   height: 18px;
-  fill: white;
+  fill: var(--text-color);
 }
 
 /* Стили для проектов */
@@ -2819,7 +2838,7 @@
 }
 
 .project-item {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -2827,7 +2846,7 @@
 
 .project-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .project-image {
@@ -2844,12 +2863,12 @@
   font-weight: 600;
   font-size: 16px;
   margin-bottom: 8px;
-  color: white;
+  color: var(--text-color);
 }
 
 .project-description {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
   margin-bottom: 12px;
   line-height: 1.4;
 }
@@ -2863,14 +2882,14 @@
 .project-tag {
   font-size: 10px;
   padding: 4px 8px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 12px;
-  color: #CCC;
+  color: var(--secondary-text);
 }
 
 /* Стили для секции навыков */
 .skills-container {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
 }
@@ -2896,7 +2915,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2912,41 +2931,42 @@
   bottom: 0;
   border-radius: 50%;
   border: 3px solid transparent;
-  border-top-color: #D2FF1F;
+  border-top-color: var(--primary-color);
   transform: rotate(0deg);
 }
 
 .skill-circle[data-level="1"]::before {
-  border-right-color: #D2FF1F;
+  border-right-color: var(--primary-color);
   transform: rotate(45deg);
 }
 
 .skill-circle[data-level="2"]::before {
-  border-right-color: #D2FF1F;
-  border-bottom-color: #D2FF1F;
+  border-right-color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
   transform: rotate(45deg);
 }
 
 .skill-circle[data-level="3"]::before {
-  border-right-color: #D2FF1F;
-  border-bottom-color: #D2FF1F;
-  border-left-color: #D2FF1F;
+  border-right-color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+  border-left-color: var(--primary-color);
   transform: rotate(45deg);
 }
 
 .skill-icon {
   font-size: 24px;
+  color: var(--text-color);
 }
 
 .skill-name {
   font-size: 12px;
-  color: #CCC;
+  color: var(--secondary-text);
   text-align: center;
 }
 
 .skill-level {
   font-size: 10px;
-  color: #D2FF1F;
+  color: var(--primary-color);
   font-weight: 600;
 }
 
@@ -2958,7 +2978,7 @@
 }
 
 .achievement-item {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   display: flex;
@@ -2984,17 +3004,17 @@
 .achievement-title {
   font-weight: 600;
   margin-bottom: 4px;
-  color: white;
+  color: var(--text-color);
 }
 
 .achievement-description {
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 .achievement-date {
   font-size: 10px;
-  color: #666;
+  color: var(--secondary-text);
   margin-top: 4px;
 }
 
@@ -3159,7 +3179,7 @@
 }
 
 .vacancy-item {
-  background-color: #2D2D2D;
+  background-color: var(--card-background);
   border-radius: 16px;
   padding: 16px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -3167,7 +3187,7 @@
 
 .vacancy-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .vacancy-header {
@@ -3180,19 +3200,19 @@
 .vacancy-position {
   font-weight: 600;
   font-size: 16px;
-  color: white;
+  color: var(--text-color);
   margin-bottom: 4px;
 }
 
 .vacancy-company {
   font-size: 14px;
-  color: #CCC;
+  color: var(--secondary-text);
 }
 
 .vacancy-salary {
   font-weight: 600;
   font-size: 16px;
-  color: #D2FF1F;
+  color: var(--primary-color);
   text-align: right;
 }
 
@@ -3208,18 +3228,18 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #999;
+  color: var(--secondary-text);
 }
 
 .vacancy-detail svg {
   width: 14px;
   height: 14px;
-  fill: #999;
+  fill: var(--secondary-text);
 }
 
 .vacancy-description {
   font-size: 14px;
-  color: #CCC;
+  color: var(--secondary-text);
   line-height: 1.5;
   margin-bottom: 12px;
 }
@@ -3234,9 +3254,9 @@
 .vacancy-tag {
   font-size: 12px;
   padding: 4px 10px;
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
   border-radius: 12px;
-  color: #CCC;
+  color: var(--secondary-text);
 }
 
 .vacancy-actions {
@@ -3254,15 +3274,15 @@
 }
 
 .vacancy-button.primary {
-  background-color: #D2FF1F;
-  color: black;
+  background-color: var(--primary-color);
+  color: var(--button-text);
   border: none;
 }
 
 .vacancy-button.secondary {
   background-color: transparent;
-  color: #CCC;
-  border: 1px solid #3A3A3A;
+  color: var(--secondary-text);
+  border: 1px solid var(--border-color);
 }
 
 .vacancy-button.primary:hover {
@@ -3270,7 +3290,7 @@
 }
 
 .vacancy-button.secondary:hover {
-  background-color: #3A3A3A;
+  background-color: var(--border-color);
 }
 
 /* Стили для вакансий на планшетах */

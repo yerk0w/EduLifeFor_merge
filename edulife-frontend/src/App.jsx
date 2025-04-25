@@ -14,8 +14,8 @@ import Notifications from './components/screens/Notifications';
 import Settings from './components/screens/Settings';
 import AdminPanel from './components/screens/admin/AdminPanel';
 import Documents from './components/screens/Documents/Documents';
-import Jobs from './components/screens/Jobs/Jobs';
-
+import Jobs from './components/screens/Jobs/Jobs'
+import TeacherPanel from './components/screens/TeacherPanel';
 import './App.css';
 
 const App = () => {
@@ -37,6 +37,8 @@ const App = () => {
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/documents" element={<Documents/>} />
           <Route path="/jobs" element={<Jobs/>} />
+          <Route path='/teacher-panel' element={<TeacherPanel/>} />
+          {/* Добавьте другие маршруты здесь */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

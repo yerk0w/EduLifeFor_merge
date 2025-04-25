@@ -4,15 +4,27 @@ import './AdminPanel.css';
 
 const AdminPanel = ({ courses = [] }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('courses');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [documentTab, setDocumentTab] = useState('requests');
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState('');
+  
+  // Add this new state for document request search
+  const [requestSearchQuery, setRequestSearchQuery] = useState('');
+  
+  // Rest of your component...
+
+  
+  // Stats for dashboard
 
   const stats = {
     totalStudents: 2458,
     activeStudents: 1845,
-    totalCourses: courses.length,
+    totalCourses: courses.length, // Now this is safe since courses will always be an array
     completionRate: 78,
     averageRating: 4.8
   };
@@ -57,7 +69,7 @@ const AdminPanel = ({ courses = [] }) => {
               <span>+12.5%</span>
             </div>
           </div>
-
+          
           <div className="stat-card warning">
             <div className="stat-icon">
               <svg viewBox="0 0 24 24" width="24" height="24">
@@ -65,7 +77,7 @@ const AdminPanel = ({ courses = [] }) => {
               </svg>
             </div>
             <div className="stat-content">
-              <div className="stat-value">{"3"}</div>
+              <div className="stat-value">{stats.totalCourses}</div>
               <div className="stat-label">Всего курсов</div>
             </div>
           </div>
@@ -73,7 +85,6 @@ const AdminPanel = ({ courses = [] }) => {
         </div>
         
         <div className="stats-row">
-          
           <div className="chart-card">
             <div className="chart-header">
               <h4 className="chart-title">Активность студентов</h4>
@@ -122,71 +133,8 @@ const AdminPanel = ({ courses = [] }) => {
           </div>
         </div>
       </div>
-      
-      <div className="dashboard-sections">
-        <div className="activity-section">
-          <div className="section-header">
-            <h4 className="section-title">Последняя активность</h4>
-            <button className="view-all-button">
-              Все активности
-              <svg viewBox="0 0 24 24" width="16" height="16">
-                <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
-              </svg>
-            </button>
-          </div>
-          <div className="activity-list">
-            <div className="activity-item">
-              <div className="activity-avatar">
-                <img src="/images/avatar1.jpg" alt="User" />
-              </div>
-              <div className="activity-content">
-                <div className="activity-text">
-                  <span className="activity-user">Анна Смирнова</span> завершила курс <span className="activity-course">UX/UI Designer</span>
-                </div>
-                <div className="activity-time">2 часа назад</div>
-              </div>
-            </div>
-            
-            <div className="activity-item">
-              <div className="activity-avatar">
-                <img src="/images/avatar2.jpg" alt="User" />
-              </div>
-              <div className="activity-content">
-                <div className="activity-text">
-                  <span className="activity-user">Иван Петров</span> присоединился к курсу <span className="activity-course">Web Development</span>
-                </div>
-                <div className="activity-time">4 часа назад</div>
-              </div>
-            </div>
-            
-            <div className="activity-item">
-              <div className="activity-avatar">
-                <img src="/images/avatar3.jpg" alt="User" />
-              </div>
-              <div className="activity-content">
-                <div className="activity-text">
-                  <span className="activity-user">Мария Иванова</span> оставила отзыв на курс <span className="activity-course">Interface Design</span>
-                </div>
-                <div className="activity-time">вчера</div>
-              </div>
-            </div>
-            
-            <div className="activity-item">
-              <div className="activity-avatar">
-                <img src="/images/avatar4.jpg" alt="User" />
-              </div>
-              <div className="activity-content">
-                <div className="activity-text">
-                  <span className="activity-user">Алексей Сидоров</span> выполнил домашнее задание по курсу <span className="activity-course">Mobile App Design</span>
-                </div>
-                <div className="activity-time">вчера</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-  </div>
-);
+    </div>
+  );
  
   
   const renderCourses = () => {
@@ -212,12 +160,12 @@ const AdminPanel = ({ courses = [] }) => {
       <div className="admin-courses">
         <div className="courses-list-container">
           <div className="courses-header">
-            <h3 className="section-title">Курсы</h3>
+            <h3 className="section-title">Расписание</h3>
             <button className="add-course-button" onClick={handleAddCourse}>
               <svg viewBox="0 0 24 24" width="20" height="20">
                 <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
               </svg>
-              Добавить курс
+              Добавить расписание
             </button>
           </div>
           
@@ -227,7 +175,7 @@ const AdminPanel = ({ courses = [] }) => {
             </svg>
             <input 
               type="text" 
-              className="search-input" 
+              className="search-input5" 
               placeholder="Поиск курсов..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -336,7 +284,7 @@ const AdminPanel = ({ courses = [] }) => {
                     <input type="file" className="file-input" id="course-image" />
                     <label htmlFor="course-image" className="file-input-label">
                       <svg viewBox="0 0 24 24" width="20" height="20">
-                        <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+                      <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
                       </svg>
                       Выбрать файл
                     </label>
@@ -377,9 +325,9 @@ const AdminPanel = ({ courses = [] }) => {
                             />
                             <button 
                               className="remove-option-button"
-                              type="button" // Добавляем тип кнопки
+                              type="button"
                               onClick={(e) => {
-                                e.preventDefault(); // Предотвращаем отправку формы
+                                e.preventDefault();
                                 // Здесь должен быть код для удаления варианта ответа
                               }}
                             >
@@ -398,9 +346,9 @@ const AdminPanel = ({ courses = [] }) => {
                     <div className="question-actions">
                       <button 
                         className="add-option-button"
-                        type="button" // Добавляем тип кнопки
+                        type="button"
                         onClick={(e) => {
-                          e.preventDefault(); // Предотвращаем отправку формы
+                          e.preventDefault();
                           // Здесь должен быть код для добавления варианта ответа
                         }}
                       >
@@ -412,9 +360,9 @@ const AdminPanel = ({ courses = [] }) => {
                       
                       <button 
                         className="remove-question-button"
-                        type="button" // Добавляем тип кнопки
+                        type="button"
                         onClick={(e) => {
-                          e.preventDefault(); // Предотвращаем отправку формы
+                          e.preventDefault();
                           // Здесь должен быть код для удаления вопроса
                         }}
                       >
@@ -429,9 +377,9 @@ const AdminPanel = ({ courses = [] }) => {
                 
                 <button 
                   className="add-question-button"
-                  type="button" // Добавляем тип кнопки
+                  type="button"
                   onClick={(e) => {
-                    e.preventDefault(); // Предотвращаем отправку формы
+                    e.preventDefault();
                     // Здесь должен быть код для добавления нового вопроса
                   }}
                 >
@@ -444,7 +392,7 @@ const AdminPanel = ({ courses = [] }) => {
                 <div className="form-actions">
                   <button 
                     className="cancel-button" 
-                    type="button" // Добавляем тип кнопки
+                    type="button"
                     onClick={() => {
                       // Если это новый курс, который еще не добавлен в список
                       if (!courses.some(c => c.id === selectedCourse.id)) {
@@ -458,7 +406,7 @@ const AdminPanel = ({ courses = [] }) => {
                   </button>
                   <button 
                     className="save-button"
-                    type="button" // Добавляем тип кнопки
+                    type="button"
                     onClick={() => {
                       // Здесь должен быть код для сохранения изменений
                       // Если это новый курс, его нужно добавить в список
@@ -485,115 +433,113 @@ const AdminPanel = ({ courses = [] }) => {
                       Редактировать
                     </button>
                     <button 
-                    className="delete-button"
-                    onClick={() => {
-                      // Здесь должен быть код для удаления курса
-                      // Например: onCoursesUpdate(courses.filter(c => c.id !== selectedCourse.id));
-                      setSelectedCourse(null);
-                      
-                      // Можно добавить подтверждение удаления
-                      if (window.confirm(`Вы уверены, что хотите удалить курс "${selectedCourse.title}"?`)) {
-                        // Удаление курса из списка
-                        // onCoursesUpdate(courses.filter(c => c.id !== selectedCourse.id));
-                      }
-                    }}
-                  >
-                    <svg viewBox="0 0 24 24" width="20" height="20">
-                      <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
-                    </svg>
-                    Удалить
-                  </button>
-                </div>
-              </div>
-              
-              <div className="course-preview">
-                <div className="course-image-container" style={{ backgroundColor: selectedCourse.backgroundColor }}>
-                  {selectedCourse.image ? (
-                    <img src={selectedCourse.image} alt={selectedCourse.title} className="course-image" />
-                  ) : (
-                    <div className="course-image-placeholder">
-                      <svg viewBox="0 0 24 24" width="48" height="48">
-                        <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+                      className="delete-button"
+                      onClick={() => {
+                        // Здесь должен быть код для удаления курса
+                        // Можно добавить подтверждение удаления
+                        if (window.confirm(`Вы уверены, что хотите удалить курс "${selectedCourse.title}"?`)) {
+                          // Удаление курса из списка
+                          // onCoursesUpdate(courses.filter(c => c.id !== selectedCourse.id));
+                          setSelectedCourse(null);
+                        }
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" width="20" height="20">
+                        <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
                       </svg>
+                      Удалить
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="course-preview">
+                  <div className="course-image-container" style={{ backgroundColor: selectedCourse.backgroundColor }}>
+                    {selectedCourse.image ? (
+                      <img src={selectedCourse.image} alt={selectedCourse.title} className="course-image" />
+                    ) : (
+                      <div className="course-image-placeholder">
+                        <svg viewBox="0 0 24 24" width="48" height="48">
+                          <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="course-info">
+                    <div className="info-group">
+                      <div className="info-label">Описание</div>
+                      <div className="info-value description">{selectedCourse.description}</div>
+                    </div>
+                    
+                    <div className="info-row">
+                      <div className="info-group half">
+                        <div className="info-label">Продолжительность</div>
+                        <div className="info-value">{selectedCourse.hours}</div>
+                      </div>
+                      
+                      <div className="info-group half">
+                        <div className="info-label">Студентов</div>
+                        <div className="info-value">{selectedCourse.people}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="info-group">
+                      <div className="info-label">Тип видео</div>
+                      <div className="info-value">{selectedCourse.videoType === 'youtube' ? 'YouTube' : 'Прямая ссылка'}</div>
+                    </div>
+                    
+                    <div className="info-group">
+                      <div className="info-label">URL видео</div>
+                      <div className="info-value url">{selectedCourse.videoUrl}</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="homework-section">
+                  <h4 className="subsection-title">Домашнее задание</h4>
+                  
+                  {selectedCourse.homework && selectedCourse.homework.length > 0 ? (
+                    <div className="homework-list">
+                      {selectedCourse.homework.map((question, index) => (
+                        <div key={index} className="homework-item">
+                          <div className="question-text">
+                            <span className="question-number">{index + 1}.</span> {question.question}
+                          </div>
+                          <div className="options-list">
+                            {question.options.map((option, optIndex) => (
+                              <div key={optIndex} className={`option-item ${optIndex === question.correctAnswer ? 'correct' : ''}`}>
+                                {option}
+                                {optIndex === question.correctAnswer && (
+                                  <svg viewBox="0 0 24 24" width="16" height="16" className="correct-icon">
+                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                                  </svg>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="no-homework">
+                      Для этого курса еще не добавлено домашнее задание.
                     </div>
                   )}
                 </div>
-                
-                <div className="course-info">
-                  <div className="info-group">
-                    <div className="info-label">Описание</div>
-                    <div className="info-value description">{selectedCourse.description}</div>
-                  </div>
-                  
-                  <div className="info-row">
-                    <div className="info-group half">
-                      <div className="info-label">Продолжительность</div>
-                      <div className="info-value">{selectedCourse.hours}</div>
-                    </div>
-                    
-                    <div className="info-group half">
-                      <div className="info-label">Студентов</div>
-                      <div className="info-value">{selectedCourse.people}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="info-group">
-                    <div className="info-label">Тип видео</div>
-                    <div className="info-value">{selectedCourse.videoType === 'youtube' ? 'YouTube' : 'Прямая ссылка'}</div>
-                  </div>
-                  
-                  <div className="info-group">
-                    <div className="info-label">URL видео</div>
-                    <div className="info-value url">{selectedCourse.videoUrl}</div>
-                  </div>
-                </div>
               </div>
-              
-              <div className="homework-section">
-                <h4 className="subsection-title">Домашнее задание</h4>
-                
-                {selectedCourse.homework && selectedCourse.homework.length > 0 ? (
-                  <div className="homework-list">
-                    {selectedCourse.homework.map((question, index) => (
-                      <div key={index} className="homework-item">
-                        <div className="question-text">
-                          <span className="question-number">{index + 1}.</span> {question.question}
-                        </div>
-                        <div className="options-list">
-                          {question.options.map((option, optIndex) => (
-                            <div key={optIndex} className={`option-item ${optIndex === question.correctAnswer ? 'correct' : ''}`}>
-                              {option}
-                              {optIndex === question.correctAnswer && (
-                                <svg viewBox="0 0 24 24" width="16" height="16" className="correct-icon">
-                                  <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
-                                </svg>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="no-homework">
-                    Для этого курса еще не добавлено домашнее задание.
-                  </div>
-                )}
-              </div>
+            )
+          ) : (
+            <div className="no-course-selected">
+              <svg viewBox="0 0 24 24" width="64" height="64">
+                <path d="M12,18.17L8.83,15L7.42,16.41L12,21L16.59,16.41L15.17,15M12,5.83L15.17,9L16.58,7.59L12,3L7.41,7.59L8.83,9L12,5.83Z" />
+              </svg>
+              <p>Выберите курс из списка слева для просмотра деталей</p>
             </div>
-          )
-        ) : (
-          <div className="no-course-selected">
-            <svg viewBox="0 0 24 24" width="64" height="64">
-              <path d="M12,18.17L8.83,15L7.42,16.41L12,21L16.59,16.41L15.17,15M12,5.83L15.17,9L16.58,7.59L12,3L7.41,7.59L8.83,9L12,5.83Z" />
-            </svg>
-            <p>Выберите курс из списка слева для просмотра деталей</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
  
   
   const renderStudents = () => (
@@ -604,7 +550,7 @@ const AdminPanel = ({ courses = [] }) => {
           <svg viewBox="0 0 24 24" width="20" height="20" className="search-icon">
             <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
           </svg>
-          <input type="text" className="search-input" placeholder="Поиск студентов..." />
+          <input type="text" className="search-input5" placeholder="Поиск студентов..." />
         </div>
         
         <div className="filter-container">
@@ -638,7 +584,7 @@ const AdminPanel = ({ courses = [] }) => {
               <td>3</td>
               <td>
                 <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: '85%' }}></div>
+                <div className="progress-fill" style={{ width: '85%' }}></div>
                 </div>
                 <span className="progress-text">85%</span>
               </td>
@@ -785,7 +731,7 @@ const AdminPanel = ({ courses = [] }) => {
 
   const renderReports = () => (
     <div className="admin-reports">
-      <h3 className="section-title">Отчеты</h3>
+      <h3 className="section-title">Посящение</h3>
       
       <div className="reports-filters">
         <div className="date-range">
@@ -808,13 +754,6 @@ const AdminPanel = ({ courses = [] }) => {
             ))}
           </select>
         </div>
-        
-        <button className="generate-report-button">
-          <svg viewBox="0 0 24 24" width="20" height="20">
-            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,19L11.5,17.5L9,15L11.5,12.5L10,11L6,15L10,19M18,15L14,11L12.5,12.5L15,15L12.5,17.5L14,19L18,15Z" />
-          </svg>
-          Экспорт в CSV
-        </button>
       </div>
       
       <div className="reports-charts">
@@ -842,54 +781,695 @@ const AdminPanel = ({ courses = [] }) => {
           </div>
         </div>
       </div>
+    </div>
+  );
+
+  // Adding the missing renderDocuments function
+  const renderDocuments = () => (
+    <div className="admin-documents">
+      <h3 className="section-title">Документооборот</h3>
       
-      <div className="reports-tables">
-        
-        
-        <div className="report-table-container">
-          <h4 className="table-title">Последние регистрации</h4>
-          <table className="report-table">
-            <thead>
-              <tr>
-                <th>Студент</th>
-                <th>Курс</th>
-                <th>Дата</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Елена Кузнецова</td>
-                <td>UX/UI Designer</td>
-                <td>23 апреля 2025</td>
-              </tr>
-              <tr>
-                <td>Дмитрий Волков</td>
-                <td>Web Development</td>
-                <td>22 апреля 2025</td>
-              </tr>
-              <tr>
-                <td>Ольга Соколова</td>
-                <td>Mobile App Design</td>
-                <td>21 апреля 2025</td>
-              </tr>
-              <tr>
-                <td>Сергей Новиков</td>
-                <td>Interface Design</td>
-                <td>20 апреля 2025</td>
-              </tr>
-              <tr>
-                <td>Татьяна Морозова</td>
-                <td>UX/UI Designer</td>
-                <td>19 апреля 2025</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div className="document-tabs">
+        <button 
+          className={`document-tab ${documentTab === 'requests' ? 'active' : ''}`}
+          onClick={() => setDocumentTab('requests')}
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20">
+          <path d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M6,9H18V11H6M14,14H6V12H14M18,8H6V6H18" />
+          </svg>
+          Заявки на документы
+        </button>
+        <button 
+          className={`document-tab ${documentTab === 'documents' ? 'active' : ''}`}
+          onClick={() => setDocumentTab('documents')}
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+          </svg>
+          Документы
+        </button>
+        <button 
+          className={`document-tab ${documentTab === 'add' ? 'active' : ''}`}
+          onClick={() => setDocumentTab('add')}
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+          </svg>
+          Добавить документ
+        </button>
+      </div>
+      
+      <div className="document-content">
+        {documentTab === 'requests' && renderRequestsTab()}
+        {documentTab === 'documents' && renderDocumentsTab()}
+        {documentTab === 'add' && renderAddDocumentTab()}
       </div>
     </div>
   );
 
-
+  const renderRequestsTab = () => {
+    // Filter requests based on search query
+    const filteredRequests = [
+      { id: 1, student: 'Анна Смирнова', type: 'Справка об обучении', date: '23.04.2025', status: 'new', statusText: 'Новая', comment: 'Нужна для предоставления в налоговую службу', avatar: '/images/avatar1.jpg' },
+      { id: 2, student: 'Иван Петров', type: 'Сертификат об окончании курса', date: '22.04.2025', status: 'processing', statusText: 'В обработке', comment: 'Курс "JavaScript для начинающих"', avatar: '/images/avatar2.jpg' },
+      { id: 3, student: 'Мария Иванова', type: 'Договор на обучение', date: '20.04.2025', status: 'completed', statusText: 'Выполнена', comment: 'Копия договора для работодателя', avatar: '/images/avatar3.jpg' },
+      { id: 4, student: 'Алексей Сидоров', type: 'Справка о посещаемости', date: '18.04.2025', status: 'rejected', statusText: 'Отклонена', comment: 'Недостаточно данных о посещаемости', avatar: '/images/avatar4.jpg' }
+    ].filter(request => 
+      request.student.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
+      request.type.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
+      request.comment.toLowerCase().includes(requestSearchQuery.toLowerCase())
+    );
+  
+    return (
+      <div className="documents-requests">
+        <h4 className="subsection-title">Заявки на документы</h4>
+        
+        <div className="documents-controls">
+          <div className="search-container">
+            <svg viewBox="0 0 24 24" width="20" height="20" className="search-icon">
+              <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+            </svg>
+            <input 
+              type="text" 
+              className="search-input" 
+              placeholder="Поиск заявок..." 
+              value={requestSearchQuery}
+              onChange={(e) => setRequestSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div className="filter-container">
+            <select className="filter-select">
+              <option value="all">Все заявки</option>
+              <option value="new">Новые</option>
+              <option value="processing">В обработке</option>
+              <option value="completed">Выполненные</option>
+              <option value="rejected">Отклоненные</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="requests-table-container">
+          <table className="documents-table">
+            <thead>
+              <tr>
+                <th>Студент</th>
+                <th>Тип документа</th>
+                <th>Дата заявки</th>
+                <th>Статус</th>
+                <th>Комментарий</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRequests.length > 0 ? (
+                filteredRequests.map(request => (
+                  <tr 
+                    key={request.id} 
+                    className={selectedRequest === request.id ? 'selected' : ''} 
+                    onClick={() => setSelectedRequest(request.id)}
+                  >
+                    <td className="student-name">
+                      <img src={request.avatar} alt={request.student} className="student-avatar" />
+                      <span>{request.student}</span>
+                    </td>
+                    <td>{request.type}</td>
+                    <td>{request.date}</td>
+                    <td>
+                      <span className={`status-badge ${request.status}`}>{request.statusText}</span>
+                    </td>
+                    <td>{request.comment}</td>
+                    <td className="actions-cell">
+                      <button className="table-action-button">
+                        <svg viewBox="0 0 24 24" width="18" height="18">
+                          <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
+                        </svg>
+                      </button>
+                      {request.status === 'new' && (
+                        <>
+                          <button className="table-action-button accept">
+                            <svg viewBox="0 0 24 24" width="18" height="18">
+                              <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                            </svg>
+                          </button>
+                          <button className="table-action-button reject">
+                            <svg viewBox="0 0 24 24" width="18" height="18">
+                              <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                      {request.status === 'processing' && (
+                        <>
+                          <button className="table-action-button complete">
+                            <svg viewBox="0 0 24 24" width="18" height="18">
+                              <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                            </svg>
+                          </button>
+                          <button className="table-action-button reject">
+                            <svg viewBox="0 0 24 24" width="18" height="18">
+                              <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                      {request.status === 'completed' && (
+                        <button className="table-action-button download">
+                          <svg viewBox="0 0 24 24" width="18" height="18">
+                            <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                          </svg>
+                        </button>
+                      )}
+                      {request.status === 'rejected' && (
+                        <button className="table-action-button reconsider">
+                          <svg viewBox="0 0 24 24" width="18" height="18">
+                            <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" />
+                          </svg>
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="no-results">Заявки не найдены</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        
+        {selectedRequest && (
+          <div className="request-details">
+            <h4 className="detail-title">Детали заявки</h4>
+            <div className="detail-content">
+              <div className="detail-row">
+                <div className="detail-label">Студент:</div>
+                <div className="detail-value">
+                  {selectedRequest === 1 ? 'Анна Смирнова' : 
+                   selectedRequest === 2 ? 'Иван Петров' : 
+                   selectedRequest === 3 ? 'Мария Иванова' : 'Алексей Сидоров'}
+                </div>
+              </div>
+              <div className="detail-row">
+                <div className="detail-label">Тип документа:</div>
+                <div className="detail-value">
+                  {selectedRequest === 1 ? 'Справка об обучении' : 
+                   selectedRequest === 2 ? 'Сертификат об окончании курса' : 
+                   selectedRequest === 3 ? 'Договор на обучение' : 'Справка о посещаемости'}
+                </div>
+              </div>
+              <div className="detail-row">
+                <div className="detail-label">Дата заявки:</div>
+                <div className="detail-value">
+                  {selectedRequest === 1 ? '23.04.2025' : 
+                   selectedRequest === 2 ? '22.04.2025' : 
+                   selectedRequest === 3 ? '20.04.2025' : '18.04.2025'}
+                </div>
+              </div>
+              <div className="detail-row">
+                <div className="detail-label">Статус:</div>
+                <div className="detail-value">
+                  <span className={`status-badge ${
+                    selectedRequest === 1 ? 'new' : 
+                    selectedRequest === 2 ? 'processing' : 
+                    selectedRequest === 3 ? 'completed' : 'rejected'
+                  }`}>
+                    {selectedRequest === 1 ? 'Новая' : 
+                     selectedRequest === 2 ? 'В обработке' : 
+                     selectedRequest === 3 ? 'Выполнена' : 'Отклонена'}
+                  </span>
+                </div>
+              </div>
+              <div className="detail-row">
+                <div className="detail-label">Комментарий:</div>
+                <div className="detail-value">
+                  {selectedRequest === 1 ? 'Нужна для предоставления в налоговую службу' : 
+                   selectedRequest === 2 ? 'Курс "JavaScript для начинающих"' : 
+                   selectedRequest === 3 ? 'Копия договора для работодателя' : 'Недостаточно данных о посещаемости'}
+                </div>
+              </div>
+              
+              {selectedRequest === 1 && (
+                <div className="request-actions">
+                  <button className="action-button process">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                    </svg>
+                    Принять в обработку
+                  </button>
+                  <button className="action-button reject">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                    </svg>
+                    Отклонить
+                  </button>
+                </div>
+              )}
+              
+              {selectedRequest === 2 && (
+                <div className="request-actions">
+                  <button className="action-button create-doc">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                    </svg>
+                    Создать документ
+                  </button>
+                  <button className="action-button reject">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                    </svg>
+                    Отклонить
+                  </button>
+                </div>
+              )}
+              
+              {selectedRequest === 3 && (
+                <div className="request-actions">
+                  <button className="action-button download">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                    </svg>
+                    Скачать документ
+                  </button>
+                  <button className="action-button send">
+                  <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
+                  </svg>
+                  Отправить повторно
+                </button>
+              </div>
+            )}
+            
+            {selectedRequest === 4 && (
+              <div className="request-actions">
+                <button className="action-button reconsider">
+                  <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" />
+                  </svg>
+                  Пересмотреть заявку
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+  
+  
+  const renderDocumentsTab = () => (
+    <div className="documents-list">
+      <h4 className="subsection-title">Существующие документы</h4>
+      
+      <div className="documents-controls">
+        <div className="search-container">
+          <svg viewBox="0 0 24 24" width="20" height="20" className="search-icon">
+            <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+          </svg>
+          <input type="text" className="search-input5" placeholder="Поиск документов..." />
+        </div>
+        
+        <div className="filter-container">
+          <select className="filter-select">
+            <option value="all">Все документы</option>
+            <option value="contracts">Договоры</option>
+            <option value="certificates">Сертификаты</option>
+            <option value="references">Справки</option>
+          </select>
+        </div>
+        
+        <button className="add-document-button" onClick={() => setDocumentTab('add')}>
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+          </svg>
+          Добавить документ
+        </button>
+      </div>
+      
+      <div className="documents-table-container">
+        <table className="documents-table">
+          <thead>
+            <tr>
+              <th>Название документа</th>
+              <th>Тип</th>
+              <th>Дата создания</th>
+              <th>Статус</th>
+              <th>Получатель</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className={selectedDocument === 1 ? 'selected' : ''} onClick={() => setSelectedDocument(1)}>
+              <td className="document-name">
+                <svg viewBox="0 0 24 24" width="20" height="20" className="document-icon">
+                  <path d="M6,2A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6M6,4H13V9H18V20H6V4M8,12V14H16V12H8M8,16V18H13V16H8Z" />
+                </svg>
+                <span>Договор на обучение №123-45</span>
+              </td>
+              <td>Договор</td>
+              <td>15.04.2025</td>
+              <td>
+                <span className="status-badge approved">Подписан</span>
+              </td>
+              <td>Анна Смирнова</td>
+              <td className="actions-cell">
+                <button className="table-action-button">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
+                  </svg>
+                </button>
+                <button className="table-action-button">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                  </svg>
+                </button>
+                <button className="table-action-button send">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr className={selectedDocument === 2 ? 'selected' : ''} onClick={() => setSelectedDocument(2)}>
+              <td className="document-name">
+                <svg viewBox="0 0 24 24" width="20" height="20" className="document-icon">
+                  <path d="M6,2A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6M6,4H13V9H18V20H6V4M8,12V14H16V12H8M8,16V18H13V16H8Z" />
+                </svg>
+                <span>Сертификат об окончании курса "JavaScript"</span>
+              </td>
+              <td>Сертификат</td>
+              <td>10.04.2025</td>
+              <td>
+                <span className="status-badge approved">Выдан</span>
+              </td>
+              <td>Мария Иванова</td>
+              <td className="actions-cell">
+                <button className="table-action-button">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
+                  </svg>
+                </button>
+                <button className="table-action-button">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                  </svg>
+                </button>
+                <button className="table-action-button send">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr className={selectedDocument === 3 ? 'selected' : ''} onClick={() => setSelectedDocument(3)}>
+              <td className="document-name">
+                <svg viewBox="0 0 24 24" width="20" height="20" className="document-icon">
+                  <path d="M6,2A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6M6,4H13V9H18V20H6V4M8,12V14H16V12H8M8,16V18H13V16H8Z" />
+                </svg>
+                <span>Справка об обучении №45-67</span>
+              </td>
+              <td>Справка</td>
+              <td>05.04.2025</td>
+              <td>
+                <span className="status-badge pending">Ожидает отправки</span>
+              </td>
+              <td>Не назначен</td>
+              <td className="actions-cell">
+                <button className="table-action-button">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                  <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
+                  </svg>
+                </button>
+                <button className="table-action-button">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                  </svg>
+                </button>
+                <button className="table-action-button send">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <tr className={selectedDocument === 4 ? 'selected' : ''} onClick={() => setSelectedDocument(4)}>
+              <td className="document-name">
+                <svg viewBox="0 0 24 24" width="20" height="20" className="document-icon">
+                  <path d="M6,2A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2H6M6,4H13V9H18V20H6V4M8,12V14H16V12H8M8,16V18H13V16H8Z" />
+                </svg>
+                <span>Договор с преподавателем №45-67</span>
+              </td>
+              <td>Договор</td>
+              <td>01.04.2025</td>
+              <td>
+                <span className="status-badge draft">Черновик</span>
+              </td>
+              <td>Не назначен</td>
+              <td className="actions-cell">
+                <button className="table-action-button">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
+                  </svg>
+                </button>
+                <button className="table-action-button edit">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                  </svg>
+                </button>
+                <button className="table-action-button delete">
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      {selectedDocument && (
+        <div className="document-details">
+          <h4 className="detail-title">Детали документа</h4>
+          <div className="detail-content">
+            <div className="detail-row">
+              <div className="detail-label">Название:</div>
+              <div className="detail-value">
+                {selectedDocument === 1 ? 'Договор на обучение №123-45' : 
+                 selectedDocument === 2 ? 'Сертификат об окончании курса "JavaScript"' : 
+                 selectedDocument === 3 ? 'Справка об обучении №45-67' : 'Договор с преподавателем №45-67'}
+              </div>
+            </div>
+            <div className="detail-row">
+              <div className="detail-label">Тип документа:</div>
+              <div className="detail-value">
+                {selectedDocument === 1 ? 'Договор' : 
+                 selectedDocument === 2 ? 'Сертификат' : 
+                 selectedDocument === 3 ? 'Справка' : 'Договор'}
+              </div>
+            </div>
+            <div className="detail-row">
+              <div className="detail-label">Дата создания:</div>
+              <div className="detail-value">
+                {selectedDocument === 1 ? '15.04.2025' : 
+                 selectedDocument === 2 ? '10.04.2025' : 
+                 selectedDocument === 3 ? '05.04.2025' : '01.04.2025'}
+              </div>
+            </div>
+            <div className="detail-row">
+              <div className="detail-label">Статус:</div>
+              <div className="detail-value">
+                <span className={`status-badge ${
+                  selectedDocument === 1 ? 'approved' : 
+                  selectedDocument === 2 ? 'approved' : 
+                  selectedDocument === 3 ? 'pending' : 'draft'
+                }`}>
+                  {selectedDocument === 1 ? 'Подписан' : 
+                   selectedDocument === 2 ? 'Выдан' : 
+                   selectedDocument === 3 ? 'Ожидает отправки' : 'Черновик'}
+                </span>
+              </div>
+            </div>
+            <div className="detail-row">
+  <div className="detail-label">Получатель:</div>
+  <div className="detail-value recipient-search">
+    <div className="search-container compact">
+      <svg viewBox="0 0 24 24" width="18" height="18" className="search-icon-small">
+        <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+      </svg>
+      <input 
+        type="text" 
+        className="search-input recipient-input" 
+        placeholder="Поиск получателя..." 
+        defaultValue={
+          selectedDocument === 1 ? 'Анна Смирнова' : 
+          selectedDocument === 2 ? 'Мария Иванова' : 
+          ''
+        }
+      />
+    </div>
+    {/* Можно добавить выпадающий список с результатами поиска */}
+    {/* <div className="search-results">
+      <div className="search-result-item">Анна Смирнова</div>
+      <div className="search-result-item">Иван Петров</div>
+      <div className="search-result-item">Мария Иванова</div>
+      <div className="search-result-item">Алексей Сидоров</div>
+    </div> */}
+  </div>
+</div>
+            
+            {(selectedDocument === 3 || selectedDocument === 4) && (
+              <div className="document-actions">
+                <div className="send-document-form">
+                  <h5 className="form-subtitle">Отправить документ студенту</h5>
+                  <div className="form-group">
+                    <label className="form-label">Выберите студента:</label>
+                    <select className="form-select" value={selectedStudent} onChange={(e) => setSelectedStudent(e.target.value)}>
+                      <option value="">Выберите студента</option>
+                      <option value="1">Анна Смирнова</option>
+                      <option value="2">Иван Петров</option>
+                      <option value="3">Мария Иванова</option>
+                      <option value="4">Алексей Сидоров</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Комментарий (необязательно):</label>
+                    <textarea className="form-textarea" rows="3" placeholder="Введите комментарий для студента..."></textarea>
+                  </div>
+                  <button className="send-button">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
+                    </svg>
+                    Отправить документ
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {(selectedDocument === 1 || selectedDocument === 2) && (
+              <div className="document-actions">
+                <button className="action-button download">
+                  <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                  </svg>
+                  Скачать документ
+                </button>
+                <button className="action-button send-again">
+                  <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
+                  </svg>
+                  Отправить повторно
+                </button>
+                {selectedDocument === 1 && (
+                  <button className="action-button print">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                      <path d="M18,3H6V7H18M19,12A1,1 0 0,1 18,11A1,1 0 0,1 19,10A1,1 0 0,1 20,11A1,1 0 0,1 19,12M16,19H8V14H16M19,8H5A3,3 0 0,0 2,11V17H6V21H18V17H22V11A3,3 0 0,0 19,8Z" />
+                    </svg>
+                    Распечатать
+                  </button>
+                )}
+              </div>
+            )}
+            
+            {selectedDocument === 4 && (
+              <div className="document-actions">
+                <button className="action-button edit">
+                  <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                  </svg>
+                  Редактировать
+                </button>
+                <button className="action-button delete">
+                  <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                  </svg>
+                  Удалить
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+  
+  const renderAddDocumentTab = () => (
+    <div className="add-document">
+      <h4 className="subsection-title">Добавление нового документа</h4>
+      
+      <div className="document-form">
+        <div className="form-group">
+          <label className="form-label">Тип документа:</label>
+          <select className="form-select">
+            <option value="">Выберите тип документа</option>
+            <option value="contract">Договор</option>
+            <option value="certificate">Сертификат</option>
+            <option value="reference">Справка</option>
+          </select>
+        </div>
+        
+        <div className="form-group">
+          <label className="form-label">Название документа:</label>
+          <input type="text" className="form-input" placeholder="Введите название документа" />
+        </div>
+        
+        <div className="form-group">
+          <label className="form-label">Шаблон документа:</label>
+          <select className="form-select">
+            <option value="">Выберите шаблон</option>
+            <option value="contract_edu">Договор на обучение</option>
+            <option value="contract_teacher">Договор с преподавателем</option>
+            <option value="certificate_completion">Сертификат об окончании курса</option>
+            <option value="reference_education">Справка об обучении</option>
+            <option value="reference_attendance">Справка о посещаемости</option>
+          </select>
+        </div>
+        
+        <div className="form-group">
+          <label className="form-label">Загрузить файл:</label>
+          <div className="file-input-container">
+            <input type="file" className="file-input" id="document-file" />
+            <label htmlFor="document-file" className="file-input-label">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+              </svg>
+              Выбрать файл
+            </label>
+            <span className="file-name">Файл не выбран</span>
+          </div>
+        </div>
+        
+        <div className="form-group">
+          <label className="form-label">Получатель (необязательно):</label>
+          <select className="form-select">
+            <option value="">Выберите получателя</option>
+            <option value="1">Анна Смирнова</option>
+            <option value="2">Иван Петров</option>
+            <option value="3">Мария Иванова</option>
+            <option value="4">Алексей Сидоров</option>
+          </select>
+        </div>
+        
+        <div className="form-group">
+          <label className="form-label">Комментарий (необязательно):</label>
+          <textarea className="form-textarea" rows="3" placeholder="Введите комментарий..."></textarea>
+        </div>
+        
+        <div className="form-actions">
+          <button className="cancel-button" onClick={() => setDocumentTab('documents')}>
+            Отмена
+          </button>
+          <button className="save-button">
+            Сохранить как черновик
+          </button>
+          <button className="create-button">
+            Создать документ
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="admin-panel">
@@ -898,8 +1478,7 @@ const AdminPanel = ({ courses = [] }) => {
           <svg viewBox="0 0 24 24" width="24" height="24">
             <path d="M12,3L1,9L12,15L21,10.09V17H23V9M5,13.18V17.18L12,21L19,17.18V13.18L12,17L5,13.18Z" />
           </svg>
-          <h1 className="admin-title">EduLife
-          </h1>
+          <h1 className="admin-title">EduLife</h1>
         </div>
         
         <div className="admin-user">
@@ -933,7 +1512,7 @@ const AdminPanel = ({ courses = [] }) => {
               <svg viewBox="0 0 24 24" width="24" height="24">
                 <path d="M12,3L1,9L12,15L21,10.09V17H23V9M5,13.18V17.18L12,21L19,17.18V13.18L12,17L5,13.18Z" />
               </svg>
-              <span className="tab-text">Курсы</span>
+              <span className="tab-text">Расписание</span>
             </button>
             
             <button 
@@ -953,10 +1532,18 @@ const AdminPanel = ({ courses = [] }) => {
               <svg viewBox="0 0 24 24" width="24" height="24">
                 <path d="M7,13H21V11H7M7,19H21V17H7M7,7H21V5H7M2,11H5.5V13H2M2,5H5.5V7H2M2,17H5.5V19H2Z" />
               </svg>
-              <span className="tab-text">Отчеты</span>
+              <span className="tab-text">Посящение</span>
             </button>
             
-
+            <button 
+              className={`sidebar-tab ${activeTab === 'documents' ? 'active' : ''}`}
+              onClick={() => setActiveTab('documents')}
+            >
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,12.5A0.5,0.5 0 0,1 11.5,12A0.5,0.5 0 0,1 12,11.5A0.5,0.5 0 0,1 12.5,12A0.5,0.5 0 0,1 12,12.5M12,11A1,1 0 0,0 11,12A1,1 0 0,0 12,13A1,1 0 0,0 13,12A1,1 0 0,0 12,11Z" />
+              </svg>
+              <span className="tab-text">Документооборот</span>
+            </button>
           </div>
           
           <button className="logout-button" onClick={handleBack}>
@@ -972,6 +1559,7 @@ const AdminPanel = ({ courses = [] }) => {
           {activeTab === 'courses' && renderCourses()}
           {activeTab === 'students' && renderStudents()}
           {activeTab === 'reports' && renderReports()}
+          {activeTab === 'documents' && renderDocuments()}
         </div>
       </div>
     </div>

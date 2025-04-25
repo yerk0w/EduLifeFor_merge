@@ -1,21 +1,56 @@
-// В компоненте Navbar.jsx
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+// src/components/common/Navbar.jsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
-import homeIcon from '../../assets/images/home-icon.png';
-import scheduleIcon from '../../assets/images/schedule-icon.png';
-import qrIcon from '../../assets/images/qr-icon.png';
-import jobsIcon from '../../assets/images/documentflow.png';
-import mapIcon from '../../assets/images/map-icon.png'; // Иконка для карты
-import profileIcon from '../../assets/images/profile-icon.png';
+
+// Импортируем иконки из библиотеки React Icons
+import { GrHomeRounded } from "react-icons/gr";
+import { RiCalendarScheduleLine } from "react-icons/ri";
+import { LuScanQrCode } from "react-icons/lu";
+import { MdOutlineWorkOutline } from "react-icons/md";
+import { PiMapPinAreaBold } from "react-icons/pi";
+import { LuUser } from "react-icons/lu";
 
 const Navbar = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Локальное состояние для мгновенного отклика
+  const [localActiveTab, setLocalActiveTab] = useState(activeTab);
+  
+  // Синхронизация с внешним состоянием
+  useEffect(() => {
+    setLocalActiveTab(activeTab);
+  }, [activeTab]);
+  
+  // Синхронизация с текущим маршрутом
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes('/dashboard')) {
+      setLocalActiveTab(0);
+      setActiveTab(0);
+    } else if (path.includes('/schedule')) {
+      setLocalActiveTab(1);
+      setActiveTab(1);
+    } else if (path.includes('/qr-code')) {
+      setLocalActiveTab(2);
+      setActiveTab(2);
+    } else if (path.includes('/jobs')) {
+      setLocalActiveTab(3);
+      setActiveTab(3);
+    } else if (path.includes('/profile')) {
+      setLocalActiveTab(5);
+      setActiveTab(5);
+    }
+  }, [location, setActiveTab]);
   
   const handleTabChange = (index) => {
+    // Сначала обновляем локальное состояние для мгновенного отклика
+    setLocalActiveTab(index);
+    // Затем обновляем внешнее состояние
     setActiveTab(index);
     
-    // Навигация в зависимости от выбранной вкладки
+    // Затем выполняем навигацию
     switch(index) {
       case 0:
         navigate('/dashboard');
@@ -44,40 +79,40 @@ const Navbar = ({ activeTab, setActiveTab }) => {
   return (
     <div className="navbar">
       <div 
-        className={`navbar-item ${activeTab === 0 ? 'active' : ''}`} 
+        className={`navbar-item ${localActiveTab === 0 ? 'active' : ''}`} 
         onClick={() => handleTabChange(0)}
       >
-        <img src={homeIcon} alt="Home" />
+        <GrHomeRounded className="navbar-icon" />
       </div>
       <div 
-        className={`navbar-item ${activeTab === 1 ? 'active' : ''}`} 
+        className={`navbar-item ${localActiveTab === 1 ? 'active' : ''}`} 
         onClick={() => handleTabChange(1)}
       >
-        <img src={scheduleIcon} alt="Schedule" />
+        <RiCalendarScheduleLine className="navbar-icon" />
       </div>
       <div 
-        className={`navbar-item ${activeTab === 2 ? 'active' : ''}`} 
+        className={`navbar-item ${localActiveTab === 2 ? 'active' : ''}`} 
         onClick={() => handleTabChange(2)}
       >
-        <img src={qrIcon} alt="QR Code" />
+        <LuScanQrCode className="navbar-icon" />
       </div>
       <div 
-        className={`navbar-item ${activeTab === 3 ? 'active' : ''}`} 
+        className={`navbar-item ${localActiveTab === 3 ? 'active' : ''}`} 
         onClick={() => handleTabChange(3)}
       >
-        <img src={jobsIcon} alt="Jobs" />
+        <MdOutlineWorkOutline className="navbar-icon" />
       </div>
       <div 
-        className={`navbar-item ${activeTab === 4 ? 'active' : ''}`} 
+        className={`navbar-item ${localActiveTab === 4 ? 'active' : ''}`} 
         onClick={() => handleTabChange(4)}
       >
-        <img src={mapIcon} alt="Map" />
+        <PiMapPinAreaBold className="navbar-icon" />
       </div>
       <div 
-        className={`navbar-item ${activeTab === 5 ? 'active' : ''}`} 
+        className={`navbar-item ${localActiveTab === 5 ? 'active' : ''}`} 
         onClick={() => handleTabChange(5)}
       >
-        <img src={profileIcon} alt="Profile" />
+        <LuUser className="navbar-icon" />
       </div>
     </div>
   );

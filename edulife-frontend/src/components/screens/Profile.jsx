@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../common/Navbar';
 import './Profile.css';
 import avatarImage1 from '../../assets/images/avatar.webp';
-import notificationIcon from '../../assets/images/notification.webp';
-import settingsIcon from '../../assets/images/settings.webp';
 import apiService from '../../services/apiService';
+import { FaCog, FaBell } from 'react-icons/fa';
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -567,17 +566,19 @@ const Profile = () => {
     
     return (
       <div className="profile-screen">
-        <div className="profile-header">
-          <button className="header-icon-button" onClick={handleSettings}>
-            <img src={settingsIcon} alt="Settings" />
-          </button>
-          <h1>Мой профиль</h1>
-          <button className="header-icon-button" onClick={handleNotifications}>
-            <img src={notificationIcon} alt="Notifications" />
-            <div className="notification-badge">2</div>
-          </button>
-        </div>
-        
+      {/* Заголовок профиля */}
+      <div className="profile-header">
+        <button className="header-icon-button" onClick={handleSettings}>
+          <FaCog size={24} color="var(--text-color)" /> {/* Иконка настроек */}
+        </button>
+        <h1>Мой профиль</h1>
+        <button className="header-icon-button" onClick={handleNotifications}>
+          <FaBell size={24} color="var(--text-color)" /> {/* Иконка уведомлений */}
+          <div className="notification-badge"></div>
+        </button>
+      </div>
+
+      {/* Информация о пользователе */}
         <div className="profile-user-info">
           <div className="avatar1-container">
             <img src={avatarImage1} alt="User avatar" className="avatar1-image" />
@@ -585,39 +586,39 @@ const Profile = () => {
           </div>
           <h2 className="user-name">{userInfo?.full_name || 'Пользователь'}</h2>
           {userInfo?.role_name && (
-            <p className="user-role">{userInfo.role_name === 'admin' ? 'Администратор' : 
-                                      userInfo.role_name === 'teacher' ? 'Преподаватель' : 
+            <p className="user-role">{userInfo.role_name === 'admin' ? 'Администратор' :
+                                      userInfo.role_name === 'teacher' ? 'Преподаватель' :
                                       'Студент'}</p>
           )}
         </div>
-        
+
         <div className="profile-tabs">
-          <button 
+          <button
             className={`tab-button ${activeTab === 'statistics' ? 'active' : ''}`}
             onClick={() => handleTabChange('statistics')}
           >
             Статистика
           </button>
-          <button 
+          <button
             className={`tab-button ${activeTab === 'portfolio' ? 'active' : ''}`}
             onClick={() => handleTabChange('portfolio')}
           >
             Мои данные
           </button>
-          <button 
+          <button
             className={`tab-button ${activeTab === 'reviews' ? 'active' : ''}`}
             onClick={() => handleTabChange('reviews')}
           >
             Обзор
           </button>
         </div>
-        
+
         <div className="profile-content">
           {renderTabContent()}
         </div>
-        
+
         <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
-        
+
         {/* Edit Modal */}
         {isEditModalOpen && (
           <div className="edit-modal-overlay" onClick={() => setIsEditModalOpen(false)}>
