@@ -12,7 +12,7 @@ const API_BASE_URL = {
 
 // Create an axios instance with default configuration
 const apiClient = axios.create({
-  timeout: 50000, // 10 seconds timeout
+  timeout: 50000, // 50 seconds timeout
   headers: {
     'Content-Type': 'application/json'
   }
@@ -120,7 +120,7 @@ const apiService = {
 
     getStudents: async () => {
       try {
-        const response = await apiClient.get(`/api/students`);
+        const response = await apiClient.get(`${API_BASE_URL.auth}/students`);
         return response.data;
       } catch (error) {
         console.error('Error fetching students:', error);
@@ -131,9 +131,9 @@ const apiService = {
     // Отправка документа студенту (для админов)
     sendDocumentToStudent: async (formData) => {
       try {
-        const response = await apiClient.post(`/api/documents/admin/send`, formData, {
+        const response = await apiClient.post(`${API_BASE_URL.dock}/documents/admin/send`, formData, {
           headers: {
-            'Content-Type': undefined
+            'Content-Type': 'multipart/form-data'
           }
         });
         return response.data;
@@ -146,7 +146,7 @@ const apiService = {
     // Получение документов, отправленных администратором текущему пользователю
     getAdminDocuments: async () => {
       try {
-        const response = await apiClient.get(`/api/documents/admin/received`);
+        const response = await apiClient.get(`${API_BASE_URL.dock}/documents/admin/received`);
         return response.data;
       } catch (error) {
         console.error('Error fetching admin documents:', error);
@@ -394,8 +394,8 @@ const apiService = {
           return [];
         }
         
-        // Используем URL с префиксом /api для прокси
-        const response = await apiClient.get(`/api/documents/`, {
+        // Используем URL с прямым адресом сервиса документов
+        const response = await apiClient.get(`${API_BASE_URL.dock}/documents/`, {
           params: { skip: (page - 1) * limit, limit },
           // Таймаут в 5 секунд для быстрого реагирования
           timeout: 5000
@@ -418,8 +418,8 @@ const apiService = {
           return [];
         }
         
-        // Используем URL с префиксом /api для прокси
-        const response = await apiClient.get(`/api/templates`);
+        // Используем URL с прямым адресом сервиса документов
+        const response = await apiClient.get(`${API_BASE_URL.dock}/templates`);
         return response.data;
       } catch (error) {
         console.error('Error fetching templates:', error);
@@ -430,7 +430,7 @@ const apiService = {
   
     getDocumentById: async (documentId) => {
       try {
-        const response = await apiClient.get(`/api/documents/${documentId}`);
+        const response = await apiClient.get(`${API_BASE_URL.dock}/documents/${documentId}`);
         return response.data;
       } catch (error) {
         console.error(`Error fetching document ${documentId}:`, error);
@@ -440,7 +440,7 @@ const apiService = {
     
     createDocument: async (documentData) => {
       try {
-        const response = await apiClient.post(`/api/documents`, documentData);
+        const response = await apiClient.post(`${API_BASE_URL.dock}/documents`, documentData);
         return response.data;
       } catch (error) {
         console.error('Error creating document:', error);
@@ -457,10 +457,10 @@ const apiService = {
         }
         
         // Отправляем запрос с правильными заголовками
-        const response = await axios.post(`${API_BASE_URL.documents}/documents/upload`, formData, {
+        const response = await axios.post(`${API_BASE_URL.dock}/documents/upload`, formData, {
           headers: {
-            // Не указываем Content-Type, чтобы axios автоматически установил с boundary
-            'Content-Type': undefined,
+            // Для FormData не нужно указывать Content-Type, браузер сам установит правильный с boundary
+            'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${localStorage.getItem('authToken')}`
           }
         });
@@ -498,7 +498,7 @@ const apiService = {
     
     updateDocumentStatus: async (documentId, status) => {
       try {
-        const response = await apiClient.patch(`/api/documents/${documentId}/review`, {
+        const response = await apiClient.patch(`${API_BASE_URL.dock}/documents/${documentId}/review`, {
           status: status
         });
         return response.data;
@@ -511,7 +511,7 @@ const apiService = {
     downloadTemplate: async (templateId) => {
       try {
         // Using blob response type for file download
-        const response = await apiClient.get(`/api/templates/${templateId}/download`, {
+        const response = await apiClient.get(`${API_BASE_URL.dock}/templates/${templateId}/download`, {
           responseType: 'blob'
         });
         
@@ -525,11 +525,11 @@ const apiService = {
     downloadDocument: async (documentId) => {
       try {
         // Сначала получаем информацию о пути к файлу
-        const response = await apiClient.get(`/api/documents/${documentId}/download`);
+        const response = await apiClient.get(`${API_BASE_URL.dock}/documents/${documentId}/download`);
         
         if (response.data && response.data.file_path) {
           // Затем используем полный URL для получения содержимого
-          const fileUrl = `/api${response.data.file_path}`;
+          const fileUrl = `${API_BASE_URL.dock}${response.data.file_path}`;
           const fileResponse = await fetch(fileUrl);
           
           if (!fileResponse.ok) {

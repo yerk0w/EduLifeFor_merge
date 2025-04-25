@@ -11,7 +11,7 @@ import osvobozhdenie from '../../../assets/documents/заявление на о�
 const Documents = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(3);
   
   // Состояния для документов и шаблонов
   const [templates, setTemplates] = useState([]);
@@ -37,6 +37,7 @@ const Documents = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || 'студент');
+  const [demoMode, setDemoMode] = useState(true); // Включаем демо-режим по умолчанию для более надежной работы
 
   // Проверка авторизации и загрузка данных
   useEffect(() => {
@@ -46,7 +47,9 @@ const Documents = () => {
       localStorage.setItem('authToken', 'demo_token');
       localStorage.setItem('userId', '1');
       localStorage.setItem('userRole', 'студент');
+      localStorage.setItem('demoMode', 'true');
       setUserRole('студент');
+      setDemoMode(true);
     }
 
     fetchData();
@@ -223,8 +226,7 @@ const Documents = () => {
       }
     } catch (error) {
       console.error('Ошибка при скачивании шаблона:', error);
-      setErrorMessage('Не удалось скачать шаблон документа');
-      setTimeout(() => setErrorMessage(''), 3000);
+      setErrorMessage('Ошибка при скачивании шаблона');
     }
   };
 
@@ -465,13 +467,13 @@ const Documents = () => {
 
       <div className="documents-content">
         {errorMessage && (
-          <div style={{ 
-            backgroundColor: '#ff5252', 
-            color: 'white', 
-            padding: '10px', 
+          <div style={{
+            backgroundColor: '#ff5252',
+            color: 'white',
+            padding: '10px',
             borderRadius: '8px',
             marginBottom: '15px',
-            textAlign: 'center' 
+            textAlign: 'center'
           }}>
             {errorMessage}
           </div>

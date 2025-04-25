@@ -32,8 +32,8 @@ class User(Base):
     # Связи с другими таблицами
     documents = relationship("Document", back_populates="author", cascade="all, delete-orphan")
     registration_requests = relationship("RegistrationRequest", back_populates="user")
-    # app/services/document.py
-# Add this implementation to handle file uploads
+    created_documents = relationship("Document", foreign_keys='Document.creator_id', back_populates="creator")
+    received_documents = relationship("Document", foreign_keys='Document.recipient_id', back_populates="recipient")
 
 from fastapi import UploadFile, File, Form, HTTPException, status
 import os
