@@ -38,16 +38,27 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Handle 401 Unauthorized errors
-    if (error.response && error.response.status === 401) {
-      // Clear invalid token
-      localStorage.removeItem('authToken');
-      // Redirect to login page
-      window.location.href = '/log';
+    // Проверяем, является ли это ошибкой сети или CORS
+    if (!error.response) {
+      console.error('Сетевая ошибка или CORS:', error);
+      // В случае ошибки сети не перенаправляем на страницу логина
+      return Promise.reject(error);
     }
+    
+    // Проверяем код ответа
+    if (error.response.status === 401) {
+      console.log('Ошибка аутентификации 401, проверяем на странице документов');
+      // Перенаправляем только если мы не на странице документов
+      if (!window.location.pathname.includes('/documents')) {
+        localStorage.removeItem('authToken');
+        window.location.href = '/log';
+      }
+    }
+    
     return Promise.reject(error);
   }
 );
+
 
 const apiService = {
   auth: {
@@ -336,82 +347,118 @@ const apiService = {
 
   },
   // Document Service APIs
+// Обновленные методы для документов в apiService.jsx
+documents: {
   documents: {
     getDocuments: async (page = 1, limit = 10) => {
       try {
+        // Проверка наличия токена
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          console.log('Нет токена, возвращаем пустой список документов');
+          return [];
+        }
+        
         const response = await apiClient.get(`${API_BASE_URL.dock}/documents`, {
-          params: { page, limit }
+          params: { skip: (page - 1) * limit, limit },
+          // Таймаут в 5 секунд для быстрого реагирования
+          timeout: 5000
         });
-        return response.data;
+        
+        return Array.isArray(response.data) ? response.data : [];
       } catch (error) {
         console.error('Error fetching documents:', error);
-        throw error;
-      }
-    },
-    
-    getDocumentById: async (documentId) => {
-      try {
-        const response = await apiClient.get(`${API_BASE_URL.dock}/documents/${documentId}`);
-        return response.data;
-      } catch (error) {
-        console.error(`Error fetching document ${documentId}:`, error);
-        throw error;
-      }
-    },
-    
-    createDocument: async (documentData) => {
-      try {
-        const response = await apiClient.post(`${API_BASE_URL.dock}/documents`, documentData);
-        return response.data;
-      } catch (error) {
-        console.error('Error creating document:', error);
-        throw error;
-      }
-    },
-    
-    updateDocument: async (documentId, documentData) => {
-      try {
-        const response = await apiClient.put(`${API_BASE_URL.dock}/documents/${documentId}`, documentData);
-        return response.data;
-      } catch (error) {
-        console.error(`Error updating document ${documentId}:`, error);
-        throw error;
-      }
-    },
-    
-    deleteDocument: async (documentId) => {
-      try {
-        const response = await apiClient.delete(`${API_BASE_URL.dock}/documents/${documentId}`);
-        return response.data;
-      } catch (error) {
-        console.error(`Error deleting document ${documentId}:`, error);
-        throw error;
+        // Возвращаем пустой массив вместо ошибки
+        return [];
       }
     },
     
     getTemplates: async () => {
       try {
-        const response = await apiClient.get(`${API_BASE_URL.dock}/templates`);
-        return response.data;
-      } catch (error) {
-        console.error('Error fetching templates:', error);
-        throw error;
-      }
-    },
-    
-    downloadTemplate: async (templateId) => {
-      try {
-        const response = await apiClient.get(`${API_BASE_URL.dock}/templates/${templateId}/download`, {
-          responseType: 'blob'
+        // Проверка наличия токена
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          console.log('Нет токена, возвращаем пустой список шаблонов');
+          return [];
+        }
+        
+        const response = await apiClient.get(`${API_BASE_URL.dock}/templates`, {
+          // Таймаут в 5 секунд для быстрого реагирования
+          timeout: 5000
         });
         
-        return response.data;
+        return Array.isArray(response.data) ? response.data : [];
       } catch (error) {
-        console.error(`Error downloading template ${templateId}:`, error);
-        throw error;
+        console.error('Error fetching templates:', error);
+        // Возвращаем пустой массив вместо ошибки
+        return [];
       }
+    },
+  
+  
+  getDocumentById: async (documentId) => {
+    try {
+      const response = await apiClient.get(`${API_BASE_URL.dock}/documents/${documentId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching document ${documentId}:`, error);
+      throw error;
     }
   },
+  
+  createDocument: async (documentData) => {
+    try {
+      // Проверяем, является ли documentData экземпляром FormData
+      let headers = {};
+      if (documentData instanceof FormData) {
+        headers = {
+          'Content-Type': 'multipart/form-data'
+        };
+      }
+      
+      const response = await apiClient.post(`${API_BASE_URL.dock}/documents`, documentData, { 
+        headers 
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating document:', error);
+      throw error;
+    }
+  },
+  
+  updateDocument: async (documentId, documentData) => {
+    try {
+      const response = await apiClient.put(`${API_BASE_URL.dock}/documents/${documentId}`, documentData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating document ${documentId}:`, error);
+      throw error;
+    }
+  },
+
+  deleteDocument: async (documentId) => {
+    try {
+      const response = await apiClient.delete(`${API_BASE_URL.dock}/documents/${documentId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting document ${documentId}:`, error);
+      throw error;
+    }
+  },
+  downloadTemplate: async (templateId) => {
+    try {
+      const response = await apiClient.get(`${API_BASE_URL.dock}/templates/${templateId}/download`, {
+        responseType: 'blob'
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error downloading template ${templateId}:`, error);
+      throw error;
+    }
+  }
+},
+},
   
   // Integration Service APIs
   integration: {

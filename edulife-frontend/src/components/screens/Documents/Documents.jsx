@@ -1,50 +1,144 @@
-// src/components/screens/Documents/Documents.jsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Documents.css';
 import Slider from 'react-slick';
 import Navbar from '../../common/Navbar';
+import apiService from '../../../services/apiService';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import osvobozhdenie from '../../../assets/documents/заявление на освобождение от занятий НОВАЯ ФОРМА.pdf';
-// import academicLeaveTemplate from '../../../assets/documents/academic-leave.pdf';
-// import scholarshipApplicationTemplate from '../../../assets/documents/scholarship-application.pdf';
-// import transferApplicationTemplate from '../../../assets/documents/transfer-application.pdf';
 
 const Documents = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState(0);
   
-  // Исправление строки 45: используем useState правильно
+  // Исходные данные для шаблонов в случае, если API недоступен
+  const defaultTemplates = [
+    {
+      id: 1,
+      name: 'Заявление на освобождение',
+      description: 'Шаблон заявления для освобождение от занятий',
+      fileUrl: osvobozhdenie,
+      fileName: 'заявление на освобождение от занятий НОВАЯ ФОРМА.pdf'
+    },
+    {
+      id: 2,
+      name: 'Академический отпуск',
+      description: 'Шаблон заявления на академический отпуск',
+      fileName: 'akademicheskij-otpusk.pdf'
+    },
+    {
+      id: 3,
+      name: 'Заявление на стипендию',
+      description: 'Шаблон заявления на повышенную стипендию',
+      fileName: 'zajavlenie-na-stipendiju.pdf'
+    },
+    {
+      id: 4,
+      name: 'Заявление на перевод',
+      description: 'Шаблон заявления на перевод в другую группу/факультет',
+      fileName: 'zajavlenie-na-perevod.pdf'
+    }
+  ];
+  
+  const [templates, setTemplates] = useState(defaultTemplates);
+  const [userDocuments, setUserDocuments] = useState([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
+  
   const [formData, setFormData] = useState({
-    name: '',
-    group: '',
-    course: '',
+    title: '',
+    content: '',
+    template_type: '',
     file: null
   });
   
   const [fileName, setFileName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // Проверка авторизации и загрузка данных только после успешной проверки
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const userId = localStorage.getItem('userId');
+    
+    // Если нет токена, не пытаемся загрузить данные через API
+    if (!token || !userId) {
+      console.log("Работаем в демо-режиме без авторизации");
+      return;
+    }
+
+    // Загрузка шаблонов только если есть токен
+    const fetchTemplates = async () => {
+      try {
+        setIsLoadingTemplates(true);
+        // Проверяем доступ к API, используя надежный метод
+        const response = await fetch('/api/health-check');
+        if (response.ok) {
+          // API доступен, пробуем загрузить шаблоны
+          const templatesData = await apiService.documents.getTemplates();
+          if (templatesData && templatesData.length > 0) {
+            setTemplates(templatesData);
+          }
+        }
+      } catch (error) {
+        console.log('Используем локальные шаблоны из-за недоступности API:', error);
+        // Тихая обработка ошибки - продолжаем использовать defaultTemplates
+      } finally {
+        setIsLoadingTemplates(false);
+      }
+    };
+
+    // Загрузка документов пользователя только если есть токен
+    const fetchUserDocuments = async () => {
+      try {
+        setIsLoadingDocuments(true);
+        const documentsData = await apiService.documents.getDocuments();
+        if (documentsData && Array.isArray(documentsData)) {
+          setUserDocuments(documentsData);
+        }
+      } catch (error) {
+        console.log('Не удалось загрузить документы пользователя:', error);
+        // Тихая обработка ошибки - показываем пустой список
+      } finally {
+        setIsLoadingDocuments(false);
+      }
+    };
+
+    fetchTemplates();
+    fetchUserDocuments();
+  }, []);
 
   const handleBack = () => {
     navigate(-1);
   };
 
   const handleDownloadTemplate = (templateUrl, templateName) => {
-    const link = document.createElement('a');
-    link.href = templateUrl;
-    link.download = templateName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (!templateUrl) {
+      setErrorMessage(`Шаблон "${templateName}" временно недоступен`);
+      setTimeout(() => setErrorMessage(''), 3000);
+      return;
+    }
+    
+    try {
+      const link = document.createElement('a');
+      link.href = templateUrl;
+      link.download = templateName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Ошибка при скачивании шаблона:', error);
+      setErrorMessage('Не удалось скачать шаблон документа');
+      setTimeout(() => setErrorMessage(''), 3000);
+    }
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file && file.type === 'application/pdf') {
-      // Исправление строки 56: используем setFormData вместо formData
       setFormData({ ...formData, file });
       setFileName(file.name);
     } else {
@@ -56,41 +150,69 @@ const Documents = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    // Исправление строки 77: используем setFormData вместо formData
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.group || !formData.course || !formData.file) {
+    // Проверяем авторизацию перед отправкой
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      navigate('/log');
+      return;
+    }
+    
+    if (!formData.title || !formData.content || !formData.file) {
       alert('Пожалуйста, заполните все поля и загрузите файл');
       return;
     }
 
     setIsSubmitting(true);
+    setErrorMessage('');
 
-    // Здесь должна быть логика отправки формы на сервер
-    // Имитация отправки
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-      
-      // Сброс формы после успешной отправки
+    try {
+      // Имитация отправки на сервер (в реальном случае используйте API)
+      // В локальной демо-версии просто имитируем успешную отправку
       setTimeout(() => {
-        setFormData({
-          name: '',
-          group: '',
-          course: '',
-          file: null
-        });
-        setFileName('');
-        setSubmitSuccess(false);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      }, 3000);
-    }, 1500);
+        setSubmitSuccess(true);
+        
+        // Добавляем документ в локальный список
+        const newDocument = {
+          id: Date.now(),
+          title: formData.title,
+          content: formData.content,
+          status: 'ожидает',
+          created_at: new Date().toISOString(),
+          template_type: formData.template_type || null
+        };
+        
+        setUserDocuments(prev => [newDocument, ...prev]);
+        
+        // Сброс формы после успешной отправки
+        setTimeout(() => {
+          setFormData({
+            title: '',
+            content: '',
+            template_type: '',
+            file: null
+          });
+          setFileName('');
+          setSubmitSuccess(false);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        }, 2000);
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Ошибка при отправке документа:', error);
+      setErrorMessage('Произошла ошибка при отправке документа');
+    } finally {
+      setTimeout(() => {
+        setIsSubmitting(false);
+      }, 1500);
+    }
   };
 
   const sliderSettings = {
@@ -112,42 +234,11 @@ const Documents = () => {
     ]
   };
 
-  const documentTemplates = [
-    {
-      id: 1,
-      title: 'Заявление на освобождение',
-      description: 'Шаблон заявления для освобождение от занятий',
-      fileUrl: osvobozhdenie,
-      fileName: 'заявление на освобождение от занятий НОВАЯ ФОРМА.pdf'
-    },
-    {
-      id: 2,
-      title: 'Академический отпуск',
-      description: 'Шаблон заявления на академический отпуск',
-    //   fileUrl: academicLeaveTemplate,
-      fileName: 'akademicheskij-otpusk.pdf'
-    },
-    {
-      id: 3,
-      title: 'Заявление на стипендию',
-      description: 'Шаблон заявления на повышенную стипендию',
-    //   fileUrl: scholarshipApplicationTemplate,
-      fileName: 'zajavlenie-na-stipendiju.pdf'
-    },
-    {
-      id: 4,
-      title: 'Заявление на перевод',
-      description: 'Шаблон заявления на перевод в другую группу/факультет',
-    //   fileUrl: transferApplicationTemplate,
-      fileName: 'zajavlenie-na-perevod.pdf'
-    }
-  ];
-
   return (
     <div className="documents-screen">
       <div className="documents-header">
-      <button className="back-button" onClick={handleBack}>
-        &lt;
+        <button className="back-button" onClick={handleBack}>
+          &lt;
         </button>
 
         <h1 className="header-title">Документооборот</h1>
@@ -155,14 +246,27 @@ const Documents = () => {
       </div>
 
       <div className="documents-content">
+        {errorMessage && (
+          <div style={{ 
+            backgroundColor: '#ff5252', 
+            color: 'white', 
+            padding: '10px', 
+            borderRadius: '8px',
+            marginBottom: '15px',
+            textAlign: 'center' 
+          }}>
+            {errorMessage}
+          </div>
+        )}
+        
         <section className="templates-section">
           <h2 className="section-title">Шаблоны документов</h2>
           <div className="templates-slider-container">
             <Slider {...sliderSettings}>
-              {documentTemplates.map(template => (
+              {templates.map(template => (
                 <div key={template.id} className="template-banner">
                   <div className="template-content">
-                    <h3 className="template-title">{template.title}</h3>
+                    <h3 className="template-title">{template.name || template.title}</h3>
                     <p className="template-description">{template.description}</p>
                     <button 
                       className="download-template-button"
@@ -181,67 +285,67 @@ const Documents = () => {
           <h2 className="section-title">Отправка документа</h2>
           <form className="document-form" onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="name">ФИО:</label>
+              <label htmlFor="title">Название документа:</label>
               <input 
                 type="text" 
-                id="name" 
-                name="name" 
-                value={formData.name}
+                id="title" 
+                name="title" 
+                value={formData.title}
                 onChange={handleInputChange}
-                placeholder="Введите ваше полное имя"
+                placeholder="Введите название документа"
                 required
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="group">Группа:</label>
+              <label htmlFor="content">Описание:</label>
               <input 
                 type="text" 
-                id="group" 
-                name="group" 
-                value={formData.group}
+                id="content" 
+                name="content" 
+                value={formData.content}
                 onChange={handleInputChange}
-                placeholder="Например: ИС-12"
+                placeholder="Краткое описание документа"
                 required
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="course">Курс:</label>
+              <label htmlFor="template_type">Тип документа:</label>
               <select 
-                id="course" 
-                name="course" 
-                value={formData.course}
+                id="template_type" 
+                name="template_type" 
+                value={formData.template_type}
                 onChange={handleInputChange}
-                required
               >
-                <option value="">Выберите курс</option>
-                <option value="1">1 курс</option>
-                <option value="2">2 курс</option>
-                <option value="3">3 курс</option>
+                <option value="">Выберите тип документа</option>
+                {templates.map(template => (
+                  <option key={template.id} value={template.name || template.title}>
+                    {template.name || template.title}
+                  </option>
+                ))}
               </select>
             </div>
 
             <div className="form-group file-upload-group">
-            <label className="file-label">Загрузите документ (PDF):</label>
-            <div className="file-upload-container">
+              <label className="file-label">Загрузите документ (PDF):</label>
+              <div className="file-upload-container">
                 <label htmlFor="document-file" className="file-upload-button">
-                <span>Выбрать файл</span>
-                <input 
+                  <span>Выбрать файл</span>
+                  <input 
                     type="file" 
                     id="document-file" 
                     ref={fileInputRef}
                     accept=".pdf" 
                     onChange={handleFileChange}
                     className="file-input"
-                />
+                  />
                 </label>
                 {fileName && (
-                <div className="file-name">{fileName}</div>
+                  <div className="file-name">{fileName}</div>
                 )}
+              </div>
             </div>
-            </div>
-
 
             <button 
               type="submit" 
@@ -251,6 +355,46 @@ const Documents = () => {
               {isSubmitting ? 'Отправка...' : submitSuccess ? 'Отправлено!' : 'Отправить документ'}
             </button>
           </form>
+        </section>
+
+        {/* Секция для отображения документов пользователя */}
+        <section className="user-documents-section" style={{ marginTop: '40px' }}>
+          <h2 className="section-title">Ваши документы</h2>
+          {isLoadingDocuments ? (
+            <p>Загрузка документов...</p>
+          ) : userDocuments.length > 0 ? (
+            <div className="documents-list">
+              {userDocuments.map(document => (
+                <div key={document.id} className="document-item" style={{ 
+                  backgroundColor: '#2D2D2D', 
+                  borderRadius: '16px',
+                  padding: '15px',
+                  marginBottom: '15px'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ margin: '0' }}>{document.title}</h3>
+                    <span style={{ 
+                      padding: '5px 10px', 
+                      borderRadius: '10px',
+                      backgroundColor: document.status === 'одобрено' ? '#4CAF50' : 
+                                      document.status === 'отклонено' ? '#F44336' : '#FFC107',
+                      color: 'white',
+                      fontSize: '12px'
+                    }}>
+                      {document.status}
+                    </span>
+                  </div>
+                  <p style={{ margin: '10px 0', color: '#ccc' }}>{document.content}</p>
+                  <div style={{ fontSize: '12px', color: '#999' }}>
+                    Дата создания: {new Date(document.created_at).toLocaleDateString()}
+                    {document.template_type && <span> • Тип: {document.template_type}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>У вас пока нет документов</p>
+          )}
         </section>
       </div>
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
