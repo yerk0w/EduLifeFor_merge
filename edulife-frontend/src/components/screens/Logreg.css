@@ -1,0 +1,121 @@
+/* src/components/screens/Logreg.css */
+.logreg-screen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-lg);
+    background-color: var(--background-color);
+    background-color: #DCC1FF;
+  }
+  
+  .logreg-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: var(--spacing-xxl, 48px);
+  }
+  
+  .logreg-content h1 {
+    font-family: var(--font-primary, 'Oddval', sans-serif);
+    font-size: var(--font-size-xl, 24px);
+    font-weight: 600;
+    color: var(--text-color, #333333);
+    margin-bottom: var(--spacing-xl, 32px);
+  }
+  
+  .logreg-image {
+    width: 80%;
+    max-width: 300px;
+    height: auto;
+    margin-bottom: var(--spacing-xl, 32px);
+  }
+  
+  /* Контейнер для кнопок */
+  .logreg-screen > div:last-child {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md, 16px);
+    margin-bottom: var(--spacing-xl, 32px);
+  }
+  
+  /* Общие стили для кнопок */
+  .log-button,
+  .reg-button {
+    background-color: transparent;
+    color: #000000;
+    border-radius: 50px;
+    padding: 12px 30px;
+    font-family: var(--font-primary, 'Oddval', sans-serif);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    transition: all 0.2s ease;
+    outline: none;
+  }
+  
+  /* Специфические стили для кнопки Войти */
+  .log-button {
+    background-color: #F5F378; /* Светло-фиолетовый фон */
+  }
+  
+  /* Специфические стили для кнопки Зарегистрироваться */
+  .reg-button {
+    background-color: #FFFFFF;
+  }
+  
+  /* Эффекты при наведении */
+  .log-button:hover,
+  .reg-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Эффекты при нажатии */
+  .log-button:active,
+  .reg-button:active {
+    transform: scale(0.98);
+  }
+  
+  /* Адаптивные стили */
+  @media screen and (max-width: 320px) {
+    .logreg-content h1 {
+      font-size: var(--font-size-lg, 20px);
+    }
+    
+    .log-button,
+    .reg-button {
+      padding: 10px 24px;
+      font-size: 14px;
+    }
+  }
+  
+  @media screen and (min-width: 768px) {
+    .logreg-content h1 {
+      font-size: var(--font-size-xxl, 32px);
+    }
+    
+    .logreg-image {
+      max-width: 400px;
+    }
+    
+    .log-button,
+    .reg-button {
+      padding: 14px 36px;
+      font-size: 18px;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    
+    .logreg-screen > div:last-child {
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+  

@@ -1,0 +1,14 @@
+{
+    "scheduleItem.teacherLabel": "Оқытушы:",
+    "scheduleItem.notSpecified": "Көрсетілмеген",
+    "scheduleItem.lessonTypeLabel": "Сабақ түрі:",
+    "scheduleItem.dateLabel": "Күні:",
+    "scheduleItem.taskSingular": "Тапсырма",
+    "scheduleItem.tasksPlural": "Тапсырмалар",
+    "navbar.home": "Үй",
+    "navbar.schedule": "Кесте",
+    "navbar.qrCode": "QR код",
+    "navbar.jobs": "Жұмыстар",
+    "navbar.map": "Карта",
+    "navbar.profile": "Профиль"
+  }

@@ -1,0 +1,18 @@
+{
+    "scheduleItem": {
+      "teacherLabel": "Преподаватель:",
+      "notSpecified": "Не указано",
+      "lessonTypeLabel": "Тип занятия:",
+      "dateLabel": "Дата:",
+      "taskSingular": "Задание",
+      "tasksPlural": "Задания"
+    },
+    "navbar": {
+      "home": "Главная",
+      "schedule": "Расписание",
+      "qrCode": "QR-код",
+      "jobs": "Работа",
+      "map": "Карта",
+      "profile": "Профиль"
+    }
+  }
