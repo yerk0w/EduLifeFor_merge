@@ -1351,6 +1351,7 @@
     display: flex;
     align-items: center;
     padding: 8px 12px;
+    width: 100%;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
@@ -1457,12 +1458,17 @@
     padding: 8px 12px;
     background-color: #D2FF1F;
     color: #1A1A1A;
+    gap: 8px;
     border: none;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s ease;
+  }
+  .action-buttons {
+    display: flex;
+    gap: 12px;
   }
   
   .add-document-button:hover {

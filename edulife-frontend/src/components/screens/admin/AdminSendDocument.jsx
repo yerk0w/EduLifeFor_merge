@@ -8,7 +8,7 @@ const AdminSendDocument = () => {
   
   const [students, setStudents] = useState([]);
   const [isLoadingStudents, setIsLoadingStudents] = useState(false);
-  const [selectedStudents, setSelectedStudents] = useState([]);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
   
   const [formData, setFormData] = useState({
     title: '',
@@ -34,28 +34,16 @@ const AdminSendDocument = () => {
     const fetchStudents = async () => {
       try {
         setIsLoadingStudents(true);
-        // В реальном приложении используйте API
         const studentsData = await apiService.auth.getStudents();
         if (studentsData && Array.isArray(studentsData)) {
           setStudents(studentsData);
         } else {
-          // Демо-данные для тестирования
-          setStudents([
-            { id: 1, user_id: 1, full_name: 'Иванов Иван', group_name: 'ИТ-101' },
-            { id: 2, user_id: 2, full_name: 'Петров Петр', group_name: 'ИТ-102' },
-            { id: 3, user_id: 3, full_name: 'Сидорова Анна', group_name: 'ИТ-101' },
-            { id: 4, user_id: 4, full_name: 'Козлова Мария', group_name: 'ИТ-102' }
-          ]);
+          console.error('Ошибка: данные студентов не являются массивом');
+          setErrorMessage('Не удалось загрузить список студентов');
         }
       } catch (error) {
         console.error('Ошибка при загрузке студентов:', error);
-        // Демо-данные для тестирования
-        setStudents([
-          { id: 1, user_id: 1, full_name: 'Иванов Иван', group_name: 'ИТ-101' },
-          { id: 2, user_id: 2, full_name: 'Петров Петр', group_name: 'ИТ-102' },
-          { id: 3, user_id: 3, full_name: 'Сидорова Анна', group_name: 'ИТ-101' },
-          { id: 4, user_id: 4, full_name: 'Козлова Мария', group_name: 'ИТ-102' }
-        ]);
+        setErrorMessage('Ошибка при загрузке списка студентов');
       } finally {
         setIsLoadingStudents(false);
       }
@@ -73,10 +61,12 @@ const AdminSendDocument = () => {
     if (file && file.type === 'application/pdf') {
       setFormData({ ...formData, file });
       setFileName(file.name);
+      setErrorMessage('');
     } else {
       alert('Пожалуйста, загрузите файл в формате PDF');
       fileInputRef.current.value = '';
       setFileName('');
+      setFormData({ ...formData, file: null });
     }
   };
 
@@ -86,18 +76,14 @@ const AdminSendDocument = () => {
   };
 
   const handleStudentSelection = (e) => {
-    const selectedOptions = Array.from(
-      e.target.selectedOptions,
-      option => parseInt(option.value)
-    );
-    setSelectedStudents(selectedOptions);
+    setSelectedStudentId(e.target.value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.content || !formData.file || selectedStudents.length === 0) {
-      alert('Пожалуйста, заполните все поля, загрузите файл и выберите получателей');
+    if (!formData.title || !formData.content || !formData.file || !selectedStudentId) {
+      setErrorMessage('Пожалуйста, заполните все поля, загрузите файл и выберите получателя');
       return;
     }
 
@@ -105,23 +91,16 @@ const AdminSendDocument = () => {
     setErrorMessage('');
 
     try {
-      // Отправляем документ каждому выбранному студенту
-      for (const studentId of selectedStudents) {
-        // Создаем FormData для отправки файла
-        const data = new FormData();
-        data.append('title', formData.title);
-        data.append('content', formData.content);
-        data.append('template_type', formData.template_type || '');
-        data.append('file', formData.file);
-        data.append('recipient_id', studentId);
-        
-        try {
-          // В реальном приложении используйте API для отправки
-          await apiService.documents.sendDocumentToStudent(data);
-        } catch (error) {
-          console.error(`Ошибка при отправке документа студенту ${studentId}:`, error);
-        }
-      }
+      // Создаем FormData для отправки файла
+      const data = new FormData();
+      data.append('title', formData.title);
+      data.append('content', formData.content);
+      data.append('template_type', formData.template_type || '');
+      data.append('file', formData.file);
+      data.append('recipient_id', selectedStudentId);
+      
+      // Отправка документа через API
+      await apiService.documents.sendDocumentToStudent(data);
       
       // Отображаем успех
       setSubmitSuccess(true);
@@ -135,15 +114,15 @@ const AdminSendDocument = () => {
           file: null
         });
         setFileName('');
-        setSelectedStudents([]);
+        setSelectedStudentId("");
         setSubmitSuccess(false);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
       }, 2000);
     } catch (error) {
-      console.error('Ошибка при отправке документов:', error);
-      setErrorMessage('Произошла ошибка при отправке документов');
+      console.error('Ошибка при отправке документа:', error);
+      setErrorMessage('Произошла ошибка при отправке документа');
     } finally {
       setTimeout(() => {
         setIsSubmitting(false);
@@ -242,30 +221,25 @@ const AdminSendDocument = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="recipients">Получатели:</label>
+              <label htmlFor="recipients">Получатель:</label>
               <select 
                 id="recipients" 
                 name="recipients" 
-                multiple 
-                size={Math.min(6, students.length)}
-                value={selectedStudents}
+                value={selectedStudentId}
                 onChange={handleStudentSelection}
-                style={{ height: 'auto' }}
                 required
               >
+                <option value="">Выберите студента</option>
                 {isLoadingStudents ? (
                   <option disabled>Загрузка студентов...</option>
                 ) : (
                   students.map(student => (
                     <option key={student.id} value={student.user_id}>
-                      {student.full_name} - {student.group_name}
+                      {student.full_name} - {student.group_name || "Без группы"}
                     </option>
                   ))
                 )}
               </select>
-              <div style={{ marginTop: '5px', fontSize: '12px', color: '#999' }}>
-                * Для выбора нескольких студентов удерживайте Ctrl (или Command на Mac)
-              </div>
             </div>
 
             <button 
@@ -273,7 +247,7 @@ const AdminSendDocument = () => {
               className={`submit-document-button ${isSubmitting ? 'loading' : ''} ${submitSuccess ? 'success' : ''}`}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Отправка...' : submitSuccess ? 'Отправлено!' : 'Отправить документы'}
+              {isSubmitting ? 'Отправка...' : submitSuccess ? 'Отправлено!' : 'Отправить документ'}
             </button>
           </form>
         </section>

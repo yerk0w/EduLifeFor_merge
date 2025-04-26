@@ -1,6 +1,11 @@
 import React from 'react';
 
 const AdminHeader = () => {
+
+
+  const username = localStorage.getItem('username') || 'Admin';
+  const userRole = localStorage.getItem('userRole') || 'Admin';
+  const userId = localStorage.getItem('userId') || 'Admin';
   return (
     <div className="admin-header">
       <div className="admin-logo">
@@ -12,11 +17,8 @@ const AdminHeader = () => {
       
       <div className="admin-user">
         <div className="user-info1">
-          <span className="user-name">Администратор</span>
-          <span className="user-role">Администратор</span>
-        </div>
-        <div className="user-avatar">
-          <img src="/images/admin-avatar.jpg" alt="Admin" />
+          <span className="user-name">{username}</span>
+          <span className="user-role">{userRole}</span>
         </div>
       </div>
     </div>

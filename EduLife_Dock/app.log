@@ -66,3 +66,19 @@
 2025-04-26 06:52:28,292 - app.routes.document - INFO - Загрузка документа: f от пользователя 2
 2025-04-26 06:52:28,304 - app.services.document - INFO - Saving file cv (2).pdf as d4f1fed51e81459f94b799158028accc.pdf
 2025-04-26 06:52:28,304 - app.services.document - INFO - Creating document record in DB: f from user 2
+2025-04-26 07:56:44,737 - app.routes.document - INFO - Загрузка документа: Прошу принять от пользователя 4
+2025-04-26 07:56:44,785 - app.services.document - INFO - User with ID 4 not found in document database. Creating record.
+2025-04-26 07:56:44,793 - app.services.document - INFO - Saving file Заявление на освобождение.pdf as 8e0ea5c939d74ab0ad963e683e319d32.pdf
+2025-04-26 07:56:44,793 - app.services.document - INFO - Creating document record in DB: Прошу принять from user 4
+2025-04-26 08:03:01,851 - app.routes.document - INFO - Отправка документа: Прошу принять от администратора 2 студенту 4
+2025-04-26 08:03:01,854 - app.services.document - INFO - Saving file document-1.pdf as 80c148b367c44eef974db95f45e65455.pdf
+2025-04-26 08:03:01,855 - app.services.document - INFO - Creating document record in DB: Прошу принять from user 2
+2025-04-26 08:03:09,658 - app.routes.document - INFO - Отправка документа: Прошу принять от администратора 2 студенту 4
+2025-04-26 08:03:09,659 - app.services.document - INFO - Saving file document-1.pdf as d8b371a282724273a998961922f3455c.pdf
+2025-04-26 08:03:09,661 - app.services.document - INFO - Creating document record in DB: Прошу принять from user 2
+2025-04-26 08:09:08,743 - app.routes.document - INFO - Отправка документа: ffff от администратора 2 студенту 4
+2025-04-26 08:09:08,745 - app.services.document - INFO - Saving file Заявление на освобождение.pdf as 8a7a4b8f6f004f5a94921bdba9139cfa.pdf
+2025-04-26 08:09:08,746 - app.services.document - INFO - Creating document record in DB: ffff from user 2
+2025-04-26 08:09:33,535 - app.routes.document - INFO - Отправка документа: fff от администратора 2 студенту 4
+2025-04-26 08:09:33,536 - app.services.document - INFO - Saving file Заявление на освобождение.pdf as 4bdaf6f386214630917e38a617bdcead.pdf
+2025-04-26 08:09:33,537 - app.services.document - INFO - Creating document record in DB: fff from user 2

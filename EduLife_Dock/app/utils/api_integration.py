@@ -4,7 +4,7 @@ from typing import Dict, Any, Optional, List
 import json
 
 # Конфигурация
-API_TIMEOUT = 10  # Таймаут для API запросов (секунды)
+API_TIMEOUT = 1000  # Таймаут для API запросов (секунды)
 
 # URL сервисов
 AUTH_API_URL = os.getenv("AUTH_API_URL", "http://localhost:8070")
@@ -19,45 +19,52 @@ class APIError(Exception):
         self.details = details
         super().__init__(self.message)
 
-def make_api_request(method: str, url: str, token: Optional[str] = None, 
-                     data: Optional[Dict[str, Any]] = None, 
-                     params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def make_api_request(
+    method: str,
+    url: str,
+    token: Optional[str] = None,
+    data: Optional[Dict[str, Any]] = None,
+    params: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Выполняет API запрос к другому сервису"""
     headers = {}
+
     if token:
-        headers["Authorization"] = f"Bearer {token}"
-    
+        # Добавляем 'Bearer ' только если его нет
+        if not token.startswith("Bearer "):
+            token = f"Bearer {token}"
+        headers["Authorization"] = token
+
     try:
-        if method.lower() == "get":
-            response = requests.get(url, headers=headers, params=params, timeout=API_TIMEOUT)
-        elif method.lower() == "post":
-            response = requests.post(url, headers=headers, json=data, timeout=API_TIMEOUT)
-        elif method.lower() == "put":
-            response = requests.put(url, headers=headers, json=data, timeout=API_TIMEOUT)
-        elif method.lower() == "delete":
-            response = requests.delete(url, headers=headers, timeout=API_TIMEOUT)
-        else:
+        response = {
+            "get": lambda: requests.get(url, headers=headers, params=params, timeout=API_TIMEOUT),
+            "post": lambda: requests.post(url, headers=headers, json=data, timeout=API_TIMEOUT),
+            "put": lambda: requests.put(url, headers=headers, json=data, timeout=API_TIMEOUT),
+            "delete": lambda: requests.delete(url, headers=headers, timeout=API_TIMEOUT)
+        }.get(method.lower())
+
+        if response is None:
             raise ValueError(f"Неподдерживаемый метод HTTP: {method}")
-        
-        # Проверяем статус ответа
-        if response.status_code >= 400:
+
+        result = response()
+
+        if result.status_code >= 400:
             try:
-                details = response.json()
-            except:
-                details = {"raw": response.text}
-            
+                details = result.json()
+            except Exception:
+                details = {"raw": result.text}
+
             raise APIError(
-                f"API вернул ошибку {response.status_code}",
-                status_code=response.status_code,
+                f"API вернул ошибку {result.status_code}",
+                status_code=result.status_code,
                 details=details
             )
-        
-        # Возвращаем данные ответа
-        return response.json()
-    
+
+        return result.json()
+
     except requests.RequestException as e:
         raise APIError(f"Ошибка при выполнении API запроса: {str(e)}")
-
+    
 # API авторизации
 def verify_token(token: str) -> Dict[str, Any]:
     """Проверяет токен пользователя через сервис авторизации"""

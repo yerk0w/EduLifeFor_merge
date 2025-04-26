@@ -155,7 +155,7 @@ const Documents = () => {
   const fetchAdminDocuments = async () => {
     try {
       setIsLoadingAdminDocuments(true);
-      const response = await apiService.auth.getAdminDocuments();
+      const response = await apiService.auth.getReceivedDocuments();
       
       if (response && Array.isArray(response)) {
         console.log('Получены документы от администрации:', response);

@@ -8,25 +8,68 @@ from typing import List, Dict, Any, Optional
 MAIN_DB_PATH = os.path.join(os.path.dirname(__file__), "main_database.db")
 SCHEDULE_API_URL = os.getenv("SCHEDULE_API_URL", "http://localhost:8090")
 
+# Конфигурация
+API_TIMEOUT = 1000  # Таймаут для API запросов (секунды)
+
 def get_db_connection():
     """Создает соединение с базой данных и возвращает его"""
     conn = sqlite3.connect(MAIN_DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-def make_api_request(token: str, url: str = None):
+class APIError(Exception):
+    """Исключение для ошибок API"""
+    def __init__(self, message, status_code=None, details=None):
+        self.message = message
+        self.status_code = status_code
+        self.details = details
+        super().__init__(self.message)
+
+def make_api_request(
+    method: str,
+    url: str,
+    token: Optional[str] = None,
+    data: Optional[Dict[str, Any]] = None,
+    params: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Выполняет API запрос к другому сервису"""
     headers = {}
+
     if token:
-        headers["Authorization"] = f"Bearer {token}"
-    
+        # Добавляем 'Bearer ' только если его нет
+        if not token.startswith("Bearer "):
+            token = f"Bearer {token}"
+        headers["Authorization"] = token
+
     try:
-        response = requests.get(url, headers=headers, timeout=1000)
-        response.raise_for_status()
-        return response.json()
+        response = {
+            "get": lambda: requests.get(url, headers=headers, params=params, timeout=API_TIMEOUT),
+            "post": lambda: requests.post(url, headers=headers, json=data, timeout=API_TIMEOUT),
+            "put": lambda: requests.put(url, headers=headers, json=data, timeout=API_TIMEOUT),
+            "delete": lambda: requests.delete(url, headers=headers, timeout=API_TIMEOUT)
+        }.get(method.lower())
+
+        if response is None:
+            raise ValueError(f"Неподдерживаемый метод HTTP: {method}")
+
+        result = response()
+
+        if result.status_code >= 400:
+            try:
+                details = result.json()
+            except Exception:
+                details = {"raw": result.text}
+
+            raise APIError(
+                f"API вернул ошибку {result.status_code}",
+                status_code=result.status_code,
+                details=details
+            )
+
+        return result.json()
+
     except requests.RequestException as e:
-        print(f"Ошибка при выполнении API запроса: {str(e)}")
-        return []
+        raise APIError(f"Ошибка при выполнении API запроса: {str(e)}")
 
 def get_user_group(user_id):
     """Получает группу пользователя из main_database.db"""

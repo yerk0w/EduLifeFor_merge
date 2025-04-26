@@ -294,12 +294,7 @@ const AdminStudents = ({ students: initialStudents }) => {
               currentStudents.map(student => (
                 <tr key={student.id}>
                   <td className="student-name">
-                    <img 
-                      src={getAvatarPlaceholder(student.full_name || student.name)} 
-                      alt={student.full_name || student.name} 
-                      className="student-avatar" 
-                    />
-                    <span>{student.full_name || student.name}</span>
+                  {student.full_name || student.name}
                   </td>
                   <td>{student.email}</td>
                   <td>{student.group_name || 'Не указана'}</td>

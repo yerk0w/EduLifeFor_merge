@@ -138,18 +138,54 @@ const apiService = {
         });
         return response.data;
       } catch (error) {
-        console.error('Error sending document to student:', error);
+        console.error('Ошибка при отправке документа студенту:', error);
+        throw error;
+      }
+    },
+    getTemplateById: async (templateId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.dock}/templates/${templateId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Ошибка при получении шаблона ${templateId}:`, error);
+        throw error;
+      }
+    },
+    // Метод для скачивания шаблона
+    downloadTemplateFile: async (templateId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.dock}/templates/${templateId}/download`, {
+          responseType: 'blob'
+        });
+        return response.data;
+      } catch (error) {
+        console.error(`Ошибка при скачивании шаблона ${templateId}:`, error);
+        throw error;
+      }
+    },
+    uploadTemplate: async (formData) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.dock}/templates`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Ошибка при загрузке шаблона:', error);
         throw error;
       }
     },
     
+    
     // Получение документов, отправленных администратором текущему пользователю
-    getAdminDocuments: async () => {
+    getReceivedDocuments: async () => {
       try {
         const response = await apiClient.get(`${API_BASE_URL.dock}/documents/admin/received`);
         return response.data;
       } catch (error) {
-        console.error('Error fetching admin documents:', error);
+        console.error('Ошибка при получении полученных документов:', error);
+        // Возвращаем пустой массив вместо ошибки
         return [];
       }
     },
@@ -407,6 +443,32 @@ const apiService = {
         return [];
       }
     },
+    uploadDocument: async (formData) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.dock}/documents/upload`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Ошибка при загрузке документа:', error);
+        throw error;
+      }
+    },
+    sendDocumentToStudent: async (formData) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.dock}/documents/admin/send`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Ошибка при отправке документа студенту:', error);
+        throw error;
+      }
+    },    
     
     getTemplates: async () => {
       try {
@@ -436,6 +498,61 @@ const apiService = {
         throw error;
       }
     },
+    // Обновление статуса документа/заявки
+    updateRequestStatus: async (documentId, newStatus) => {
+      try {
+        // Преобразование статуса из формата фронтенда в формат API
+        const apiStatus = 
+          newStatus === 'new' ? 'ожидает' :
+          newStatus === 'completed' ? 'одобрено' :
+          newStatus === 'rejected' ? 'отклонено' : 'ожидает';
+        
+        const response = await apiClient.patch(`${API_BASE_URL.dock}/documents/${documentId}/review`, {
+          status: apiStatus
+        });
+        return response.data;
+      } catch (error) {
+        console.error(`Ошибка при обновлении статуса документа ${documentId}:`, error);
+        throw error;
+      }
+    },
+    getDocumentRequests: async () => {
+      try {
+        // Используем маршрут /documents для получения заявок (документы со статусом "ожидает")
+        const response = await apiClient.get(`${API_BASE_URL.dock}/documents/all`);
+        
+        if (Array.isArray(response.data)) {
+          // Преобразуем документы в формат заявок
+          return response.data
+            .filter(doc => doc.status === 'ожидает') // Фильтруем только ожидающие
+            .map(doc => ({
+              id: doc.id,
+              student_name: doc.author_name || 'Неизвестный студент',
+              student_avatar: null,
+              document_type: doc.template_type || 'Документ',
+              created_at: doc.created_at,
+              status: 'new', // Для отображения в интерфейсе
+              comment: doc.content || '',
+              student_group: ''
+            }));
+        }
+        return [];
+      } catch (error) {
+        console.error('Ошибка при получении заявок на документы:', error);
+        return [];
+      }
+    },
+    getAllDocuments: async (page = 1, limit = 100) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.dock}/documents/all`, {
+          params: { skip: (page - 1) * limit, limit }
+        });
+        return Array.isArray(response.data) ? response.data : [];
+      } catch (error) {
+        console.error('Ошибка при получении всех документов:', error);
+        return [];
+      }
+    },
     
     createDocument: async (documentData) => {
       try {
@@ -456,54 +573,6 @@ const apiService = {
         throw error;
       }
     },
-    
-    uploadDocument: async (formData) => {
-      try {
-        // Добавляем логирование для диагностики
-        console.log('Отправка документа, содержимое FormData:');
-        for (let pair of formData.entries()) {
-          console.log(pair[0] + ': ' + (pair[0] === 'file' ? pair[1].name : pair[1]));
-        }
-        
-        // Отправляем запрос с правильными заголовками
-        const response = await axios.post(`${API_BASE_URL.dock}/documents/upload`, formData, {
-          headers: {
-            // Для FormData не нужно указывать Content-Type, браузер сам установит правильный с boundary
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-          }
-        });
-        
-        return response.data;
-      } catch (error) {
-        console.error('Ошибка при загрузке документа:', error);
-        
-        // Проверяем детали ошибки
-        if (error.response) {
-          // Ответ получен, но статус не 2xx
-          console.error('Статус ошибки:', error.response.status);
-          console.error('Данные ошибки:', error.response.data);
-          
-          // Для отладки - смотрим, какие заголовки были отправлены
-          console.log('Заголовки запроса:', error.config?.headers);
-        }
-        
-        // Если в localStorage установлен флаг demoMode, возвращаем фиктивный ответ
-        if (localStorage.getItem('demoMode') === 'true') {
-          console.log('Демо-режим: возвращаем фиктивный успешный ответ');
-          return {
-            id: Date.now(),
-            title: formData.get('title'),
-            content: formData.get('content'),
-            status: 'ожидает',
-            created_at: new Date().toISOString(),
-            file_path: '/static/uploads/demo-file.pdf'
-          };
-        }
-        
-        throw error;
-      }
-    },  
     
     updateDocumentStatus: async (documentId, status) => {
       try {
@@ -537,23 +606,29 @@ const apiService = {
         const response = await apiClient.get(`${API_BASE_URL.dock}/documents/${documentId}/download`);
         
         if (response.data && response.data.file_path) {
-          // Затем используем полный URL для получения содержимого
+          // Полный URL для доступа к файлу
           const fileUrl = `${API_BASE_URL.dock}${response.data.file_path}`;
+          
+          // Получаем содержимое файла
           const fileResponse = await fetch(fileUrl);
           
           if (!fileResponse.ok) {
-            throw new Error(`Failed to download document: ${fileResponse.statusText}`);
+            throw new Error(`Ошибка при скачивании документа: ${fileResponse.statusText}`);
           }
           
           return fileResponse.blob();
         } else {
-          throw new Error('Document file path not found');
+          throw new Error('Путь к файлу документа не найден');
         }
       } catch (error) {
-        console.error(`Error downloading document ${documentId}:`, error);
+        console.error(`Ошибка при скачивании документа ${documentId}:`, error);
         throw error;
       }
-    }
+    },
+    downloadRequestDocument: async (requestId) => {
+      return apiService.documents.downloadDocument(requestId);
+    },
+    
   },
 
   // Integration Service APIs
