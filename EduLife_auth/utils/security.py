@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from fastapi import Header
 from database import get_user_by_username, get_user_by_id
 
 # Настройки JWT
@@ -23,6 +24,25 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Проверяет соответствие пароля его хешу"""
     return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
+
+def get_token_data(authorization: str = Header(...)) -> Dict[str, Any]:
+    """Извлекает данные из JWT токена из заголовка Authorization"""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Недействительные учетные данные",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    if not authorization.startswith("Bearer "):
+        raise credentials_exception
+    token = authorization[len("Bearer "):]
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        return payload
+    except JWTError:
+        raise credentials_exception
 
 def authenticate_user(username: str, password: str) -> Optional[Dict[str, Any]]:
     """Аутентифицирует пользователя по username и паролю"""

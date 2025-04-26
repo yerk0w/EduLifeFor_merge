@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 import departmentService
-from utils.security import get_current_user, check_admin_role
+from utils.security import get_current_user, check_admin_role,get_token_data
+from utils.api import get_teacher_schedule
 
 router = APIRouter(
     prefix="/departments",
@@ -70,17 +71,19 @@ async def get_user_department(user_id: int):
     return department
 
 @router.get("/user/{user_id}/schedule", response_model=List[Dict[str, Any]])
-async def get_user_department_schedule(user_id: int):
-    """Получить расписание для пользователя (преподавателя) по его ID"""
-    teacher_id = departmentService.get_teacher_id_by_user_id(user_id)
-    if not teacher_id:
+async def get_user_schedule(
+    user_id: int,
+    token_data: Dict[str, Any] = Depends(get_token_data)
+):
+    """Получить расписание для преподавателя по ID"""
+    schedule = get_teacher_schedule(token_data, user_id)
+    if not schedule:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Преподаватель не найден"
+            detail="Расписание для преподавателя не найдено"
         )
-    
-    schedule = departmentService.get_schedule_for_teacher(teacher_id)
     return schedule
+
 
 @router.post("/", response_model=Dict[str, Any], dependencies=[Depends(check_admin_role)])
 async def create_department(department: DepartmentCreate):
@@ -125,3 +128,15 @@ async def delete_department(department_id: int):
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Ошибка при удалении кафедры"
     )
+
+@router.get("/by-student/{user_id}shedule", response_model=List[ScheduleResponse])
+async def get_student_schedule(department_id: int):
+    """Получить расписание для студентов кафедры"""
+    schedule = departmentService.get_student_schedule(department_id)
+    if not schedule:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Расписание не найдено"
+        )
+    
+    return schedule

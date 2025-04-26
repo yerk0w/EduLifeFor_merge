@@ -38,3 +38,31 @@
 2025-04-26 03:08:06,985 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
 2025-04-26 03:08:06,996 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
 2025-04-26 03:09:10,838 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-26 06:26:23,412 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-26 06:26:23,427 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-26 06:26:41,764 - app.routes.document - INFO - Загрузка документа: f от пользователя 2
+2025-04-26 06:26:41,776 - app.services.document - INFO - Saving file Заявление на освобождение.pdf as a54f4a986d384f029d681a54b5404cf1.pdf
+2025-04-26 06:26:41,777 - app.services.document - INFO - Creating document record in DB: f from user 2
+2025-04-26 06:27:07,577 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-26 06:27:07,605 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-26 06:31:13,047 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-26 06:31:13,078 - app.routes.document - ERROR - Ошибка при получении документов от администратора: name 'Document' is not defined
+2025-04-26 06:46:43,768 - app.routes.document - INFO - Загрузка документа: f от пользователя 2
+2025-04-26 06:46:43,768 - app.routes.document - ERROR - Ошибка при загрузке документа: delete_document() got an unexpected keyword argument 'title'
+2025-04-26 06:46:43,781 - app.routes.document - INFO - Загрузка документа: f от пользователя 2
+2025-04-26 06:46:43,781 - app.routes.document - ERROR - Ошибка при загрузке документа: delete_document() got an unexpected keyword argument 'title'
+2025-04-26 06:48:41,482 - app.routes.document - INFO - Загрузка документа: f от пользователя 2
+2025-04-26 06:48:41,482 - app.routes.document - ERROR - Ошибка при загрузке документа: name 'delete_document' is not defined
+2025-04-26 06:48:41,494 - app.routes.document - INFO - Загрузка документа: f от пользователя 2
+2025-04-26 06:48:41,494 - app.routes.document - ERROR - Ошибка при загрузке документа: name 'delete_document' is not defined
+2025-04-26 06:50:35,933 - app.routes.document - INFO - Загрузка документа: f от пользователя 2
+2025-04-26 06:50:35,933 - app.routes.document - ERROR - Ошибка при загрузке документа: delete_document() got an unexpected keyword argument 'title'
+2025-04-26 06:50:35,942 - app.routes.document - INFO - Загрузка документа: f от пользователя 2
+2025-04-26 06:50:35,942 - app.routes.document - ERROR - Ошибка при загрузке документа: delete_document() got an unexpected keyword argument 'title'
+2025-04-26 06:51:55,563 - app.routes.document - INFO - Загрузка документа: f от пользователя 2
+2025-04-26 06:51:55,563 - app.routes.document - ERROR - Ошибка при загрузке документа: create_document() got an unexpected keyword argument 'title'
+2025-04-26 06:51:55,581 - app.routes.document - INFO - Загрузка документа: f от пользователя 2
+2025-04-26 06:51:55,581 - app.routes.document - ERROR - Ошибка при загрузке документа: create_document() got an unexpected keyword argument 'title'
+2025-04-26 06:52:28,292 - app.routes.document - INFO - Загрузка документа: f от пользователя 2
+2025-04-26 06:52:28,304 - app.services.document - INFO - Saving file cv (2).pdf as d4f1fed51e81459f94b799158028accc.pdf
+2025-04-26 06:52:28,304 - app.services.document - INFO - Creating document record in DB: f from user 2

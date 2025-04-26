@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 import json
 from api_integration import verify_token, get_teacher_info, get_group_info, send_schedule_notifications, enrich_schedule_data,get_student_by_user_id
+from database import get_schedule_by_group, get_schedule_by_teacher
 
 # Настройка порта
 PORT = int(os.getenv("PORT", "8090"))
@@ -321,7 +322,52 @@ async def delete_schedule(
         return {"message": f"Расписание с ID {schedule_id} успешно удалено"}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    
 
+@app.get("/schedule/teacher/{teacher_id}", response_model=List[ScheduleRead])
+def get_schedule_by_teacher(
+    teacher_id: int,
+    current_user: dict = Depends(get_current_user),
+    authorization: str = Header(None)
+):
+    schedules = database.get_schedule_by_teacher(teacher_id)
+    
+    # Обогащаем данные расписания информацией о преподавателе и группе
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.replace("Bearer ", "")
+        enriched_schedules = []
+        for schedule in schedules:
+            enriched_schedules.append(enrich_schedule_data(schedule, token))
+        return enriched_schedules
+    
+    return schedules
+
+@app.get("/schedule/user/{user_id}", response_model=List[ScheduleRead])
+def get_schedule_by_user_id(
+    user_id: int,
+    current_user: dict = Depends(get_current_user),
+    authorization: str = Header(None)
+):
+    if current_user["role"] == "student":
+        student_info = get_student_by_user_id(user_id, authorization)
+        if not student_info:
+            raise HTTPException(status_code=404, detail="Студент не найден")
+        
+        group_id = student_info.get("group_id")
+        if not group_id:
+            raise HTTPException(status_code=404, detail="Группа студента не найдена")
+        
+        return get_schedule_by_group(group_id)
+    
+    elif current_user["role"] == "teacher":
+        teacher_info = get_teacher_info(user_id, authorization)
+        if not teacher_info:
+            raise HTTPException(status_code=404, detail="Преподаватель не найден")
+        
+        return get_schedule_by_teacher(teacher_info.get("id"))
+    
+    else:
+        raise HTTPException(status_code=403, detail="Недостаточно прав доступа")
 
 # Эндпоинты для управления предметами
 @app.get("/subjects", response_model=List[SubjectRead])
@@ -420,8 +466,6 @@ def delete_classroom(
         return {"message": f"Аудитория с ID {classroom_id} успешно удалена"}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
-# Эндпоинты для управления типами занятий
-
 
 # Эндпоинт для получения типов занятий
 @app.get("/lesson-types", response_model=List[LessonTypeRead])

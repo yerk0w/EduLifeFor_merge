@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Background
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from sqlalchemy import desc
+from app.models import Document
 
 from app.db.database import get_db
 from app.schemas.document import DocumentCreate, DocumentResponse, DocumentUpdate
@@ -232,6 +233,30 @@ async def upload_document(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Ошибка при загрузке документа: {str(e)}"
         )
+
+@router.delete("/{id}", response_model=DocumentResponse)
+def delete_document(id: int, db: Session = Depends(get_db)):
+    doc = db.query(Document).get(id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Документ не найден")
+    
+    # Сохраняем нужные данные перед удалением
+    response_data = DocumentResponse(
+        id=doc.id,
+        title=doc.title,
+        content=doc.content,
+        created_at=doc.created_at,
+        status=doc.status,
+        author_id=doc.author_id,
+        author_name = doc.author.full_name if doc.author else "Неизвестно",
+        template_type=doc.template_type,
+        file_path=doc.file_path
+    )
+    
+    db.delete(doc)
+    db.commit()
+
+    return response_data
 
 @router.get("/{document_id}/download")
 async def download_document(

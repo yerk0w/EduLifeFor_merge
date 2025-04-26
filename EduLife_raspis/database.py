@@ -353,6 +353,51 @@ def update_schedule(schedule_id, schedule_data):
 
     return schedule_id
 
+def get_schedule_by_teacher(teacher_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            s.id, s.date, s.time_start, s.time_end,
+            s.subject_id, subj.name as subject_name,
+            s.teacher_id, s.group_id,
+            s.classroom_id, c.name as classroom_name,
+            s.lesson_type_id, lt.name as lesson_type
+        FROM schedule s
+        JOIN subjects subj ON s.subject_id = subj.id
+        JOIN classrooms c ON s.classroom_id = c.id
+        JOIN lesson_types lt ON s.lesson_type_id = lt.id
+        WHERE s.teacher_id = ?
+    """, (teacher_id,))
+
+    result = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+
+    return result
+
+def get_schedule_by_group(group_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            s.id, s.date, s.time_start, s.time_end,
+            s.subject_id, subj.name as subject_name,
+            s.teacher_id, s.group_id,
+            s.classroom_id, c.name as classroom_name,
+            s.lesson_type_id, lt.name as lesson_type
+        FROM schedule s
+        JOIN subjects subj ON s.subject_id = subj.id
+        JOIN classrooms c ON s.classroom_id = c.id
+        JOIN lesson_types lt ON s.lesson_type_id = lt.id
+        WHERE s.group_id = ?
+    """, (group_id,))
+
+    result = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+
+    return result
 
 def get_pending_notifications():
     conn = get_db_connection()

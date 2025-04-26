@@ -4,14 +4,16 @@ from typing import Dict, Any, Optional, List
 import json
 import database
 from database import create_user, get_user_by_username
+from utils.security import get_token_data
 
 # Конфигурация
-API_TIMEOUT = 10  # Таймаут для API запросов (секунды)
+API_TIMEOUT = 1000  # Таймаут для API запросов (секунды)
 
 # URL сервисов
 RASPIS_API_URL = os.getenv("RASPIS_API_URL", "http://localhost:8090")
 QR_API_URL = os.getenv("QR_API_URL", "http://localhost:8080")
 DOCK_API_URL = os.getenv("DOCK_API_URL", "http://localhost:8100")
+
 
 class APIError(Exception):
     """Исключение для ошибок API"""
@@ -27,7 +29,7 @@ def make_api_request(method: str, url: str, token: Optional[str] = None,
     """Выполняет API запрос к другому сервису"""
     headers = {}
     if token:
-        headers["Authorization"] = f"Bearer {token}"
+        headers["Authorization"] = f"Bearer {get_token_data()}"
     
     try:
         if method.lower() == "get":
@@ -80,9 +82,8 @@ def get_student_schedule(token: str, student_id: int) -> List[Dict[str, Any]]:
 
 def get_teacher_schedule(token: str, teacher_id: int) -> List[Dict[str, Any]]:
     """Получает расписание для преподавателя"""
-    url = f"{RASPIS_API_URL}/schedule"
-    params = {"teacher_id": teacher_id}
-    return make_api_request("get", url, token=token, params=params)
+    url = f"{RASPIS_API_URL}/schedule/teacher/{teacher_id}"
+    return make_api_request("get", url, token=token)
 
 async def get_subjects_by_teacher_id(teacher_id):
     """Получает список предметов, которые ведет учитель по его ID"""

@@ -50,6 +50,17 @@ async def get_student(student_id: int):
         )
     return student
 
+@router.get("/by-user/{user_id}", response_model=StudentResponse)
+async def get_student_by_user(user_id: int):
+    """Получить информацию о студенте по ID пользователя"""
+    student = database.get_student_by_user_id(user_id)
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Студент не найден"
+        )
+    return student
+
 @router.get("/by-group/{group_id}", response_model=List[StudentResponse])
 async def get_students_by_group(group_id: int):
     """Получить список студентов определенной группы"""

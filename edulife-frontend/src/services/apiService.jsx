@@ -281,30 +281,27 @@ const apiService = {
         console.log(`Requesting schedule for user ${userId} with role ${userRole}`);
         
         // Используем непосредственно API департаментов для получения расписания пользователя
-        const response = await apiClient.get(`${API_BASE_URL.auth}/departments/user/${userId}/schedule`);
+        const response = await apiClient.get(`${API_BASE_URL.raspis}/schedule/user/${userId}`);
         console.log(`Schedule response from department API:`, response.data);
         
         // Если API департаментов вернуло данные, используем их
         if (response.data && Array.isArray(response.data)) {
           return { schedule: response.data };
         }
-        
-        // В качестве запасного варианта используем старый подход
-        // Different parameters based on user role
+        // Если API департаментов не вернуло данные, используем fallback
+        console.log(`Fallback to default schedule API`);
         const params = {};
         if (userRole === 'teacher') {
           params.teacher_id = userId;
         } else if (userRole === 'student') {
           // First we need to get the student's group ID
-          const studentResponse = await apiClient.get(`${API_BASE_URL.auth}/students?user_id=${userId}`);
+          const studentResponse = await apiClient.get(`${API_BASE_URL.auth}/students/by-user/${userId}`);
           if (studentResponse.data && studentResponse.data.length > 0) {
             const groupId = studentResponse.data[0].group_id;
             params.group_id = groupId;
           }
         }
-        
-        // Make the actual schedule request
-        const fallbackResponse = await apiClient.get(`${API_BASE_URL.raspis}/schedule`, {
+        const fallbackResponse = await apiClient.get(`${API_BASE_URL.raspis}/schedule/${groupId}`, {
           params: params
         });
         
@@ -320,14 +317,16 @@ const apiService = {
             params.teacher_id = userId;
           } else if (userRole === 'student') {
             // Получаем группу студента
-            const studentResponse = await apiClient.get(`${API_BASE_URL.auth}/students/${userId}`);
+            const studentResponse = await apiClient.get(`${API_BASE_URL.auth}/students/by-user/${userId}`);
             if (studentResponse.data && studentResponse.data.length > 0) {
               const groupId = studentResponse.data[0].group_id;
               params.group_id = groupId;
             }
           }
-          
-          const fallbackResponse = await apiClient.get(`${API_BASE_URL.raspis}/schedule`, {
+          // Запрос расписания с использованием ID группы
+          console.log(`Fallback request for group ID ${groupId}`);
+          // Используем API расписания для получения расписания группы
+          const fallbackResponse = await apiClient.get(`${API_BASE_URL.raspis}/schedule/${groupId}`, {
             params: params
           });
           
@@ -444,6 +443,16 @@ const apiService = {
         return response.data;
       } catch (error) {
         console.error('Error creating document:', error);
+        throw error;
+      }
+    },
+    // Метод для удаления документа
+    deleteDocument: async (documentId) => {
+      try {
+        const response = await apiClient.delete(`${API_BASE_URL.dock}/documents/${documentId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error deleting document ${documentId}:`, error);
         throw error;
       }
     },

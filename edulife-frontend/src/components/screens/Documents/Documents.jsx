@@ -390,10 +390,13 @@ const Documents = () => {
     try {
       // Для демо-режима просто удаляем из локального состояния
       setUserDocuments(prev => prev.filter(doc => doc.id !== documentId));
-      
-      // Здесь должен быть код для отправки запроса на сервер
-      // await apiService.documents.deleteDocument(documentId);
-      
+      setAdminDocuments(prev => prev.filter(doc => doc.id !== documentId));
+      setErrorMessage('Документ успешно отменен');
+      setTimeout(() => setErrorMessage(''), 3000);
+      const response = await apiService.documents.deleteDocument(documentId);
+
+
+
     } catch (error) {
       console.error('Ошибка при удалении документа:', error);
       setErrorMessage('Не удалось удалить документ');

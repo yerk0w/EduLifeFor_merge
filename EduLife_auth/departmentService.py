@@ -14,14 +14,14 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-def make_api_request(url: str, token: Optional[str] = None):
+def make_api_request(token: str, url: str = None):
     """Выполняет API запрос к другому сервису"""
     headers = {}
     if token:
         headers["Authorization"] = f"Bearer {token}"
     
     try:
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=1000)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
@@ -103,7 +103,7 @@ def get_schedule_for_group(group_id, token=None):
     """Получает расписание для группы из сервиса расписания"""
     try:
         url = f"{SCHEDULE_API_URL}/schedule?group_id={group_id}"
-        return make_api_request(url, token)
+        return make_api_request(token, url)
     except Exception as e:
         print(f"Ошибка при получении расписания для группы: {e}")
         return []
@@ -111,7 +111,7 @@ def get_schedule_for_group(group_id, token=None):
 def get_schedule_for_teacher(teacher_id, token=None):
     """Получает расписание для преподавателя из сервиса расписания"""
     try:
-        url = f"{SCHEDULE_API_URL}/schedule?teacher_id={teacher_id}"
+        url = f"{SCHEDULE_API_URL}/schedule/teacher/{teacher_id}"
         return make_api_request(url, token)
     except Exception as e:
         print(f"Ошибка при получении расписания для преподавателя: {e}")
@@ -251,3 +251,12 @@ def delete_department(department_id):
     except Exception as e:
         print(f"Ошибка при удалении кафедры: {e}")
         return False
+    
+def get_student_schedule(department_id, token=None):
+    """Получает расписание для студентов кафедры из сервиса расписания"""
+    try:
+        url = f"{SCHEDULE_API_URL}/schedule?department_id={department_id}"
+        return make_api_request(url, token)
+    except Exception as e:
+        print(f"Ошибка при получении расписания для студентов кафедры: {e}")
+        return []

@@ -637,6 +637,28 @@ def get_student_by_id(student_id):
         return dict(student)
     return None
 
+def get_student_by_user_id(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT 
+            s.id, s.user_id, s.group_id, s.student_id, s.enrollment_year,
+            u.full_name, u.email,
+            g.name as group_name, g.year as group_year,
+            f.id as faculty_id, f.name as faculty_name
+        FROM students s
+        JOIN users u ON s.user_id = u.id
+        JOIN groups g ON s.group_id = g.id
+        JOIN faculties f ON g.faculty_id = f.id
+        WHERE s.user_id = ?
+    """, (user_id,))
+    student = cursor.fetchone()
+    conn.close()
+    if student:
+        return dict(student)
+    return None
+
+
 def get_students_by_group(group_id):
     conn = get_db_connection()
     cursor = conn.cursor()

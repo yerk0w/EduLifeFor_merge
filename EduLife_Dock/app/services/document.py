@@ -256,16 +256,27 @@ def delete_document(db: Session, document_id: int):
     """
     db_document = db.query(Document).filter(Document.id == document_id).first()
     if not db_document:
-        return False
+        raise HTTPException(status_code=404, detail="Документ не найден")
     
     # Удаляем файл, если он существует
     if db_document.file_path:
         file_path = os.path.join(STATIC_DIR, db_document.file_path.lstrip('/'))
         if os.path.exists(file_path):
-            os.remove(file_path)
+            try:
+                os.remove(file_path)
+                print(f"Файл {file_path} успешно удалён.")  # Здесь можно использовать логирование
+            except Exception as e:
+                print(f"Ошибка при удалении файла {file_path}: {str(e)}")
+                raise HTTPException(status_code=500, detail="Не удалось удалить файл")
     
     # Удаляем запись из БД
-    db.delete(db_document)
-    db.commit()
+    try:
+        db.delete(db_document)
+        db.commit()
+        print(f"Документ с ID {document_id} успешно удалён.")
+    except Exception as e:
+        print(f"Ошибка при удалении документа: {str(e)}")
+        db.rollback()  # Откатываем изменения в случае ошибки
+        raise HTTPException(status_code=500, detail="Не удалось удалить документ")
     
     return True
