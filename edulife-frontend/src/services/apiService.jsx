@@ -482,25 +482,6 @@ const apiService = {
         return [];
       }
     },
-    getSubjects: async () => {
-      try {
-        const response = await apiClient.get(`${API_BASE_URL.raspis}/subjects`);
-        return Array.isArray(response.data) ? response.data : [];
-      } catch (error) {
-        console.error('Error fetching subjects:', error);
-        return [];
-      }
-    },
-    getTeachers: async () => {
-      try {
-        const response = await apiClient.get(`${API_BASE_URL.auth}/teachers`);
-        return Array.isArray(response.data) ? response.data : [];
-      } catch (error) {
-        console.error('Error fetching teachers:', error);
-        return [];
-      }
-    },
-    
     // Метод для получения обогащенной статистики с именами предметов и преподавателей
     getEnrichedAttendanceStats: async (startDate = null, endDate = null) => {
       try {
@@ -618,6 +599,17 @@ const apiService = {
           // Return empty schedule if everything fails
           return { schedule: [] };
         }
+      }
+    },
+    getTeacherSchedule: async (teacherId) => {
+      try {
+        console.log(`Запрос расписания для преподавателя ID: ${teacherId}`);
+        const response = await apiClient.get(`${API_BASE_URL.raspis}/schedule/teacher/${teacherId}`);
+        console.log('Ответ API расписания преподавателя:', response.data);
+        return Array.isArray(response.data) ? response.data : [];
+      } catch (error) {
+        console.error(`Ошибка при получении расписания преподавателя ${teacherId}:`, error);
+        return [];
       }
     },
     getNotifications: async (groupId = null) => {
