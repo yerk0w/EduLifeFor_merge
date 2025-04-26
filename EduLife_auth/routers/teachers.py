@@ -55,6 +55,54 @@ async def get_teachers():
     """Получить список всех преподавателей"""
     return database.get_all_teachers()
 
+@router.get("/by-user/{user_id}", response_model=TeacherResponse)
+async def get_teacher_by_user(user_id: int):
+    """Получить информацию о преподавателе по ID пользователя"""
+    conn = database.get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            SELECT 
+                t.id, t.user_id, t.position, t.contact_info, t.department_id,
+                u.full_name, u.email, u.username, d.name as department_name
+            FROM teachers t
+            JOIN users u ON t.user_id = u.id
+            JOIN departments d ON t.department_id = d.id
+            WHERE t.user_id = ?
+        """, (user_id,))
+        
+        teacher = cursor.fetchone()
+        
+        if not teacher:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Преподаватель не найден"
+            )
+        
+        teacher_dict = dict(teacher)
+        
+        # Получаем предметы, которые ведет учитель
+        cursor.execute("""
+            SELECT s.id, s.name
+            FROM teacher_subjects ts
+            JOIN subjects s ON ts.subject_id = s.id
+            WHERE ts.teacher_id = ?
+        """, (teacher["id"],))
+        
+        teacher_dict["subjects"] = [dict(row) for row in cursor.fetchall()]
+        
+        return teacher_dict
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ошибка при получении данных преподавателя: {str(e)}"
+        )
+    finally:
+        conn.close()
+
 @router.get("/{teacher_id}", response_model=TeacherResponse)
 async def get_teacher(teacher_id: int):
     """Получить информацию о конкретном преподавателе"""

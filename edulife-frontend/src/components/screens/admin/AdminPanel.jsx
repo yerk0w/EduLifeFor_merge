@@ -10,6 +10,7 @@ import AdminSidebar from './AdminSidebar';
 import AdminDashboard from './AdminDashboard.jsx';
 import AdminSchedule from './AdminSchedule.jsx'; 
 import AdminStudents from './AdminStudents.jsx';
+import AdminUsers from './AdminUsers.jsx';
 import AdminReports from './AdminReports.jsx';
 import AdminDocuments from './AdminDocuments.jsx';
 import AdminSubjects from './AdminSubjects.jsx';
@@ -410,6 +411,7 @@ const AdminPanel = () => {
               onDeleteClassroom={handleDeleteClassroom}
             />
           )}
+          {activeTab === 'users' && (<AdminUsers/>)}
           {activeTab === 'students' && <AdminStudents students={students} />}
           {activeTab === 'reports' && <AdminReports scheduleItems={scheduleItems} />}
           {activeTab === 'documents' && (

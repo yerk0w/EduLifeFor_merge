@@ -4,7 +4,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from datetime import datetime
-from routers import auth, users, teachers, students, groups, faculties, profile, department
+from routers import auth, users, teachers, students, groups, faculties, profile, department , roles
 
 # Настройки JWT
 SECRET_KEY = os.getenv("SECRET_KEY", "default_secret_key_for_development")
@@ -45,7 +45,8 @@ app.include_router(students.router)
 app.include_router(groups.router)
 app.include_router(profile.router)
 app.include_router(faculties.router)  # Добавлен маршрут для факультетов
-app.include_router(department.router)  # Добавлен маршрут для кафедр
+app.include_router(department.router) 
+app.include_router(roles.router)
 
 @app.get("/")
 def read_root():

@@ -62,6 +62,7 @@ apiClient.interceptors.response.use(
 
 const apiService = {
   auth: {
+    // Метод для логина
     login: async (username, password) => {
       try {
         const response = await axios.post(`${API_BASE_URL.auth}/auth/login`,
@@ -110,6 +111,162 @@ const apiService = {
         throw error;
       }
     },
+    getAllUsers: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/users`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        return [];
+      }
+    },
+    
+    // Получение факультетов
+    getFaculties: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/faculties`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching faculties:', error);
+        return [];
+      }
+    },
+    
+    // Получение кафедр
+    getDepartments: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/departments`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+        return [];
+      }
+    },
+    
+    // Получение групп
+    getGroups: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/groups`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching groups:', error);
+        return [];
+      }
+    },
+    
+    // Получение ролей
+    getRoles: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/roles`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+        // Возвращаем стандартные роли если API не реализовано
+        return [
+          { id: 1, name: 'admin', display_name: 'Администратор' },
+          { id: 2, name: 'teacher', display_name: 'Преподаватель' },
+          { id: 3, name: 'student', display_name: 'Студент' }
+        ];
+      }
+    },
+    
+    // Обновление пользователя
+    updateUser: async (userId, userData) => {
+      try {
+        const response = await apiClient.put(`${API_BASE_URL.auth}/users/${userId}`, userData);
+        return response.data;
+      } catch (error) {
+        console.error(`Error updating user ${userId}:`, error);
+        throw error;
+      }
+    },
+    
+    // Удаление пользователя
+    deleteUser: async (userId) => {
+      try {
+        const response = await apiClient.delete(`${API_BASE_URL.auth}/users/${userId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error deleting user ${userId}:`, error);
+        throw error;
+      }
+    },
+    
+    // Получение информации о студенте по ID пользователя
+    getStudentByUser: async (userId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/students/by-user/${userId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching student info for user ${userId}:`, error);
+        return null;
+      }
+    },
+    
+    // Получение информации о преподавателе по ID пользователя
+    getTeacherByUser: async (userId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/teachers/by-user/${userId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching teacher info for user ${userId}:`, error);
+        return null;
+      }
+    },
+    
+    // Создание студента
+    createStudent: async (studentData) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.auth}/students`, studentData);
+        return response.data;
+      } catch (error) {
+        console.error('Error creating student:', error);
+        throw error;
+      }
+    },
+    
+    // Обновление студента
+    updateStudent: async (studentId, studentData) => {
+      try {
+        const response = await apiClient.put(`${API_BASE_URL.auth}/students/${studentId}`, studentData);
+        return response.data;
+      } catch (error) {
+        console.error(`Error updating student ${studentId}:`, error);
+        throw error;
+      }
+    },
+    
+    // Создание преподавателя
+    createTeacher: async (teacherData) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.auth}/teachers`, teacherData);
+        return response.data;
+      } catch (error) {
+        console.error('Error creating teacher:', error);
+        throw error;
+      }
+    },
+    
+    // Обновление преподавателя
+    updateTeacher: async (teacherId, teacherData) => {
+      try {
+        const response = await apiClient.put(`${API_BASE_URL.auth}/teachers/${teacherId}`, teacherData);
+        return response.data;
+      } catch (error) {
+        console.error(`Error updating teacher ${teacherId}:`, error);
+        throw error;
+      }
+    },
+    
+    // Создание пользователя (для администраторов)
+    createUser: async (userData) => {
+      try {
+        const response = await apiClient.post(`${API_BASE_URL.auth}/users`, userData);
+        return response.data;
+      } catch (error) {
+        console.error('Error creating user:', error);
+        throw error;
+      }},
     
     logout: () => {
       localStorage.removeItem('authToken');
@@ -176,7 +333,7 @@ const apiService = {
         throw error;
       }
     },
-    
+
     
     // Получение документов, отправленных администратором текущему пользователю
     getReceivedDocuments: async () => {
