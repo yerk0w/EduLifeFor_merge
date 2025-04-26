@@ -79,19 +79,38 @@ def get_session_stats(start_date=None, end_date=None):
             shift_id,
             teacher_id,
             day_of_week,
-            COUNT(*) as attendance_count
+            COUNT(*) as attendance_count,
+            MAX(created_at) as created_at,
+            MAX(session_time) as session_time
         FROM SESSION_DATA
         WHERE 1=1
     """
 
     params = []
     if start_date:
-        query += " AND session_time >= ?"
-        params.append(start_date)
+        # Преобразование даты из формата DD.MM.YYYY в ISO формат YYYY-MM-DD
+        try:
+            # Разбиваем строку даты по точкам и переставляем части
+            day, month, year = start_date.split('.')
+            formatted_start_date = f"{year}-{month}-{day} 00:00:00"
+            query += " AND session_time >= ?"
+            params.append(formatted_start_date)
+        except ValueError:
+            # Если дата уже в подходящем формате или формат неверный, 
+            # используем как есть (SQLite вернет пустой результат при несоответствии)
+            query += " AND session_time >= ?"
+            params.append(start_date)
 
     if end_date:
-        query += " AND session_time <= ?"
-        params.append(end_date)
+        # Преобразование даты из формата DD.MM.YYYY в ISO формат YYYY-MM-DD
+        try:
+            day, month, year = end_date.split('.')
+            formatted_end_date = f"{year}-{month}-{day} 23:59:59"
+            query += " AND session_time <= ?"
+            params.append(formatted_end_date)
+        except ValueError:
+            query += " AND session_time <= ?"
+            params.append(end_date)
 
     query += """
         GROUP BY subject_id, shift_id, teacher_id, day_of_week

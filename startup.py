@@ -10,29 +10,28 @@ services = [
     {
         "name": "Auth Service",
         "path": "EduLife_auth",
-        "command": "..\\venv\\Scripts\\activate.bat && python main.py",
+        "command": "venv/bin/python3 main.py",
         "port": 8070,
         "process": None
     },
-
     {
         "name": "QR Service",
         "path": "EduLife_Qr",
-        "command": "..\\venv\\Scripts\\activate.bat && python main.py",
+        "command": "venv/bin/python3 main.py",
         "port": 8080,
         "process": None
     },
     {
         "name": "Schedule Service",
         "path": "EduLife_raspis",
-        "command": "..\\venv\\Scripts\\activate.bat && python main.py",
+        "command": "venv/bin/python main.py",
         "port": 8090,
         "process": None
     },
     {
         "name": "Document Service",
         "path": "EduLife_Dock",
-        "command": "..\\venv\\Scripts\\activate.bat && cd app && python main.py",
+        "command": "source venv/bin/activate && cd app && python3 main.py",
         "port": 8100,
         "process": None
     }
@@ -46,7 +45,7 @@ def get_terminal_command(cmd, service_name):
     elif system == "Darwin":  # macOS
         escaped_cmd = cmd.replace('"', '\\"')
         return f'osascript -e \'tell app "Terminal" to do script "{escaped_cmd}"\''
-    else:  # Linux и другие
+    else:  # Linux
         terminals = [
             ("gnome-terminal", f'gnome-terminal -- bash -c "{cmd}; exec bash"'),
             ("xterm", f'xterm -title "EduLife {service_name}" -e bash -c "{cmd}; exec bash"'),
@@ -58,7 +57,6 @@ def get_terminal_command(cmd, service_name):
             if subprocess.call(["which", term], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0:
                 return term_cmd
         
-        # Если не нашли подходящий терминал, запускаем без новой консоли
         return None
 
 # Устанавливаем переменные окружения с URL для каждого сервиса
@@ -83,19 +81,19 @@ def start_services_in_new_terminals():
         else:
             print(f"Не удалось запустить {service['name']} в новой консоли")
 
-# Запуск всех сервисов в фоне (для запуска в одной консоли)
+# Запуск всех сервисов в фоне (для одной консоли)
 def start_services_in_background():
     for service in services:
         print(f"Запуск {service['name']} на порту {service['port']}...")
-        cmd = service['command'].split()
         process = subprocess.Popen(
-            cmd,
+            service['command'],
             cwd=service['path'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
             bufsize=1,
-            universal_newlines=True
+            universal_newlines=True,
+            shell=True  # <<< исправление здесь
         )
         
         service['process'] = process
@@ -128,23 +126,18 @@ def monitor_outputs():
         while True:
             for service in services:
                 if service['process'] and service['process'].poll() is None:
-                    # Чтение stdout
                     output = service['process'].stdout.readline()
                     if output:
                         print(f"[{service['name']}] {output.strip()}")
                     
-                    # Чтение stderr
                     error = service['process'].stderr.readline()
                     if error:
                         print(f"[{service['name']}] ERROR: {error.strip()}")
-                
-                # Если процесс завершился, выводим сообщение
                 elif service['process'] and service['process'].poll() is not None:
                     return_code = service['process'].poll()
                     print(f"{service['name']} завершил работу с кодом {return_code}")
                     service['process'] = None
-            
-            # Небольшая задержка для снижения нагрузки на CPU
+
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("\nЗавершение работы по запросу пользователя...")
@@ -152,16 +145,13 @@ def monitor_outputs():
         stop_services()
 
 if __name__ == "__main__":
-    # Регистрируем обработчик сигналов
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
-    # Устанавливаем переменные окружения
     set_environment_variables()
     
     print("=== Запуск EduLife микросервисов ===")
     
-    # Спрашиваем пользователя о способе запуска
     mode = input("Выберите режим запуска (1 - отдельные консоли, 2 - в одной консоли): ")
     
     if mode == "1":

@@ -3058,3 +3058,9 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.reports-charts{
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}

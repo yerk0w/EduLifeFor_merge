@@ -449,7 +449,96 @@ const apiService = {
         console.error(`Error fetching schedule for user ${userId}:`, error);
         throw error;
       }
+    },
+    getAttendanceStats: async (startDate = null, endDate = null) => {
+      try {
+        const params = {};
+        if (startDate) params.start_date = startDate;
+        if (endDate) params.end_date = endDate;
+        
+        const response = await apiClient.get(`${API_BASE_URL.qr}/stats`, { params });
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching attendance statistics:', error);
+        return { stats: [] };
+      }
+    },
+    getSubjects: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.raspis}/subjects`);
+        return Array.isArray(response.data) ? response.data : [];
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+        return [];
+      }
+    },
+    
+    getTeachers: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/teachers`);
+        return Array.isArray(response.data) ? response.data : [];
+      } catch (error) {
+        console.error('Error fetching teachers:', error);
+        return [];
+      }
+    },
+    getSubjects: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.raspis}/subjects`);
+        return Array.isArray(response.data) ? response.data : [];
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+        return [];
+      }
+    },
+    getTeachers: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/teachers`);
+        return Array.isArray(response.data) ? response.data : [];
+      } catch (error) {
+        console.error('Error fetching teachers:', error);
+        return [];
+      }
+    },
+    
+    // Метод для получения обогащенной статистики с именами предметов и преподавателей
+    getEnrichedAttendanceStats: async (startDate = null, endDate = null) => {
+      try {
+        // Сначала получаем базовую статистику
+        const statsResponse = await apiService.qr.getAttendanceStats(startDate, endDate);
+        
+        if (!statsResponse || !statsResponse.stats || !Array.isArray(statsResponse.stats)) {
+          return { stats: [] };
+        }
+        
+        // Получаем информацию о предметах
+        const subjects = await apiService.qr.getSubjects();
+        const subjectsMap = subjects.reduce((map, subject) => {
+          map[subject.id] = subject.name || `Предмет ${subject.id}`;
+          return map;
+        }, {});
+        
+        // Получаем информацию о преподавателях
+        const teachers = await apiService.qr.getTeachers();
+        const teachersMap = teachers.reduce((map, teacher) => {
+          map[teacher.id] = teacher.full_name || `Преподаватель ${teacher.id}`;
+          return map;
+        }, {});
+        
+        // Обогащаем статистику дополнительной информацией
+        const enrichedStats = statsResponse.stats.map(stat => ({
+          ...stat,
+          subject_name: subjectsMap[stat.subject_id] || `Предмет ${stat.subject_id}`,
+          teacher_name: teachersMap[stat.teacher_id] || `Преподаватель ${stat.teacher_id}`
+        }));
+        
+        return { stats: enrichedStats };
+      } catch (error) {
+        console.error('Error fetching enriched attendance statistics:', error);
+        return { stats: [] };
+      }
     }
+
   },
   
   // Schedule Service APIs
