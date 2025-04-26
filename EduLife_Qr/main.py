@@ -207,6 +207,18 @@ def get_attendance_stats(
     stats = database.get_session_stats(start_date, end_date)
     return {"stats": stats}
 
+
+@app.get("/stats/user/{user_id}", response_model=Dict)
+def get_user_attendance_stats(
+    user_id: int,
+    current_user: dict = Depends(get_current_user),
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None
+):
+    stats = database.get_user_session_stats(user_id, start_date, end_date)
+    return {"user_id": user_id, "stats": stats}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=True)

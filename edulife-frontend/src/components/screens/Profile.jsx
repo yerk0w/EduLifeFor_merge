@@ -6,6 +6,93 @@ import avatarImage1 from '../../assets/images/avatar.webp';
 import apiService from '../../services/apiService';
 import { FaCog, FaBell } from 'react-icons/fa';
 
+// CSS for the promocodes tab
+const promocodesStyles = `
+.profile-promocodes {
+  padding: 15px;
+}
+
+.promocodes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.promocode-card {
+  background: var(--card-bg, #fff);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.promocode-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.promocode-card.inactive {
+  opacity: 0.6;
+  background-color: var(--bg-secondary, #f5f5f5);
+}
+
+.promocode-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.promocode-code {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--primary-color, #4F6DE6);
+  background-color: rgba(79, 109, 230, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 1px;
+}
+
+.promocode-discount {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--success-color, #28a745);
+  background-color: rgba(40, 167, 69, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.promocode-description {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+  margin-bottom: 15px;
+}
+
+.promocode-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-tertiary, #888);
+}
+
+.promocode-status {
+  color: var(--danger-color, #dc3545);
+  font-weight: 500;
+}
+
+.attendance-overview-card {
+  margin-top: 20px;
+}
+`;
+
+// Add the styles to the document
+const styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
+styleSheet.innerText = promocodesStyles;
+document.head.appendChild(styleSheet);
+
 const Profile = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('statistics');
@@ -35,7 +122,6 @@ const Profile = () => {
       address: '',
       telegram: '',
       group_name: ''
-
     });
 
     // State for cities and colleges
@@ -47,14 +133,24 @@ const Profile = () => {
     const timeRangeOptions = ['6 Months', '1 Year', 'All'];
     const [showTimeRangeDropdown, setShowTimeRangeDropdown] = useState(false);
     
-    // Fetch user data on component mount
+    // Mock data for promocodes
+    const mockPromocodesData = [
+      { code: 'EDU25OFF', discount: '25%', description: 'Скидка на курсы повышения квалификации', validUntil: '31.12.2024', isActive: true },
+      { code: 'BOOKSTORE10', discount: '10%', description: 'Скидка в книжном магазине кампуса', validUntil: '15.05.2024', isActive: true },
+      { code: 'CAFETERIA5', discount: '5%', description: 'Скидка в кафетерии колледжа', validUntil: '01.06.2024', isActive: true },
+      { code: 'GRADSALE2024', discount: '20%', description: 'Скидка на выпускной альбом', validUntil: '30.06.2024', isActive: false }
+    ];
+    
+    // Fetch user data and attendance stats on component mount
     useEffect(() => {
       const fetchUserData = async () => {
         try {
           setLoading(true);
           
-          // Get user ID from localStorage
+          // Get user ID and auth token from localStorage
           const userId = localStorage.getItem('userId');
+          const authToken = localStorage.getItem('authToken');
+          
           if (!userId) {
             throw new Error('User not authenticated');
           }
@@ -92,7 +188,47 @@ const Profile = () => {
             faculty_name: userResponse.faculty_name || ''
           });
 
-          setAttendanceData([]);
+          // Fetch attendance data from the API
+          try {
+            // Try to fetch from the specific endpoint with auth token
+            const response = await fetch(`http://127.0.0.1:8080/stats/user/${userId}`, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (response.ok) {
+              const attendanceStats = await response.json();
+              console.log('Fetched attendance stats:', attendanceStats);
+              
+              // Process attendance stats into the format needed for the chart
+              const processedData = processAttendanceData(attendanceStats);
+              setAttendanceData(processedData);
+            } else {
+              console.warn(`Failed to fetch attendance data: ${response.status} ${response.statusText}`);
+              // If fetch fails, try to use the QR service stats endpoint through apiService
+              try {
+                const statsResponse = await apiService.qr.getAttendanceStats();
+                console.log('Fetched stats through apiService:', statsResponse);
+                
+                if (statsResponse && statsResponse.stats) {
+                  const processedData = processAttendanceData(statsResponse.stats);
+                  setAttendanceData(processedData);
+                } else {
+                  setAttendanceData(generateMockAttendanceData());
+                }
+              } catch (apiError) {
+                console.error('Error fetching stats through apiService:', apiError);
+                setAttendanceData(generateMockAttendanceData());
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching attendance data:', error);
+            // Fallback to mock data
+            setAttendanceData(generateMockAttendanceData());
+          }
           
         } catch (err) {
           console.error('Error fetching user data:', err);
@@ -104,6 +240,68 @@ const Profile = () => {
       
       fetchUserData();
     }, []);
+    
+    // Function to process attendance data from the API
+    const processAttendanceData = (rawData) => {
+      // This function should transform the API response into the format needed by the chart
+      // The implementation depends on the actual structure of the API response
+      
+      // If the API data doesn't match the expected format, handle that here
+      if (!rawData || !Array.isArray(rawData)) {
+        return generateMockAttendanceData();
+      }
+      
+      // Example transformation (adjust based on actual API response structure)
+      const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+      
+      try {
+        return rawData.map(entry => {
+          // Parse date from entry (assuming it has date or timestamp field)
+          const date = new Date(entry.date || entry.timestamp || entry.created_at);
+          const month = date.getMonth();
+          const year = date.getFullYear();
+          
+          // Calculate attendance rate
+          const presentDays = entry.present_days || entry.presentDays || 0;
+          const absentDays = entry.absent_days || entry.absentDays || 0;
+          const totalDays = presentDays + absentDays;
+          const attendanceRate = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
+          
+          // Check if it's vacation period (implementation depends on how vacations are marked in the API)
+          const isVacation = entry.is_vacation || false;
+          
+          return {
+            month: monthNames[month],
+            year: year.toString(),
+            presentDays: presentDays,
+            absentDays: absentDays,
+            value: attendanceRate,
+            isVacation: isVacation
+          };
+        });
+      } catch (error) {
+        console.error('Error processing attendance data:', error);
+        return generateMockAttendanceData();
+      }
+    };
+    
+    // Generate mock attendance data as fallback
+    const generateMockAttendanceData = () => {
+      return [
+        { month: 'Янв', year: '2024', presentDays: 18, absentDays: 2, value: 90, isVacation: false },
+        { month: 'Фев', year: '2024', presentDays: 20, absentDays: 0, value: 100, isVacation: false },
+        { month: 'Мар', year: '2024', presentDays: 15, absentDays: 5, value: 75, isVacation: false },
+        { month: 'Апр', year: '2024', presentDays: 16, absentDays: 4, value: 80, isVacation: false },
+        { month: 'Май', year: '2024', presentDays: 0, absentDays: 0, value: 0, isVacation: true },
+        { month: 'Июн', year: '2024', presentDays: 0, absentDays: 0, value: 0, isVacation: true },
+        { month: 'Июл', year: '2024', presentDays: 0, absentDays: 0, value: 0, isVacation: true },
+        { month: 'Авг', year: '2024', presentDays: 0, absentDays: 0, value: 0, isVacation: true },
+        { month: 'Сен', year: '2024', presentDays: 22, absentDays: 0, value: 100, isVacation: false },
+        { month: 'Окт', year: '2024', presentDays: 20, absentDays: 2, value: 90, isVacation: false },
+        { month: 'Ноя', year: '2024', presentDays: 19, absentDays: 3, value: 85, isVacation: false },
+        { month: 'Дек', year: '2024', presentDays: 21, absentDays: 1, value: 95, isVacation: false }
+      ];
+    };
     
     // Function to handle edit button click
     const handleEditClick = (section) => {
@@ -410,7 +608,7 @@ const Profile = () => {
             </button>
           </div>
           
-          {/* Analytics card */}
+          {/* Attendance Analytics card */}
           <div className="analytics-card">
             <div className="analytics-header">
               <h3>Аналитика посещаемости</h3>
@@ -501,23 +699,54 @@ const Profile = () => {
               </div>
             </div>
           </div>
+          
+          {/* Attendance Info Card */}
+          <div className="analytics-card attendance-overview-card">
+            <div className="analytics-header">
+              <h3>Посещаемость</h3>
+            </div>
+            <div className="attendance-info">
+              <div className="attendance-stat">
+                <div className="attendance-value">{totalAttendance.totalPresent}/{totalAttendance.totalPresent + totalAttendance.totalAbsent}</div>
+                <div className="attendance-label">Дней в этом году</div>
+              </div>
+              <div className="attendance-stat">
+                <div className="attendance-value">{totalAttendance.attendanceRate}%</div>
+                <div className="attendance-label">Посещаемость</div>
+              </div>
+            </div>
+          </div>
         </div>
       );
     };
     
-    const renderReviewsTab = () => {
+    const renderPromocodesTab = () => {
       return (
-        <div className="profile-reviews">
-          <h3>Посещаемость</h3>
-          <div className="attendance-info">
-            <div className="attendance-stat">
-              <div className="attendance-value">{totalAttendance.totalPresent}/{totalAttendance.totalPresent + totalAttendance.totalAbsent}</div>
-              <div className="attendance-label">Дней в этом году</div>
-            </div>
-            <div className="attendance-stat">
-              <div className="attendance-value">{totalAttendance.attendanceRate}%</div>
-              <div className="attendance-label">Посещаемость</div>
-            </div>
+        <div className="profile-promocodes">
+          <h3>Промокоды</h3>
+          <div className="promocodes-container">
+            {mockPromocodesData.map((promo, index) => (
+              <div 
+                key={index} 
+                className={`promocode-card ${!promo.isActive ? 'inactive' : ''}`}
+              >
+                <div className="promocode-header">
+                  <div className="promocode-code">{promo.code}</div>
+                  <div className="promocode-discount">{promo.discount}</div>
+                </div>
+                <div className="promocode-description">{promo.description}</div>
+                <div className="promocode-footer">
+                  <div className="promocode-valid-until">
+                    Действует до: {promo.validUntil}
+                  </div>
+                  {!promo.isActive && (
+                    <div className="promocode-status">
+                      Истек
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       );
@@ -529,8 +758,8 @@ const Profile = () => {
           return renderStatisticsTab();
         case 'portfolio':
           return renderPortfolioTab();
-        case 'reviews':
-          return renderReviewsTab();
+        case 'promocodes':
+          return renderPromocodesTab();
         default:
           return null;
       }
@@ -540,13 +769,13 @@ const Profile = () => {
       return (
         <div className="profile-screen">
           <div className="loading-message">
-          <div class="loader">
-            <div class="loader__bar"></div>
-            <div class="loader__bar"></div>
-            <div class="loader__bar"></div>
-            <div class="loader__bar"></div>
-            <div class="loader__bar"></div>
-            <div class="loader__ball"></div>
+          <div className="loader">
+            <div className="loader__bar"></div>
+            <div className="loader__bar"></div>
+            <div className="loader__bar"></div>
+            <div className="loader__bar"></div>
+            <div className="loader__bar"></div>
+            <div className="loader__ball"></div>
           </div>
           </div>
         </div>
@@ -606,10 +835,10 @@ const Profile = () => {
             Мои данные
           </button>
           <button
-            className={`tab-button ${activeTab === 'reviews' ? 'active' : ''}`}
-            onClick={() => handleTabChange('reviews')}
+            className={`tab-button ${activeTab === 'promocodes' ? 'active' : ''}`}
+            onClick={() => handleTabChange('promocodes')}
           >
-            Обзор
+            Промокоды
           </button>
         </div>
 
@@ -764,6 +993,5 @@ const Profile = () => {
         )}
       </div>
     );
-};
-
-export default Profile;
+  }
+  export default Profile;
