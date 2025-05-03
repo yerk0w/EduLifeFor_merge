@@ -21,8 +21,8 @@ async def get_all_transfers(
 @router.get("/incoming", response_model=List[KeyTransferResponse])
 async def get_incoming_transfers(current_user: dict = Depends(get_current_user)):
     """Get all incoming key transfer requests for the current teacher"""
-    # Check if user role exists at 'role_name' or just 'role'
-    user_role = current_user.get("role_name") or current_user.get("role")
+    # Check if user role exists at 'role' or just 'role'
+    user_role = current_user.get("role") or current_user.get("role")
     
     if not user_role or user_role not in ["admin", "teacher"]:
         raise HTTPException(
@@ -35,8 +35,8 @@ async def get_incoming_transfers(current_user: dict = Depends(get_current_user))
 @router.get("/outgoing", response_model=List[KeyTransferResponse])
 async def get_outgoing_transfers(current_user: dict = Depends(get_current_user)):
     """Get all outgoing key transfer requests for the current teacher"""
-    # Check if user role exists at 'role_name' or just 'role'
-    user_role = current_user.get("role_name") or current_user.get("role")
+    # Check if user role exists at 'role' or just 'role'
+    user_role = current_user.get("role") or current_user.get("role")
     
     if not user_role or user_role not in ["admin", "teacher"]:
         raise HTTPException(
@@ -52,8 +52,8 @@ async def create_transfer(
     current_user: dict = Depends(get_current_user)
 ):
     """Create a new key transfer request"""
-    # Check if user role exists at 'role_name' or just 'role'
-    user_role = current_user.get("role_name") or current_user.get("role")
+    # Check if user role exists at 'role' or just 'role'
+    user_role = current_user.get("role") or current_user.get("role")
     is_admin = user_role == "admin"
     
     # Check if the user is creating a transfer for themselves or is an admin
@@ -88,8 +88,8 @@ async def approve_transfer(
             detail=f"Pending transfer with ID {transfer_id} not found"
         )
     
-    # Check if user role exists at 'role_name' or just 'role'
-    user_role = current_user.get("role_name") or current_user.get("role")
+    # Check if user role exists at 'role' or just 'role'
+    user_role = current_user.get("role") or current_user.get("role")
     is_admin = user_role == "admin"
     
     # Check if the user is the target of the transfer or an admin
@@ -125,8 +125,8 @@ async def reject_transfer(
             detail=f"Pending transfer with ID {transfer_id} not found"
         )
     
-    # Check if user role exists at 'role_name' or just 'role'
-    user_role = current_user.get("role_name") or current_user.get("role")
+    # Check if user role exists at 'role' or just 'role'
+    user_role = current_user.get("role") or current_user.get("role")
     is_admin = user_role == "admin"
     
     # Check if the user is the target of the transfer or an admin
@@ -161,8 +161,8 @@ async def cancel_transfer(
             detail=f"Pending transfer with ID {transfer_id} not found"
         )
     
-    # Check if user role exists at 'role_name' or just 'role'
-    user_role = current_user.get("role_name") or current_user.get("role")
+    # Check if user role exists at 'role' or just 'role'
+    user_role = current_user.get("role") or current_user.get("role")
     is_admin = user_role == "admin"
     
     # Check if the user is the initiator of the transfer or an admin

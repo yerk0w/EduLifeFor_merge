@@ -31,7 +31,7 @@ async def get_teacher_history(
 ):
     """Get the key history for a specific teacher"""
     # Check if the user is requesting their own history or is an admin
-    if current_user["id"] != teacher_id and current_user["role_name"] != "admin":
+    if current_user["id"] != teacher_id and current_user["role"] != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access to other teachers' history is not allowed"

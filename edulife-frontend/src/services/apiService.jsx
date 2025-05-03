@@ -401,16 +401,6 @@ const apiService = {
         return [];
       }
     },
-    getTeacherByUser: async (userId) => {
-      try {
-        const response = await apiClient.get(`${API_BASE_URL.auth}/teachers/by-user/${userId}`);
-        return response.data;
-      } catch (error) {
-        console.error(`Error fetching teacher info for user ${userId}:`, error);
-        return null;
-      }
-    },
-    
     // Получение всех преподавателей
     getTeachers: async () => {
       try {
@@ -958,7 +948,6 @@ const apiService = {
           return [];
         }
       },
-      
       // Get keys assigned to a specific teacher
       getTeacherKeys: async (teacherId) => {
         try {

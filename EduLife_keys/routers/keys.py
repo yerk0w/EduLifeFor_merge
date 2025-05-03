@@ -26,6 +26,8 @@ async def get_key(key_id: int, current_user: dict = Depends(get_current_user)):
         )
     return key
 
+
+
 @router.post("/", response_model=dict, dependencies=[Depends(check_admin_role)])
 async def create_key(key: KeyCreate, current_user: dict = Depends(check_admin_role)):
     """Create a new key (admin only)"""
@@ -70,20 +72,20 @@ async def delete_key(key_id: int, current_user: dict = Depends(check_admin_role)
             detail=str(e)
         )
 
-@router.get("/teacher/{teacher_id}", response_model=List[KeyResponse])
+@router.get("/teacher/{user_id}", response_model=List[KeyResponse])
 async def get_teacher_keys(
-    teacher_id: int, 
+    user_id: int, 
     current_user: dict = Depends(get_current_user)
 ):
     """Get all keys assigned to a specific teacher"""
     # Check if the user is requesting their own keys or is an admin
-    if current_user["id"] != teacher_id and current_user["role_name"] != "admin":
+    if current_user["id"] != user_id and current_user["role"] != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access to other teachers' keys is not allowed"
         )
     
-    return database.get_teacher_keys(teacher_id)
+    return database.get_teacher_keys(user_id)
 
 @router.post("/{key_id}/assign/{teacher_id}", response_model=dict, dependencies=[Depends(check_admin_role)])
 async def admin_assign_key(

@@ -49,8 +49,8 @@ async def get_current_user(token_data: Dict[str, Any] = Depends(get_token_data))
 
 async def check_admin_role(current_user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
     """Checks if the current user has admin role"""
-    # Check if role is in 'role_name' or 'role' field
-    user_role = current_user.get("role_name") or current_user.get("role")
+    # Check if role is in 'role' or 'role' field
+    user_role = current_user.get("role") or current_user.get("role")
     
     if not user_role or user_role != "admin":
         raise HTTPException(
@@ -62,8 +62,8 @@ async def check_admin_role(current_user: Dict[str, Any] = Depends(get_current_us
 
 async def check_teacher_or_admin_role(current_user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
     """Checks if the current user has teacher or admin role"""
-    # Check if role is in 'role_name' or 'role' field
-    user_role = current_user.get("role_name") or current_user.get("role")
+    # Check if role is in 'role' or 'role' field
+    user_role = current_user.get("role") or current_user.get("role")
     
     if not user_role or user_role not in ["admin", "teacher"]:
         raise HTTPException(
@@ -77,7 +77,7 @@ async def get_teacher_info(teacher_id: int, token: str) -> Dict[str, Any]:
     """Get teacher information from the auth service"""
     try:
         response = requests.get(
-            f"{AUTH_API_URL}/teachers/{teacher_id}",
+            f"{AUTH_API_URL}/teachers/by-user/{teacher_id}",
             headers={"Authorization": f"Bearer {token}"}
         )
         

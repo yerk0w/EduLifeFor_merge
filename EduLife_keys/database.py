@@ -153,8 +153,8 @@ def create_key(key_data: Dict[str, Any]):
         
         key_id = cursor.lastrowid
         
-        # If an initial teacher_id is provided, assign the key
         if "teacher_id" in key_data and key_data["teacher_id"]:
+            
             cursor.execute("""
                 INSERT INTO key_assignments (key_id, teacher_id)
                 VALUES (?, ?)
@@ -265,7 +265,7 @@ def delete_key(key_id: int):
         conn.close()
 
 # Key Assignment operations
-def get_teacher_keys(teacher_id: int):
+def get_teacher_keys(user_id: int):
     """Get all keys currently assigned to a teacher"""
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -278,7 +278,7 @@ def get_teacher_keys(teacher_id: int):
         JOIN key_assignments ka ON k.id = ka.key_id
         WHERE ka.teacher_id = ? AND ka.is_active = 1
         ORDER BY k.building, k.floor, k.room_number
-    """, (teacher_id,))
+    """, (user_id,))
     
     keys = [dict(row) for row in cursor.fetchall()]
     conn.close()

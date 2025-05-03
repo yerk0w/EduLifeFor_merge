@@ -15,6 +15,7 @@ import AdminReports from './AdminReports.jsx';
 import AdminDocuments from './AdminDocuments.jsx';
 import AdminSubjects from './AdminSubjects.jsx';
 import AdminClassrooms from './AdminClassrooms.jsx';
+import AdminKeyManagement from './AdminKeyManagement.jsx';
 
 // Импорт сервиса API
 import apiService from '../../../services/apiService';
@@ -410,6 +411,9 @@ const AdminPanel = () => {
               onUpdateClassroom={handleUpdateClassroom}
               onDeleteClassroom={handleDeleteClassroom}
             />
+          )}
+          {activeTab === 'keys' && (
+            <AdminKeyManagement />
           )}
           {activeTab === 'users' && (<AdminUsers/>)}
           {activeTab === 'students' && <AdminStudents students={students} />}
