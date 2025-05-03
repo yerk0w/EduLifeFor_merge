@@ -137,9 +137,8 @@ def get_key_by_id(key_id: int):
 def create_key(key_data: Dict[str, Any]):
     """Create a new key"""
     conn = get_db_connection()
-    cursor = conn.cursor()
-    
     try:
+        cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO keys (key_code, room_number, building, floor, description)
             VALUES (?, ?, ?, ?, ?)
@@ -154,7 +153,7 @@ def create_key(key_data: Dict[str, Any]):
         key_id = cursor.lastrowid
         
         if "teacher_id" in key_data and key_data["teacher_id"]:
-            
+
             cursor.execute("""
                 INSERT INTO key_assignments (key_id, teacher_id)
                 VALUES (?, ?)
@@ -183,9 +182,8 @@ def create_key(key_data: Dict[str, Any]):
 def update_key(key_id: int, key_data: Dict[str, Any]):
     """Update key information"""
     conn = get_db_connection()
-    cursor = conn.cursor()
-    
     try:
+        cursor = conn.cursor()
         # First check if the key exists
         cursor.execute("SELECT id FROM keys WHERE id = ?", (key_id,))
         if not cursor.fetchone():
@@ -224,43 +222,39 @@ def update_key(key_id: int, key_data: Dict[str, Any]):
 def delete_key(key_id: int):
     """Delete a key"""
     conn = get_db_connection()
-    cursor = conn.cursor()
-    
     try:
+        cursor = conn.cursor()
+
         # Check if key is currently assigned
         cursor.execute(
             "SELECT id FROM key_assignments WHERE key_id = ? AND is_active = 1", 
             (key_id,)
         )
-        
         if cursor.fetchone():
-            conn.close()
             raise ValueError(f"Cannot delete key with ID {key_id} as it is currently assigned")
-        
+
         # Check if there are pending transfers
         cursor.execute(
             "SELECT id FROM key_transfers WHERE key_id = ? AND status = 'pending'", 
             (key_id,)
         )
-        
         if cursor.fetchone():
-            conn.close()
             raise ValueError(f"Cannot delete key with ID {key_id} as it has pending transfer requests")
-        
-        # Delete the key
+
+        # Delete the key and related records
         cursor.execute("DELETE FROM keys WHERE id = ?", (key_id,))
-        
-        # Also delete related records
         cursor.execute("DELETE FROM key_assignments WHERE key_id = ?", (key_id,))
         cursor.execute("DELETE FROM key_transfers WHERE key_id = ?", (key_id,))
         cursor.execute("DELETE FROM key_history WHERE key_id = ?", (key_id,))
-        
+
         conn.commit()
         return True
-    
+
     except Exception as e:
         conn.rollback()
-        raise e
+        print(f"Error deleting key: {e}")
+        raise
+
     finally:
         conn.close()
 
@@ -287,9 +281,9 @@ def get_teacher_keys(user_id: int):
 def assign_key(key_id: int, teacher_id: int, notes: Optional[str] = None):
     """Assign a key to a teacher"""
     conn = get_db_connection()
-    cursor = conn.cursor()
-    
+
     try:
+        cursor = conn.cursor()
         # First check if the key exists
         cursor.execute("SELECT id FROM keys WHERE id = ?", (key_id,))
         if not cursor.fetchone():
@@ -357,9 +351,9 @@ def assign_key(key_id: int, teacher_id: int, notes: Optional[str] = None):
 def unassign_key(key_id: int, notes: Optional[str] = None):
     """Unassign a key (return to management)"""
     conn = get_db_connection()
-    cursor = conn.cursor()
-    
+
     try:
+        cursor = conn.cursor()
         # First check if the key exists and is assigned
         cursor.execute(
             "SELECT teacher_id FROM key_assignments WHERE key_id = ? AND is_active = 1", 
@@ -467,38 +461,32 @@ def get_teacher_outgoing_transfers(teacher_id: int):
     return transfers
 
 def create_transfer_request(transfer_data: Dict[str, Any]):
-    """Create a new key transfer request"""
     conn = get_db_connection()
-    cursor = conn.cursor()
-    
     try:
-        # Check if the key exists
+        cursor = conn.cursor()
+
+        # Check if key exists
         cursor.execute("SELECT id FROM keys WHERE id = ?", (transfer_data["key_id"],))
         if not cursor.fetchone():
-            conn.close()
             raise ValueError(f"Key with ID {transfer_data['key_id']} does not exist")
-        
-        # Check if the key is currently assigned to the from_teacher
+
+        # Check current assignment
         cursor.execute(
             "SELECT id FROM key_assignments WHERE key_id = ? AND teacher_id = ? AND is_active = 1", 
             (transfer_data["key_id"], transfer_data["from_teacher_id"])
         )
-        
         if not cursor.fetchone():
-            conn.close()
-            raise ValueError(f"Key is not currently assigned to the requesting teacher")
-        
-        # Check if there is already a pending transfer for this key
+            raise ValueError("Key is not currently assigned to the requesting teacher")
+
+        # Check for pending transfer
         cursor.execute(
             "SELECT id FROM key_transfers WHERE key_id = ? AND status = 'pending'", 
             (transfer_data["key_id"],)
         )
-        
         if cursor.fetchone():
-            conn.close()
-            raise ValueError(f"There is already a pending transfer request for this key")
-        
-        # Create the transfer request
+            raise ValueError("There is already a pending transfer request for this key")
+
+        # Insert the transfer request
         cursor.execute("""
             INSERT INTO key_transfers 
             (key_id, from_teacher_id, to_teacher_id, notes)
@@ -509,23 +497,23 @@ def create_transfer_request(transfer_data: Dict[str, Any]):
             transfer_data["to_teacher_id"],
             transfer_data.get("notes")
         ))
-        
-        transfer_id = cursor.lastrowid
+
         conn.commit()
-        return transfer_id
-    
+        return {"transfer_id": cursor.lastrowid}
+
     except Exception as e:
         conn.rollback()
         raise e
     finally:
         conn.close()
 
+
 def approve_transfer_request(transfer_id: int):
     """Approve and complete a key transfer request"""
     conn = get_db_connection()
-    cursor = conn.cursor()
-    
+
     try:
+        cursor = conn.cursor() 
         # Get the transfer request
         cursor.execute("""
             SELECT key_id, from_teacher_id, to_teacher_id, notes
@@ -582,9 +570,9 @@ def approve_transfer_request(transfer_id: int):
 def reject_transfer_request(transfer_id: int, reason: Optional[str] = None):
     """Reject a key transfer request"""
     conn = get_db_connection()
-    cursor = conn.cursor()
     
     try:
+        cursor = conn.cursor()
         # Get the transfer request
         cursor.execute("""
             SELECT id FROM key_transfers
@@ -617,9 +605,9 @@ def reject_transfer_request(transfer_id: int, reason: Optional[str] = None):
 def cancel_transfer_request(transfer_id: int):
     """Cancel a key transfer request (by the initiating teacher)"""
     conn = get_db_connection()
-    cursor = conn.cursor()
     
     try:
+        cursor = conn.cursor()
         # Get the transfer request
         cursor.execute("""
             SELECT id FROM key_transfers

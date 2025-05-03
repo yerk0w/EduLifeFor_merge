@@ -79,7 +79,7 @@ async def get_teacher_keys(
 ):
     """Get all keys assigned to a specific teacher"""
     # Check if the user is requesting their own keys or is an admin
-    if current_user["id"] != user_id and current_user["role"] != "admin":
+    if current_user["id"] != user_id and current_user["role"] != "admin" and current_user["role"] != "teacher":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access to other teachers' keys is not allowed"

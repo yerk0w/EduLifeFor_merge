@@ -52,17 +52,26 @@ async def create_transfer(
     current_user: dict = Depends(get_current_user)
 ):
     """Create a new key transfer request"""
-    # Check if user role exists at 'role' or just 'role'
-    user_role = current_user.get("role") or current_user.get("role")
+    user_role = current_user.get("role")
+    user_id = current_user.get("id")
+
+    is_teacher = user_role == "teacher"
     is_admin = user_role == "admin"
-    
-    # Check if the user is creating a transfer for themselves or is an admin
-    if transfer.from_teacher_id != current_user["id"] and not is_admin:
+
+    # Разрешаем только teacher или admin
+    if not (is_teacher or is_admin):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers and admins can create transfer requests"
+        )
+
+    # Если не админ, то можно создавать ТОЛЬКО от своего имени
+    if not is_admin and transfer.from_teacher_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You can only create transfers for your own keys"
         )
-    
+
     try:
         transfer_id = database.create_transfer_request(transfer.dict())
         return {"id": transfer_id, "message": "Transfer request created successfully"}
@@ -71,6 +80,7 @@ async def create_transfer(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+
 
 @router.post("/{transfer_id}/approve", response_model=dict)
 async def approve_transfer(

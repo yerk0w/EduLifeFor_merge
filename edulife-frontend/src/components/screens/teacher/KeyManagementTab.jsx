@@ -7,6 +7,7 @@ const KeyManagementTab = () => {
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [outgoingRequests, setOutgoingRequests] = useState([]);
   const [availableTeachers, setAvailableTeachers] = useState([]);
+  const [teacherId, setTeacherId] = useState(null);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [selectedKey, setSelectedKey] = useState(null);
   const [transferNote, setTransferNote] = useState('');
@@ -27,10 +28,18 @@ const KeyManagementTab = () => {
     
     try {
       const userId = localStorage.getItem('userId');
-      
-      // Get all keys assigned to the current teacher
-      const keysResponse = await apiService.keys.getTeacherKeys(userId);
+
+      const teacherInfo = await apiService.auth.getTeacherByUser(userId);
+      if (teacherInfo && teacherInfo.id) {
+        setTeacherId(teacherInfo.id);
+      } else {
+        console.warn('Failed to get teacher ID, using user ID as fallback');
+        setTeacherId(userId);
+      }
+      // Get all keys assigned to the teacher
+      const keysResponse = await apiService.keys.getTeacherKeys(teacherInfo.id);
       setMyKeys(keysResponse || []);
+      // Get all keys assigned to the current teacher
       
       // Get incoming transfer requests
       const incomingResponse = await apiService.keys.getIncomingTransfers();
@@ -184,7 +193,7 @@ const KeyManagementTab = () => {
 
   return (
     <div className="key-management-tab">
-      <h3 className="section-title">Key Management</h3>
+      <h3 className="section-title">Управление ключами</h3>
       
       {/* Notification area */}
       {error && (
@@ -208,7 +217,7 @@ const KeyManagementTab = () => {
         <div className="inbox-notification" onClick={() => setActiveTab('incoming')}>
           <span className="inbox-icon">📩</span>
           <span className="inbox-count">{incomingRequests.length}</span>
-          <span className="inbox-message">You have pending key transfer requests</span>
+          <span className="inbox-message">У вас есть ожидающие запросы на передачу ключей</span>
         </div>
       )}
       
@@ -218,7 +227,7 @@ const KeyManagementTab = () => {
           className={`key-tab ${activeTab === 'my-keys' ? 'active' : ''}`}
           onClick={() => setActiveTab('my-keys')}
         >
-          My Keys
+          Мои ключи
           {myKeys.length > 0 && <span className="tab-badge">{myKeys.length}</span>}
         </button>
         
@@ -226,7 +235,7 @@ const KeyManagementTab = () => {
           className={`key-tab ${activeTab === 'incoming' ? 'active' : ''}`}
           onClick={() => setActiveTab('incoming')}
         >
-          Incoming Requests
+          Входящие запросы
           {incomingRequests.length > 0 && <span className="tab-badge">{incomingRequests.length}</span>}
         </button>
         
@@ -234,7 +243,7 @@ const KeyManagementTab = () => {
           className={`key-tab ${activeTab === 'outgoing' ? 'active' : ''}`}
           onClick={() => setActiveTab('outgoing')}
         >
-          Outgoing Requests
+          Исходящие запросы
           {outgoingRequests.length > 0 && <span className="tab-badge">{outgoingRequests.length}</span>}
         </button>
       </div>
@@ -245,7 +254,7 @@ const KeyManagementTab = () => {
           {myKeys.length === 0 ? (
             <div className="no-keys-message">
               <div className="no-keys-icon">🔑</div>
-              <p>You don't have any keys assigned to you.</p>
+              <p>Вам не назначены ключи.</p>
             </div>
           ) : (
             <>
@@ -262,18 +271,18 @@ const KeyManagementTab = () => {
                     </div>
                     <div className="key-card-body">
                       <div className="key-detail">
-                        <span className="key-label">Room:</span>
+                        <span className="key-label">Кабинет:</span>
                         <span className="key-value">{key.room_number}</span>
                       </div>
                       {key.building && (
                         <div className="key-detail">
-                          <span className="key-label">Building:</span>
+                          <span className="key-label">Блок:</span>
                           <span className="key-value">{key.building}</span>
                         </div>
                       )}
                       {key.floor && (
                         <div className="key-detail">
-                          <span className="key-label">Floor:</span>
+                          <span className="key-label">Этаж:</span>
                           <span className="key-value">{key.floor}</span>
                         </div>
                       )}
@@ -285,7 +294,7 @@ const KeyManagementTab = () => {
                     </div>
                     <div className="key-card-footer">
                       <span className="assigned-date">
-                        Assigned: {formatDate(key.assigned_at)}
+                        Назначен: {formatDate(key.assigned_at)}
                       </span>
                     </div>
                   </div>
@@ -294,22 +303,22 @@ const KeyManagementTab = () => {
               
               {/* Transfer form */}
               <div className="transfer-form">
-                <h4>Transfer Key to Another Teacher</h4>
+                <h4>Передать ключ другому учителю</h4>
                 <div className="transfer-form-content">
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Selected Key:</label>
+                      <label>Выберите ключ:</label>
                       <div className="selected-key">
                         {selectedKey ? (
-                          <span><strong>{selectedKey.key_code}</strong> - Room {selectedKey.room_number}</span>
+                          <span><strong>{selectedKey.key_code}</strong> - Кабинет {selectedKey.room_number}</span>
                         ) : (
-                          <span className="select-prompt">Please select a key from above</span>
+                          <span className="select-prompt">Выберите ключ из списка выше</span>
                         )}
                       </div>
                     </div>
                     
                     <div className="form-group">
-                      <label htmlFor="teacher-select">Transfer to Teacher:</label>
+                      <label htmlFor="teacher-select">Передача преподавателю:</label>
                       <select
                         id="teacher-select"
                         value={selectedTeacher?.id || ''}
@@ -320,7 +329,7 @@ const KeyManagementTab = () => {
                         }}
                         disabled={!selectedKey}
                       >
-                        <option value="">Select a teacher</option>
+                        <option value="">Выберите преподователя</option>
                         {availableTeachers.map(teacher => (
                           <option key={teacher.id} value={teacher.id}>
                             {teacher.full_name} ({teacher.department_name})
@@ -332,12 +341,12 @@ const KeyManagementTab = () => {
                   
                   <div className="form-row">
                     <div className="form-group full-width">
-                      <label htmlFor="transfer-note">Note (optional):</label>
+                      <label htmlFor="transfer-note">Заметка (дополнительно):</label>
                       <textarea
                         id="transfer-note"
                         value={transferNote}
                         onChange={(e) => setTransferNote(e.target.value)}
-                        placeholder="Add a note about this transfer (e.g., reason, instructions, etc.)"
+                        placeholder="Добавьте примечание об этом переводе (например, причину, инструкции и т.д.)"
                         disabled={!selectedKey}
                         rows={3}
                       />
@@ -350,7 +359,7 @@ const KeyManagementTab = () => {
                       onClick={handleTransferKey}
                       disabled={!selectedKey || !selectedTeacher || loading}
                     >
-                      {loading ? 'Processing...' : 'Send Transfer Request'}
+                      {loading ? 'В процессе...' : 'запрос на передачу ключа отправлен'}
                     </button>
                   </div>
                 </div>
@@ -363,12 +372,12 @@ const KeyManagementTab = () => {
       {/* Incoming Requests Tab */}
       {activeTab === 'incoming' && (
         <div className="incoming-requests-section">
-          <h4>Pending Key Transfer Requests</h4>
+          <h4>Ожидающие запросы на передачу ключа</h4>
           
           {incomingRequests.length === 0 ? (
             <div className="no-requests-message">
               <div className="no-requests-icon">📮</div>
-              <p>You don't have any incoming key transfer requests.</p>
+              <p>Входящие запросы на перенос ключей отсутствуют. </p>
             </div>
           ) : (
             <div className="requests-list">
@@ -386,24 +395,24 @@ const KeyManagementTab = () => {
                   
                   <div className="request-details">
                     <div className="request-row">
-                      <span className="request-label">Room:</span>
+                      <span className="request-label">Кабинет:</span>
                       <span className="request-value">{request.room_number}</span>
                     </div>
                     {request.building && (
                       <div className="request-row">
-                        <span className="request-label">Building:</span>
+                        <span className="request-label">Блок:</span>
                         <span className="request-value">{request.building}</span>
                       </div>
                     )}
                     <div className="request-row">
-                      <span className="request-label">From Teacher:</span>
+                      <span className="request-label">От учителя :</span>
                       <span className="request-value teacher-name">
                         {request.from_teacher_name || `ID: ${request.from_teacher_id}`}
                       </span>
                     </div>
                     {request.notes && (
                       <div className="request-notes">
-                        <div className="notes-label">Note:</div>
+                        <div className="notes-label">Заметка:</div>
                         <div className="notes-content">{request.notes}</div>
                       </div>
                     )}
@@ -415,14 +424,14 @@ const KeyManagementTab = () => {
                       onClick={() => handleApproveTransfer(request.id)}
                       disabled={loading}
                     >
-                      {loading ? 'Processing...' : 'Accept'}
+                      {loading ? 'В процессе...' : 'Принять'}
                     </button>
                     <button
                       className="reject-button"
                       onClick={() => handleRejectTransfer(request.id)}
                       disabled={loading}
                     >
-                      {loading ? 'Processing...' : 'Reject'}
+                      {loading ? 'В процессе...' : 'Отклонить'}
                     </button>
                   </div>
                 </div>
@@ -435,12 +444,12 @@ const KeyManagementTab = () => {
       {/* Outgoing Requests Tab */}
       {activeTab === 'outgoing' && (
         <div className="outgoing-requests-section">
-          <h4>My Key Transfer Requests</h4>
+          <h4>Мои запросы  на передачу ключей</h4>
           
           {outgoingRequests.length === 0 ? (
             <div className="no-requests-message">
               <div className="no-requests-icon">📤</div>
-              <p>You don't have any outgoing key transfer requests.</p>
+              <p>вы не имеете запросы на передачу ключей</p>
             </div>
           ) : (
             <div className="requests-list">
@@ -458,30 +467,30 @@ const KeyManagementTab = () => {
                   
                   <div className="request-details">
                     <div className="request-row">
-                      <span className="request-label">Room:</span>
+                      <span className="request-label">Кабинет:</span>
                       <span className="request-value">{request.room_number}</span>
                     </div>
                     {request.building && (
                       <div className="request-row">
-                        <span className="request-label">Building:</span>
+                        <span className="request-label">Блок:</span>
                         <span className="request-value">{request.building}</span>
                       </div>
                     )}
                     <div className="request-row">
-                      <span className="request-label">To Teacher:</span>
+                      <span className="request-label">Для :</span>
                       <span className="request-value teacher-name">
                         {request.to_teacher_name || `ID: ${request.to_teacher_id}`}
                       </span>
                     </div>
                     <div className="request-row">
-                      <span className="request-label">Requested:</span>
+                      <span className="request-label">Запрос:</span>
                       <span className="request-value">
                         {formatDate(request.requested_at)}
                       </span>
                     </div>
                     {request.completed_at && (
                       <div className="request-row">
-                        <span className="request-label">Completed:</span>
+                        <span className="request-label">Завершен:</span>
                         <span className="request-value">
                           {formatDate(request.completed_at)}
                         </span>
@@ -489,7 +498,7 @@ const KeyManagementTab = () => {
                     )}
                     {request.notes && (
                       <div className="request-notes">
-                        <div className="notes-label">Note:</div>
+                        <div className="notes-label">Заметка:</div>
                         <div className="notes-content">{request.notes}</div>
                       </div>
                     )}
@@ -502,7 +511,7 @@ const KeyManagementTab = () => {
                         onClick={() => handleCancelTransfer(request.id)}
                         disabled={loading}
                       >
-                        {loading ? 'Processing...' : 'Cancel Request'}
+                        {loading ? 'В процессе...' : 'Отменить запрос'} 
                       </button>
                     </div>
                   )}
