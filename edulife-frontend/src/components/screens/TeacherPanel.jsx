@@ -8,6 +8,7 @@ import Sidebar from './teacher/Sidebar';
 import Header from './teacher/Header';
 import ScheduleTab from './teacher/ScheduleTab';
 import QRCodeTab from './teacher/QRCodeTab';
+import KeyManagementTab from './teacher/KeyManagementTab';
 
 const TeacherPanel = () => {
   const navigate = useNavigate();
@@ -102,6 +103,10 @@ const TeacherPanel = () => {
                   selectedSubject={selectedSubject} 
                   userId={teacherId || localStorage.getItem('userId')}
                 />
+              )}
+              
+              {activeTab === 'keys' && (
+                <KeyManagementTab />
               )}
             </>
           )}

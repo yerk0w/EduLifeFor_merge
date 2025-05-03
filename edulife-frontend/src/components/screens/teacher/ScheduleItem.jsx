@@ -6,7 +6,7 @@ const ScheduleItem = ({ item, onSubjectSelect, isToday = false }) => {
   const safeItem = {
     subject_name: item.subject_name || 'Неизвестный предмет',
     group_name: item.group_name || 'Группа не указана',
-    room_number: item.room_number || item.cabinet || 'Аудитория не указана',
+    classroom_name: item.classroom_name || item.classroom_name || 'Аудитория не указана',
     time_start: item.time_start || '',
     time_end: item.time_end || '',
     subject_id: item.subject_id || 0,
@@ -113,7 +113,7 @@ const ScheduleItem = ({ item, onSubjectSelect, isToday = false }) => {
       shift_id: safeItem.shift_id,
       group_name: safeItem.group_name,
       group_size: safeItem.group_size,
-      room_number: safeItem.room_number,
+      classroom_name: safeItem.classroom_name,
       time_start: safeItem.time_start,
       time_end: safeItem.time_end,
       date: safeItem.date,
@@ -139,20 +139,14 @@ const ScheduleItem = ({ item, onSubjectSelect, isToday = false }) => {
             <svg viewBox="0 0 24 24" width="16" height="16">
               <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z" />
             </svg>
-            {safeItem.room_number}
+            {safeItem.classroom_name || safeItem.classroom_name }  
           </div>
         </div>
         <div className="schedule-group">
-          <svg viewBox="0 0 24 24" width="16" height="16">
-            <path d="M12,5.5A3.5,3.5 0 0,1 15.5,9A3.5,3.5 0 0,1 12,12.5A3.5,3.5 0 0,1 8.5,9A3.5,3.5 0 0,1 12,5.5M5,8C5.56,8 6.08,8.15 6.53,8.42C6.38,9.85 6.8,11.27 7.66,12.38C7.16,13.34 6.16,14 5,14A3,3 0 0,1 2,11A3,3 0 0,1 5,8M19,8A3,3 0 0,1 22,11A3,3 0 0,1 19,14C17.84,14 16.84,13.34 16.34,12.38C17.2,11.27 17.62,9.85 17.47,8.42C17.92,8.15 18.44,8 19,8M5.5,18.25C5.5,16.18 8.41,14.5 12,14.5C15.59,14.5 18.5,16.18 18.5,18.25V20H5.5V18.25M0,20V18.5C0,17.11 1.89,15.94 4.45,15.6C3.86,16.28 3.5,17.22 3.5,18.25V20H0M24,20H20.5V18.25C20.5,17.22 20.14,16.28 19.55,15.6C22.11,15.94 24,17.11 24,18.5V20Z" />
-          </svg>
           {safeItem.group_name}
         </div>
         {safeItem.date && (
           <div className="schedule-date">
-            <svg viewBox="0 0 24 24" width="16" height="16">
-              <path d="M19,19H5V8H19M16,1V3H8V1H6V3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3H18V1" />
-            </svg>
             {new Date(safeItem.date).toLocaleDateString()}
           </div>
         )}

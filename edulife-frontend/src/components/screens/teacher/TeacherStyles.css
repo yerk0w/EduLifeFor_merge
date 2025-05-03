@@ -28,27 +28,26 @@
   }
   
   .schedule-day {
-    background-color: #fff;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
     padding: 1rem;
   }
   
   .schedule-day.current-day {
-    border-left: 4px solid #4A6CF7;
+    border-left: 4px solid #D2FF1F;
   }
   
   .day-title {
     margin-top: 0;
     margin-bottom: 1rem;
     font-weight: 600;
-    color: #333;
+    color: #f9f9f9;
     display: flex;
     align-items: center;
   }
   
   .schedule-day.current-day .day-title {
-    color: #4A6CF7;
+    color: #D2FF1F;
   }
   
   .schedule-day-items {
@@ -68,14 +67,14 @@
   }
   
   .schedule-item.current-class {
-    border: 2px solid #4A6CF7;
+    border: 2px solid #D2FF1F;
   }
   
   .schedule-details {
     display: flex;
     justify-content: space-between;
     margin-top: 0.5rem;
-    color: #666;
+    color: #fff;
   }
   
   .schedule-time {
@@ -87,7 +86,7 @@
     align-items: center;
     gap: 0.25rem;
     margin-top: 0.25rem;
-    color: #666;
+    color: #FFF;
   }
   
   .schedule-location svg, .schedule-group svg {
@@ -121,7 +120,7 @@
   }
   
   .no-classes {
-    color: #666;
+    color: #f5f5f5;
     font-style: italic;
     padding: 1rem 0;
   }
@@ -371,7 +370,6 @@
   .subsection-title {
     margin-top: 0;
     margin-bottom: 1rem;
-    color: #333;
     font-weight: 600;
   }
   
@@ -417,3 +415,4 @@
   .no-subject-selected svg {
     fill: #ccc;
   }
+  

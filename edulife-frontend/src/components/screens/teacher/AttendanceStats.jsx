@@ -1,4 +1,3 @@
-// src/components/screens/teacher/AttendanceStats.jsx
 import React from 'react';
 
 const AttendanceStats = ({ stats }) => {

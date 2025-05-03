@@ -20,7 +20,6 @@ const promocodesStyles = `
 }
 
 .promocode-card {
-  background: var(--card-bg, #fff);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 16px;
@@ -34,8 +33,12 @@ const promocodesStyles = `
 
 .promocode-card.inactive {
   opacity: 0.6;
-  background-color: var(--bg-secondary, #f5f5f5);
 }
+.promocode-description , .promocode-valid-until {
+  font-size: 14px;
+  color: white !important;
+  margin-bottom: 15px;
+} 
 
 .promocode-header {
   display: flex;

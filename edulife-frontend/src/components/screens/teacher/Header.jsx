@@ -1,4 +1,3 @@
-// src/components/screens/teacher/Header.jsx
 import React, { useState, useEffect } from 'react';
 import apiService from '../../../services/apiService';
 
@@ -43,11 +42,6 @@ const Header = () => {
         <div className="user-info1">
           <span className="user-name">{userData.name}</span>
           <span className="user-role">{userData.role}</span>
-        </div>
-        <div className="user-avatar">
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
-          </svg>
         </div>
       </div>
     </div>

@@ -66,7 +66,7 @@ const Navbar = ({ activeTab, setActiveTab }) => {
         break;
       case 4:
         // Переход на другой фронтенд с картой
-        window.location.href = 'http://localhost:3001/aitumap';
+        window.location.href = 'http://localhost:3000/aitumap';
         break;
       case 5:
         navigate('/profile');

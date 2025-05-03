@@ -93,7 +93,7 @@ const ScheduleTab = ({ schedule, onSubjectSelect }) => {
   const adjustedCurrentDay = currentDayIndex === 0 ? 7 : currentDayIndex;
 
   return (
-    <div className="admin-courses">
+    <div className="admin-coursess">
       <div className="courses-header">
         <h3 className="section-title">Расписание занятий</h3>
         {Array.isArray(schedule) && schedule.length === 0 && (
@@ -159,7 +159,7 @@ const ScheduleTab = ({ schedule, onSubjectSelect }) => {
           {/* Затем остальные дни недели */}
           {daysOfWeek.map((day, index) => {
             const dayIndex = index + 1;
-            if (dayIndex === adjustedCurrentDay) return null; // Пропускаем текущий день, т.к. он уже отображен
+            if (dayIndex === adjustedCurrentDay) return null;
             
             return (
               <div className="schedule-day" key={dayIndex}>

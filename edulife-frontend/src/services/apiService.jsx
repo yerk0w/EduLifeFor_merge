@@ -7,7 +7,8 @@ const API_BASE_URL = {
   qr: 'http://localhost:8080',
   raspis: 'http://localhost:8090',
   dock: 'http://localhost:8100',
-  integration: 'http://localhost:8110'
+  integration: 'http://localhost:8110',
+  keys: 'http://localhost:8120'
 };
 
 // Create an axios instance with default configuration
@@ -399,7 +400,27 @@ const apiService = {
         console.error('Error fetching colleges:', error);
         return [];
       }
-    }
+    },
+    getTeacherByUser: async (userId) => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/teachers/by-user/${userId}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error fetching teacher info for user ${userId}:`, error);
+        return null;
+      }
+    },
+    
+    // Получение всех преподавателей
+    getTeachers: async () => {
+      try {
+        const response = await apiClient.get(`${API_BASE_URL.auth}/teachers`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching teachers:', error);
+        return [];
+      }
+    },
   },
 
   // QR Service APIs
@@ -925,6 +946,192 @@ const apiService = {
       }
     }
   },
+    // Key Management Service APIs
+  keys: {
+      // Get all keys (admin only)
+      getAllKeys: async () => {
+        try {
+          const response = await apiClient.get(`${API_BASE_URL.keys}/keys/`);
+          return response.data;
+        } catch (error) {
+          console.error('Error fetching all keys:', error);
+          return [];
+        }
+      },
+      
+      // Get keys assigned to a specific teacher
+      getTeacherKeys: async (teacherId) => {
+        try {
+          const response = await apiClient.get(`${API_BASE_URL.keys}/keys/teacher/${teacherId}`);
+          return response.data;
+        } catch (error) {
+          console.error(`Error fetching keys for teacher ${teacherId}:`, error);
+          return [];
+        }
+      },
+      
+      // Get incoming transfer requests
+      getIncomingTransfers: async () => {
+        try {
+          const response = await apiClient.get(`${API_BASE_URL.keys}/transfers/incoming`);
+          return response.data;
+        } catch (error) {
+          console.error('Error fetching incoming transfers:', error);
+          return [];
+        }
+      },
+      
+      // Get outgoing transfer requests
+      getOutgoingTransfers: async () => {
+        try {
+          const response = await apiClient.get(`${API_BASE_URL.keys}/transfers/outgoing`);
+          return response.data;
+        } catch (error) {
+          console.error('Error fetching outgoing transfers:', error);
+          return [];
+        }
+      },
+      
+      // Create a new key transfer request
+      createTransfer: async (transferData) => {
+        try {
+          const response = await apiClient.post(`${API_BASE_URL.keys}/transfers/`, transferData);
+          return response.data;
+        } catch (error) {
+          console.error('Error creating key transfer:', error);
+          throw error;
+        }
+      },
+      
+      // Approve a key transfer request
+      approveTransfer: async (transferId) => {
+        try {
+          const response = await apiClient.post(`${API_BASE_URL.keys}/transfers/${transferId}/approve`);
+          return response.data;
+        } catch (error) {
+          console.error(`Error approving transfer ${transferId}:`, error);
+          throw error;
+        }
+      },
+      
+      // Reject a key transfer request
+      rejectTransfer: async (transferId, reason) => {
+        try {
+          const response = await apiClient.post(
+            `${API_BASE_URL.keys}/transfers/${transferId}/reject`,
+            null,
+            { params: { reason } }
+          );
+          return response.data;
+        } catch (error) {
+          console.error(`Error rejecting transfer ${transferId}:`, error);
+          throw error;
+        }
+      },
+      
+      // Cancel a key transfer request
+      cancelTransfer: async (transferId) => {
+        try {
+          const response = await apiClient.post(`${API_BASE_URL.keys}/transfers/${transferId}/cancel`);
+          return response.data;
+        } catch (error) {
+          console.error(`Error cancelling transfer ${transferId}:`, error);
+          throw error;
+        }
+      },
+      
+      // Get key history
+      getKeyHistory: async (keyId) => {
+        try {
+          const response = await apiClient.get(`${API_BASE_URL.keys}/history/key/${keyId}`);
+          return response.data;
+        } catch (error) {
+          console.error(`Error fetching history for key ${keyId}:`, error);
+          return [];
+        }
+      },
+      
+      // Get teacher key history
+      getTeacherHistory: async (teacherId) => {
+        try {
+          const response = await apiClient.get(`${API_BASE_URL.keys}/history/teacher/${teacherId}`);
+          return response.data;
+        } catch (error) {
+          console.error(`Error fetching key history for teacher ${teacherId}:`, error);
+          return [];
+        }
+      },
+      
+      // Get dashboard data
+      getDashboardData: async () => {
+        try {
+          const response = await apiClient.get(`${API_BASE_URL.keys}/dashboard`);
+          return response.data;
+        } catch (error) {
+          console.error('Error fetching key dashboard data:', error);
+          return [];
+        }
+      },
+      
+      // Admin methods for key management
+      createKey: async (keyData) => {
+        try {
+          const response = await apiClient.post(`${API_BASE_URL.keys}/keys/`, keyData);
+          return response.data;
+        } catch (error) {
+          console.error('Error creating key:', error);
+          throw error;
+        }
+      },
+      
+      updateKey: async (keyId, keyData) => {
+        try {
+          const response = await apiClient.put(`${API_BASE_URL.keys}/keys/${keyId}`, keyData);
+          return response.data;
+        } catch (error) {
+          console.error(`Error updating key ${keyId}:`, error);
+          throw error;
+        }
+      },
+      
+      deleteKey: async (keyId) => {
+        try {
+          const response = await apiClient.delete(`${API_BASE_URL.keys}/keys/${keyId}`);
+          return response.data;
+        } catch (error) {
+          console.error(`Error deleting key ${keyId}:`, error);
+          throw error;
+        }
+      },
+      
+      assignKey: async (keyId, teacherId, notes) => {
+        try {
+          const response = await apiClient.post(
+            `${API_BASE_URL.keys}/keys/${keyId}/assign/${teacherId}`,
+            null,
+            { params: { notes } }
+          );
+          return response.data;
+        } catch (error) {
+          console.error(`Error assigning key ${keyId} to teacher ${teacherId}:`, error);
+          throw error;
+        }
+      },
+      
+      unassignKey: async (keyId, notes) => {
+        try {
+          const response = await apiClient.post(
+            `${API_BASE_URL.keys}/keys/${keyId}/unassign`,
+            null,
+            { params: { notes } }
+          );
+          return response.data;
+        } catch (error) {
+          console.error(`Error unassigning key ${keyId}:`, error);
+          throw error;
+        }
+      }
+    }
   
 };
 

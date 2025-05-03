@@ -24,9 +24,9 @@ const handleLogin = async (e) => {
     const userRole = response.role || localStorage.getItem('userRole');
     
     if (userRole === 'admin') {
-      navigate('/dashboard');
+      navigate('/admin');
     } else if (userRole === 'teacher') {
-      navigate('/dashboard');
+      navigate('/teacher');
     } else {
       navigate('/dashboard');
     }
