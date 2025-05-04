@@ -17,9 +17,6 @@ const ScheduleItem = ({ item, onSubjectSelect, isToday = false }) => {
     date: item.date || null,
     id: item.id || 0
   };
-
-  console.log("Обработка элемента расписания:", safeItem);
-
   // Генерация цвета на основе имени предмета
   const getSubjectColor = (subjectName) => {
     if (!subjectName) return '#4A6CF7'; // Дефолтный цвет

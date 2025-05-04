@@ -73,14 +73,18 @@ async def create_transfer(
         )
 
     try:
-        transfer_id = database.create_transfer_request(transfer.dict())
-        return {"id": transfer_id, "message": "Transfer request created successfully"}
+        result = database.create_transfer_request(transfer.dict())
+        # Проверяем, что result не None и имеет ключ transfer_id
+        if result and "transfer_id" in result:
+            return {"id": result["transfer_id"], "message": "Transfer request created successfully"}
+        else:
+            # Если результат некорректный, возвращаем безопасный ответ
+            return {"message": "Transfer request processed, but ID could not be retrieved"}
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
-
 
 @router.post("/{transfer_id}/approve", response_model=dict)
 async def approve_transfer(

@@ -31,7 +31,6 @@ const ScheduleTab = ({ schedule, onSubjectSelect }) => {
   
   // Группировка занятий по дням недели при изменении расписания
   useEffect(() => {
-    console.log("Обработка расписания:", schedule);
     const groupedSchedule = {};
     
     // Инициализация пустыми массивами для каждого дня
@@ -65,8 +64,6 @@ const ScheduleTab = ({ schedule, onSubjectSelect }) => {
         }
       });
     }
-    
-    console.log("Сгруппированное расписание:", groupedSchedule);
     setScheduleByDay(groupedSchedule);
   }, [schedule]);
   

@@ -615,8 +615,8 @@ const apiService = {
     getTeacherSchedule: async (teacherId) => {
       try {
         console.log(`Запрос расписания для преподавателя ID: ${teacherId}`);
+        localStorage.setItem('teacherId', teacherId);
         const response = await apiClient.get(`${API_BASE_URL.raspis}/schedule/teacher/${teacherId}`);
-        console.log('Ответ API расписания преподавателя:', response.data);
         return Array.isArray(response.data) ? response.data : [];
       } catch (error) {
         console.error(`Ошибка при получении расписания преподавателя ${teacherId}:`, error);
