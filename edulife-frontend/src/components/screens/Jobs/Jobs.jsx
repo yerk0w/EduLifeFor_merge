@@ -179,7 +179,7 @@ const Jobs = () => {
       </button>
 
       {/* Заголовок */}
-      <h1 className="header-title">Вакансий</h1>
+      <h1 className="header-title">Вакансии</h1>
 
       {/* Кнопка поиска */}
       <button className="search-button" onClick={toggleSearch}>
@@ -268,7 +268,7 @@ const Jobs = () => {
               </>
             ) : (
               <>
-                <p>У вас пока нет избранных вакансий</p>
+                <p>У вас пока нет избранных вакансии</p>
                 <button 
                   className="show-all-button"
                   onClick={() => setShowFavorites(false)}
