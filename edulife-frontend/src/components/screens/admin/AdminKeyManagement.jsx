@@ -236,7 +236,7 @@ const AdminKeyManagement = () => {
   return (
     <div className="admin-key-management">
       <div className="admin-panel-header">
-        <h3 className="section-title">Key Management</h3>
+        <h3 className="section-title">Управление ключами</h3>
         <button 
           className="add-key-button"
           onClick={() => setIsAddingKey(!isAddingKey)}
@@ -269,7 +269,7 @@ const AdminKeyManagement = () => {
           <form onSubmit={handleKeyFormSubmit} className="key-form">
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="key-code">Key Code*</label>
+                <label htmlFor="key-code">Код ключа*</label>
                 <input
                   id="key-code"
                   type="text"
@@ -282,7 +282,7 @@ const AdminKeyManagement = () => {
               </div>
               
               <div className="form-group">
-                <label htmlFor="room-number">Room Number*</label>
+                <label htmlFor="room-number">Номер кабинета*</label>
                 <input
                   id="room-number"
                   type="text"
@@ -297,7 +297,7 @@ const AdminKeyManagement = () => {
             
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="building">Building</label>
+                <label htmlFor="building">Блок</label>
                 <input
                   id="building"
                   type="text"
@@ -309,7 +309,7 @@ const AdminKeyManagement = () => {
               </div>
               
               <div className="form-group">
-                <label htmlFor="floor">Floor</label>
+                <label htmlFor="floor">Этаж</label>
                 <input
                   id="floor"
                   type="number"
@@ -323,13 +323,13 @@ const AdminKeyManagement = () => {
             
             <div className="form-row">
               <div className="form-group full-width">
-                <label htmlFor="description">Description</label>
+                <label htmlFor="description">Описание</label>
                 <textarea
                   id="description"
                   name="description"
                   value={keyFormData.description}
                   onChange={handleKeyFormChange}
-                  placeholder="Optional description of the room or key"
+                  placeholder="Необязательное описание комнаты или ключа"
                   rows={3}
                 />
               </div>
@@ -337,14 +337,14 @@ const AdminKeyManagement = () => {
             
             <div className="form-row">
               <div className="form-group full-width">
-                <label htmlFor="teacher-id">Initial Assignment (Optional)</label>
+                <label htmlFor="teacher-id">Начальное назначение (необязательно)</label>
                 <select
                   id="teacher-id"
                   name="teacher_id"
                   value={keyFormData.teacher_id}
                   onChange={handleKeyFormChange}
                 >
-                  <option value="">No initial assignment</option>
+                  <option value="">Без первоначального назначения</option>
                   {teachers.map(teacher => (
                     <option key={teacher.id} value={teacher.id}>
                       {teacher.full_name} ({teacher.department_name})
@@ -359,7 +359,7 @@ const AdminKeyManagement = () => {
                 Cancel
               </button>
               <button type="submit" className="submit-button" disabled={loading}>
-                {loading ? 'Processing...' : (editingKeyId ? 'Update Key' : 'Create Key')}
+                {loading ? 'В процессе...' : (editingKeyId ? 'Обновить ключ' : 'Создать ключ')}
               </button>
             </div>
           </form>
@@ -368,21 +368,21 @@ const AdminKeyManagement = () => {
       
       {/* Keys Table */}
       <div className="keys-table-container">
-        <h4>All Keys</h4>
+        <h4>Вс ключи</h4>
         {allKeys.length === 0 ? (
           <div className="no-keys-message">
-            <p>No keys found. Add a new key to get started.</p>
+            <p>Ключи не найдены. Для начала работы добавьте новый ключ.</p>
           </div>
         ) : (
           <table className="keys-table">
             <thead>
               <tr>
-                <th>Key Code</th>
-                <th>Room</th>
-                <th>Building</th>
-                <th>Current Holder</th>
-                <th>Assigned Date</th>
-                <th>Actions</th>
+                <th>Код ключа</th>
+                <th>Кабинет</th>
+                <th>Блок</th>
+                <th>Текущий держатель</th>
+                <th>Назначенная дата</th>
+                <th>Действия</th>
               </tr>
             </thead>
             <tbody>
@@ -437,21 +437,21 @@ const AdminKeyManagement = () => {
       
       {/* Pending Transfers Section */}
       <div className="pending-transfers-container">
-        <h4>Pending Key Transfer Requests</h4>
+        <h4>Ожидающие запросы на передачу ключа</h4>
         {pendingTransfers.length === 0 ? (
           <div className="no-transfers-message">
-            <p>No pending key transfer requests.</p>
+            <p>Нет ожидающих запросов на передачу ключа.</p>
           </div>
         ) : (
           <table className="transfers-table">
             <thead>
               <tr>
-                <th>Key</th>
-                <th>Room</th>
-                <th>From Teacher</th>
-                <th>To Teacher</th>
-                <th>Requested</th>
-                <th>Actions</th>
+                <th>Ключ</th>
+                <th>Кабинет</th>
+                <th>От</th>
+                <th>Для</th>
+                <th>Запрос</th>
+                <th>Действия</th>
               </tr>
             </thead>
             <tbody>
