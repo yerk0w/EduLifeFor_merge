@@ -241,7 +241,7 @@ const AdminKeyManagement = () => {
           className="add-key-button"
           onClick={() => setIsAddingKey(!isAddingKey)}
         >
-          {isAddingKey ? 'Cancel' : '+ Add New Key'}
+          {isAddingKey ? 'Отмена' : '+ Добавить новый ключ'}
         </button>
       </div>
       

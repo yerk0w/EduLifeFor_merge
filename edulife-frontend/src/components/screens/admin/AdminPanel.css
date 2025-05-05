@@ -1312,7 +1312,6 @@
   
   /* Стили для деталей заявки */
   .request-details, .document-details {
-    background-color: #3A3A3A;
     border-radius: 16px;
     padding: 16px;
   }

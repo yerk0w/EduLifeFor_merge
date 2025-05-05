@@ -11,7 +11,7 @@ class KeyBase(BaseModel):
     description: Optional[str] = Field(None, description="Additional description of the room or key")
 
 class KeyCreate(KeyBase):
-    teacher_id: Optional[int] = Field(None, description="ID of the teacher to initially assign the key to")
+    user_id: Optional[int] = Field(None, description="ID of the user to initially assign the key to")
 
 class KeyUpdate(BaseModel):
     key_code: Optional[str] = Field(None, description="Unique code for the key")
@@ -22,8 +22,8 @@ class KeyUpdate(BaseModel):
 
 class KeyResponse(KeyBase):
     id: int
-    teacher_id: Optional[int] = Field(None, description="ID of the teacher currently assigned to the key")
-    assigned_at: Optional[datetime] = Field(None, description="When the key was assigned to the current teacher")
+    user_id: Optional[int] = Field(None, description="ID of the user currently assigned to the key")
+    assigned_at: Optional[datetime] = Field(None, description="When the key was assigned to the current user")
     is_active: Optional[bool] = Field(None, description="Whether the key assignment is active")
 
     class Config:
@@ -32,8 +32,8 @@ class KeyResponse(KeyBase):
 # Key Transfer models
 class KeyTransferBase(BaseModel):
     key_id: int = Field(..., description="ID of the key being transferred")
-    from_teacher_id: int = Field(..., description="ID of the teacher transferring the key")
-    to_teacher_id: int = Field(..., description="ID of the teacher receiving the key")
+    from_user_id: int = Field(..., description="ID of the user transferring the key")
+    to_user_id: int = Field(..., description="ID of the user receiving the key")
     notes: Optional[str] = Field(None, description="Additional notes about the transfer")
 
 class KeyTransferCreate(KeyTransferBase):
@@ -59,8 +59,8 @@ class KeyTransferResponse(KeyTransferBase):
 class KeyHistoryEntry(BaseModel):
     id: int
     key_id: int
-    from_teacher_id: Optional[int] = None
-    to_teacher_id: int
+    from_user_id: Optional[int] = None
+    to_user_id: int
     action: str
     timestamp: datetime
     notes: Optional[str] = None
@@ -79,9 +79,9 @@ class DashboardStats(BaseModel):
     pending_transfers: int
     recent_transfers: List[KeyTransferResponse]
 
-# Teacher Key Summary
-class TeacherKeySummary(BaseModel):
-    teacher_id: int
+# User Key Summary
+class UserKeySummary(BaseModel):
+    user_id: int
     keys_count: int
     keys: List[KeyResponse]
     incoming_requests: List[KeyTransferResponse]

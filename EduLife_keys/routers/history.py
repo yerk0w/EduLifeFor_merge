@@ -24,21 +24,23 @@ async def get_key_history(
             detail=str(e)
         )
 
-@router.get("/teacher/{teacher_id}", response_model=List[KeyHistoryEntry])
-async def get_teacher_history(
-    teacher_id: int,
+@router.get("/user/{user_id}", response_model=List[KeyHistoryEntry])
+async def get_user_history(
+    user_id: int,
     current_user: dict = Depends(get_current_user)
 ):
-    """Get the key history for a specific teacher"""
+    """Get the key history for a specific user"""
     # Check if the user is requesting their own history or is an admin
-    if current_user["id"] != teacher_id and current_user["role"] != "admin":
+    user_role = current_user.get("role_name") or current_user.get("role")
+    
+    if current_user["id"] != user_id and user_role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access to other teachers' history is not allowed"
+            detail="Access to other users' history is not allowed"
         )
     
     try:
-        return database.get_teacher_key_history(teacher_id)
+        return database.get_user_key_history(user_id)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -58,7 +60,7 @@ async def get_complete_history(
         
         cursor.execute("""
             SELECT 
-                kh.id, kh.key_id, kh.from_teacher_id, kh.to_teacher_id, 
+                kh.id, kh.key_id, kh.from_user_id, kh.to_user_id, 
                 kh.action, kh.timestamp, kh.notes,
                 k.key_code, k.room_number, k.building
             FROM key_history kh
@@ -96,26 +98,26 @@ async def get_history_stats(
         
         action_counts = {row["action"]: row["count"] for row in cursor.fetchall()}
         
-        # Get top 5 teachers with most key movements
+        # Get top 5 users with most key movements
         cursor.execute("""
             SELECT 
-                teacher_id, 
+                user_id, 
                 COUNT(*) as count
             FROM (
-                SELECT from_teacher_id as teacher_id
+                SELECT from_user_id as user_id
                 FROM key_history
-                WHERE from_teacher_id IS NOT NULL
+                WHERE from_user_id IS NOT NULL
                 UNION ALL
-                SELECT to_teacher_id as teacher_id
+                SELECT to_user_id as user_id
                 FROM key_history
             )
-            GROUP BY teacher_id
+            GROUP BY user_id
             ORDER BY count DESC
             LIMIT 5
         """)
         
-        top_teachers = [{"teacher_id": row["teacher_id"], "count": row["count"]} 
-                       for row in cursor.fetchall()]
+        top_users = [{"user_id": row["user_id"], "count": row["count"]} 
+                     for row in cursor.fetchall()]
         
         # Get most transferred keys
         cursor.execute("""
@@ -136,7 +138,7 @@ async def get_history_stats(
         
         return {
             "action_counts": action_counts,
-            "top_teachers": top_teachers,
+            "top_users": top_users,
             "top_keys": top_keys
         }
     except Exception as e:

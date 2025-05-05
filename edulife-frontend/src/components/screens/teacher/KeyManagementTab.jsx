@@ -7,7 +7,6 @@ const KeyManagementTab = () => {
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [outgoingRequests, setOutgoingRequests] = useState([]);
   const [availableTeachers, setAvailableTeachers] = useState([]);
-  const [teacherId, setTeacherId] = useState(null);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [selectedKey, setSelectedKey] = useState(null);
   const [transferNote, setTransferNote] = useState('');
@@ -28,218 +27,187 @@ const KeyManagementTab = () => {
     
     try {
       const userId = localStorage.getItem('userId');
-
-      // Получаем информацию о преподавателе
-      let currentTeacherId = null;
-      try {
-        const teacherInfo = await apiService.auth.getTeacherByUser(userId);
-        console.log('Информация о преподавателе:', teacherInfo);
-        if (teacherInfo && teacherInfo.id) {
-          currentTeacherId = teacherInfo.id;
-          setTeacherId(teacherInfo.id);
-        }
-      } catch (teacherError) {
-        console.error('Ошибка при получении информации о преподавателе:', teacherError);
-      }
-
-      // Если не удалось получить ID преподавателя, используем ID пользователя
-      if (!currentTeacherId) {
-        console.warn('Не удалось получить ID преподавателя, используем ID пользователя');
-        currentTeacherId = parseInt(userId);
-        setTeacherId(parseInt(userId));
-      }
       
-      console.log('Используемый ID преподавателя для запросов:', currentTeacherId);
-      
-      // Получаем ключи преподавателя
+      // Get keys assigned to current user
       try {
-        const keysResponse = await apiService.keys.getTeacherKeys(currentTeacherId);
-        console.log('Ключи преподавателя:', keysResponse);
+        const keysResponse = await apiService.keys.getUserKeys(userId);
+        console.log('User keys:', keysResponse);
         setMyKeys(keysResponse || []);
       } catch (keysError) {
-        console.error('Ошибка при получении ключей:', keysError);
+        console.error('Error fetching user keys:', keysError);
         setMyKeys([]);
       }
       
-      // Получаем входящие запросы на передачу
+      // Get incoming transfer requests
       try {
         const incomingResponse = await apiService.keys.getIncomingTransfers();
-        console.log('Входящие запросы:', incomingResponse);
+        console.log('Incoming transfer requests:', incomingResponse);
         setIncomingRequests(incomingResponse || []);
       } catch (incomingError) {
-        console.error('Ошибка при получении входящих запросов:', incomingError);
+        console.error('Error fetching incoming transfers:', incomingError);
         setIncomingRequests([]);
       }
       
-      // Получаем исходящие запросы на передачу
+      // Get outgoing transfer requests
       try {
         const outgoingResponse = await apiService.keys.getOutgoingTransfers();
-        console.log('Исходящие запросы:', outgoingResponse);
+        console.log('Outgoing transfer requests:', outgoingResponse);
         setOutgoingRequests(outgoingResponse || []);
       } catch (outgoingError) {
-        console.error('Ошибка при получении исходящих запросов:', outgoingError);
+        console.error('Error fetching outgoing transfers:', outgoingError);
         setOutgoingRequests([]);
       }
       
-      // Получаем список доступных преподавателей
+      // Get list of available teachers
       try {
         const teachersResponse = await apiService.auth.getTeachers();
-        console.log('Список преподавателей:', teachersResponse);
-        // Исключаем текущего преподавателя из списка
+        console.log('Teachers list:', teachersResponse);
+        
+        // Filter out current user from the list
         const filteredTeachers = teachersResponse.filter(teacher => {
           if (!teacher) return false;
-          // Используем или user_id, или id для сравнения
+          // Get the user_id from teacher object
           const teacherUserId = teacher.user_id !== undefined ? teacher.user_id : null;
+          // Only include teachers whose user_id is not the current user's ID
           return teacherUserId !== null && teacherUserId.toString() !== userId.toString();
         });
-        console.log('Отфильтрованный список преподавателей:', filteredTeachers);
+        
+        console.log('Filtered teachers list:', filteredTeachers);
         setAvailableTeachers(filteredTeachers || []);
       } catch (teachersError) {
-        console.error('Ошибка при получении списка преподавателей:', teachersError);
+        console.error('Error fetching teachers list:', teachersError);
         setAvailableTeachers([]);
       }
       
     } catch (err) {
-      console.error('Ошибка при загрузке данных:', err);
-      setError('Не удалось загрузить данные. Пожалуйста, попробуйте позже.');
+      console.error('Error fetching data:', err);
+      setError('Failed to load data. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Инициация передачи ключа
+  // Create key transfer request
   const handleTransferKey = async () => {
     if (!selectedKey || !selectedTeacher) {
-      setError('Пожалуйста, выберите ключ и преподавателя для передачи.');
+      setError('Please select both a key and a recipient teacher.');
       return;
     }
 
     setLoading(true);
     setError(null);
     
-    // Отладочная информация
-    console.log('Данные для передачи:', {
-      key_id: selectedKey.id,
-      from_teacher_id: Number(teacherId), // Преобразуем в число
-      to_teacher_id: Number(selectedTeacher.id), // Преобразуем в число
-      notes: transferNote
-    });
-    
     try {
-      // Создаем запрос на передачу
+      const userId = localStorage.getItem('userId');
+      
+      // Create transfer request
       await apiService.keys.createTransfer({
         key_id: selectedKey.id,
-        from_teacher_id: Number(teacherId), // Преобразуем в число
-        to_teacher_id: Number(selectedTeacher.id), // Преобразуем в число
-        notes: transferNote || ''  // Используем пустую строку, если примечание отсутствует
+        from_user_id: parseInt(userId),
+        to_user_id: parseInt(selectedTeacher.id),
+        notes: transferNote || ''
       });
       
-      setSuccessMessage(`Запрос на передачу ключа ${selectedKey.key_code} отправлен ${selectedTeacher.full_name}`);
+      setSuccessMessage(`Transfer request for key ${selectedKey.key_code} sent to ${selectedTeacher.full_name}`);
+      
+      // Reset form state
       setSelectedKey(null);
       setSelectedTeacher(null);
       setTransferNote('');
       
-      // Обновляем данные
+      // Refresh data
       fetchData();
     } catch (err) {
-      console.error('Ошибка при создании передачи ключа:', err);
+      console.error('Error creating transfer request:', err);
       
-      // Подробная информация об ошибке
-      if (err.response) {
-        console.log('Статус ошибки:', err.response.status);
-        console.log('Данные ошибки:', err.response.data);
-        
-        // Устанавливаем сообщение об ошибке на основе ответа сервера
-        if (err.response.data && err.response.data.detail) {
-          setError(`Ошибка: ${err.response.data.detail}`);
-        } else {
-          setError('Не удалось создать запрос на передачу ключа. Пожалуйста, проверьте данные и попробуйте снова.');
-        }
-      } else if (err.request) {
-        console.log('Запрос был отправлен, но ответ не получен:', err.request);
-        setError('Сервер не отвечает. Пожалуйста, проверьте подключение и попробуйте снова.');
+      if (err.response && err.response.data && err.response.data.detail) {
+        setError(`Error: ${err.response.data.detail}`);
       } else {
-        console.log('Ошибка при настройке запроса:', err.message);
-        setError('Произошла ошибка при создании запроса. Пожалуйста, попробуйте позже.');
+        setError('Failed to create transfer request. Please check your data and try again.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Обработка одобрения входящего запроса на передачу
+  // Handle approve incoming transfer
   const handleApproveTransfer = async (transferId) => {
     setLoading(true);
     setError(null);
     
     try {
       await apiService.keys.approveTransfer(transferId);
-      setSuccessMessage('Запрос на передачу одобрен. Ключ теперь назначен вам.');
+      setSuccessMessage('Transfer request approved. The key is now assigned to you.');
       
-      // Обновляем данные
+      // Refresh data
       fetchData();
     } catch (err) {
-      console.error('Ошибка при одобрении передачи:', err);
+      console.error('Error approving transfer:', err);
       
       if (err.response && err.response.data && err.response.data.detail) {
-        setError(`Ошибка: ${err.response.data.detail}`);
+        setError(`Error: ${err.response.data.detail}`);
       } else {
-        setError('Не удалось одобрить запрос на передачу. Пожалуйста, попробуйте позже.');
+        setError('Failed to approve transfer request. Please try again later.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Обработка отклонения входящего запроса
-  const handleRejectTransfer = async (transferId, reason = 'Request rejected') => {
+  // Handle reject incoming transfer
+  const handleRejectTransfer = async (transferId) => {
     setLoading(true);
     setError(null);
     
     try {
+      const reason = window.prompt('Reason for rejection (optional):');
       await apiService.keys.rejectTransfer(transferId, reason);
-      setSuccessMessage('Запрос на передачу отклонен.');
+      setSuccessMessage('Transfer request rejected successfully.');
       
-      // Обновляем данные
+      // Refresh data
       fetchData();
     } catch (err) {
-      console.error('Ошибка при отклонении передачи:', err);
+      console.error('Error rejecting transfer:', err);
       
       if (err.response && err.response.data && err.response.data.detail) {
-        setError(`Ошибка: ${err.response.data.detail}`);
+        setError(`Error: ${err.response.data.detail}`);
       } else {
-        setError('Не удалось отклонить запрос на передачу. Пожалуйста, попробуйте позже.');
+        setError('Failed to reject transfer request. Please try again later.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Обработка отмены исходящего запроса
+  // Handle cancel outgoing transfer
   const handleCancelTransfer = async (transferId) => {
+    if (!window.confirm('Are you sure you want to cancel this transfer request?')) {
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     
     try {
       await apiService.keys.cancelTransfer(transferId);
-      setSuccessMessage('Запрос на передачу отменен.');
+      setSuccessMessage('Transfer request cancelled successfully.');
       
-      // Обновляем данные
+      // Refresh data
       fetchData();
     } catch (err) {
-      console.error('Ошибка при отмене передачи:', err);
+      console.error('Error cancelling transfer:', err);
       
       if (err.response && err.response.data && err.response.data.detail) {
-        setError(`Ошибка: ${err.response.data.detail}`);
+        setError(`Error: ${err.response.data.detail}`);
       } else {
-        setError('Не удалось отменить запрос на передачу. Пожалуйста, попробуйте позже.');
+        setError('Failed to cancel transfer request. Please try again later.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Форматирование даты и времени
+  // Format date
   const formatDate = (dateString) => {
     if (!dateString) return '—';
     
@@ -253,12 +221,12 @@ const KeyManagementTab = () => {
         minute: '2-digit'
       }).format(date);
     } catch (e) {
-      console.error('Ошибка при форматировании даты:', e);
+      console.error('Error formatting date:', e);
       return dateString;
     }
   };
 
-  // Очистка сообщения об успехе через 5 секунд
+  // Clear success message after timeout
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => {
@@ -269,13 +237,13 @@ const KeyManagementTab = () => {
     }
   }, [successMessage]);
 
-  // Показываем индикатор загрузки, если данные загружаются и нет ключей
+  // Show loading indicator if data is being loaded
   if (loading && myKeys.length === 0) {
     return (
       <div className="key-management-tab">
         <div className="loading-indicator">
           <div className="spinner"></div>
-          <p>Загрузка данных...</p>
+          <p>Loading key data...</p>
         </div>
       </div>
     );
@@ -283,9 +251,9 @@ const KeyManagementTab = () => {
 
   return (
     <div className="key-management-tab">
-      <h3 className="section-title">Управление ключами</h3>
+      <h3 className="section-title">Менеджер ключей</h3>
       
-      {/* Область уведомлений */}
+      {/* Notification area */}
       {error && (
         <div className="notification error">
           <span className="notification-icon">⚠️</span>
@@ -302,7 +270,7 @@ const KeyManagementTab = () => {
         </div>
       )}
       
-      {/* Уведомление о входящих запросах */}
+      {/* Notification for incoming requests */}
       {incomingRequests.length > 0 && activeTab !== 'incoming' && (
         <div className="inbox-notification" onClick={() => setActiveTab('incoming')}>
           <span className="inbox-icon">📩</span>
@@ -311,7 +279,7 @@ const KeyManagementTab = () => {
         </div>
       )}
       
-      {/* Навигация по вкладкам */}
+      {/* Tab navigation */}
       <div className="key-tabs">
         <button 
           className={`key-tab ${activeTab === 'my-keys' ? 'active' : ''}`}
@@ -338,7 +306,7 @@ const KeyManagementTab = () => {
         </button>
       </div>
       
-      {/* Вкладка "Мои ключи" */}
+      {/* My Keys tab */}
       {activeTab === 'my-keys' && (
         <div className="my-keys-section">
           {myKeys.length === 0 ? (
@@ -384,14 +352,14 @@ const KeyManagementTab = () => {
                     </div>
                     <div className="key-card-footer">
                       <span className="assigned-date">
-                        Назначен: {formatDate(key.assigned_at)}
+                        Дата назначение: {formatDate(key.assigned_at)}
                       </span>
                     </div>
                   </div>
                 ))}
               </div>
               
-              {/* Форма передачи ключа */}
+              {/* Transfer form */}
               <div className="transfer-form">
                 <h4>Передать ключ другому учителю</h4>
                 <div className="transfer-form-content">
@@ -402,29 +370,27 @@ const KeyManagementTab = () => {
                         {selectedKey ? (
                           <span><strong>{selectedKey.key_code}</strong> - Кабинет {selectedKey.room_number}</span>
                         ) : (
-                          <span className="select-prompt">Выберите ключ из списка выше</span>
+                          <span className="select-prompt">Выберите ключ из списка</span>
                         )}
                       </div>
                     </div>
                     
                     <div className="form-group">
-                      <label htmlFor="teacher-select">Передача преподавателю:</label>
+                      <label htmlFor="teacher-select">Кому:</label>
                       <select
                         id="teacher-select"
                         value={selectedTeacher?.id || ''}
                         onChange={(e) => {
                           const selectedId = e.target.value;
-                          console.log('Выбран преподаватель с ID:', selectedId);
                           const teacher = availableTeachers.find(t => t.id.toString() === selectedId);
-                          console.log('Найден преподаватель:', teacher);
                           setSelectedTeacher(teacher || null);
                         }}
                         disabled={!selectedKey}
                       >
-                        <option value="">Выберите преподователя</option>
+                        <option value="">Выберите преподавателя</option>
                         {availableTeachers.map(teacher => (
                           <option key={teacher.id} value={teacher.id}>
-                            {teacher.full_name || 'Преподаватель'} 
+                            {teacher.full_name || 'Teacher'} 
                             {teacher.department_name ? ` (${teacher.department_name})` : ''}
                           </option>
                         ))}
@@ -434,7 +400,7 @@ const KeyManagementTab = () => {
                   
                   <div className="form-row">
                     <div className="form-group full-width">
-                      <label htmlFor="transfer-note">Заметка (дополнительно):</label>
+                      <label htmlFor="transfer-note">Заметка (опционально):</label>
                       <textarea
                         id="transfer-note"
                         value={transferNote}
@@ -452,7 +418,7 @@ const KeyManagementTab = () => {
                       onClick={handleTransferKey}
                       disabled={!selectedKey || !selectedTeacher || loading}
                     >
-                      {loading ? 'В процессе...' : 'Отправить запрос на передачу'}
+                      {loading ? 'Processing...' : 'Отправить запрос на перевод'}
                     </button>
                   </div>
                 </div>
@@ -462,7 +428,7 @@ const KeyManagementTab = () => {
         </div>
       )}
       
-      {/* Вкладка "Входящие запросы" */}
+      {/* Incoming Requests tab */}
       {activeTab === 'incoming' && (
         <div className="incoming-requests-section">
           <h4>Ожидающие запросы на передачу ключа</h4>
@@ -470,7 +436,7 @@ const KeyManagementTab = () => {
           {incomingRequests.length === 0 ? (
             <div className="no-requests-message">
               <div className="no-requests-icon">📮</div>
-              <p>Входящие запросы на перенос ключей отсутствуют. </p>
+              <p>Отсутствуют входящие запросы на перенос ключей.</p>
             </div>
           ) : (
             <div className="requests-list">
@@ -486,7 +452,7 @@ const KeyManagementTab = () => {
                     </div>
                   </div>
                   
-                  <div className="request-detailss">
+                  <div className="request-details">
                     <div className="request-row">
                       <span className="request-label">Кабинет:</span>
                       <span className="request-value">{request.room_number}</span>
@@ -498,14 +464,14 @@ const KeyManagementTab = () => {
                       </div>
                     )}
                     <div className="request-row">
-                      <span className="request-label">От учителя :</span>
+                      <span className="request-label">Для:</span>
                       <span className="request-value teacher-name">
-                        {request.from_teacher_name || `ID: ${request.from_teacher_id}`}
+                        {request.from_user_name || `ID: ${request.from_user_id}`}
                       </span>
                     </div>
                     {request.notes && (
                       <div className="request-notes">
-                        <div className="notes-label">Заметка:</div>
+                        <div className="notes-label">Note:</div>
                         <div className="notes-content">{request.notes}</div>
                       </div>
                     )}
@@ -517,14 +483,14 @@ const KeyManagementTab = () => {
                       onClick={() => handleApproveTransfer(request.id)}
                       disabled={loading}
                     >
-                      {loading ? 'В процессе...' : 'Принять'}
+                      {loading ? 'Processing...' : 'Принять'}
                     </button>
                     <button
                       className="reject-button"
                       onClick={() => handleRejectTransfer(request.id)}
                       disabled={loading}
                     >
-                      {loading ? 'В процессе...' : 'Отклонить'}
+                      {loading ? 'Processing...' : 'Отклонить'}
                     </button>
                   </div>
                 </div>
@@ -534,15 +500,15 @@ const KeyManagementTab = () => {
         </div>
       )}
       
-      {/* Вкладка "Исходящие запросы" */}
+      {/* Outgoing Requests tab */}
       {activeTab === 'outgoing' && (
         <div className="outgoing-requests-section">
-          <h4>Мои запросы на передачу ключей</h4>
+          <h4>Мои запросы на обмен ключами</h4>
           
           {outgoingRequests.length === 0 ? (
             <div className="no-requests-message">
               <div className="no-requests-icon">📤</div>
-              <p>Вы не имеете запросы на передачу ключей</p>
+              <p>У вас нет исходящих запросов на перенос ключа.</p>
             </div>
           ) : (
             <div className="requests-list">
@@ -555,14 +521,14 @@ const KeyManagementTab = () => {
                     </div>
                     <div className={`request-status ${request.status}`}>
                       {request.status === 'pending' && 'Ожидает'}
-                      {request.status === 'approved' && 'Одобрен'}
-                      {request.status === 'rejected' && 'Отклонен'}
-                      {request.status === 'cancelled' && 'Отменен'}
-                      {!request.status && 'Неизвестно'}
+                      {request.status === 'approved' && 'Одобрено'}
+                      {request.status === 'rejected' && 'Отклонено'}
+                      {request.status === 'cancelled' && 'Отменено'}
+                      {!request.status && '—'}  
                     </div>
                   </div>
                   
-                  <div className="request-detailss">
+                  <div className="request-details">
                     <div className="request-row">
                       <span className="request-label">Кабинет:</span>
                       <span className="request-value">{request.room_number}</span>
@@ -574,20 +540,20 @@ const KeyManagementTab = () => {
                       </div>
                     )}
                     <div className="request-row">
-                      <span className="request-label">Для :</span>
+                      <span className="request-label">Для:</span>
                       <span className="request-value teacher-name">
-                        {request.to_teacher_name || `ID: ${request.to_teacher_id}`}
+                        {request.to_user_name || `ID: ${request.to_user_id}`}
                       </span>
                     </div>
                     <div className="request-row">
-                      <span className="request-label">Запрос:</span>
+                      <span className="request-label">Дата запроса:</span>
                       <span className="request-value">
                         {formatDate(request.requested_at)}
                       </span>
                     </div>
                     {request.completed_at && (
                       <div className="request-row">
-                        <span className="request-label">Завершен:</span>
+                        <span className="request-label">Дата одобрения:</span>
                         <span className="request-value">
                           {formatDate(request.completed_at)}
                         </span>
@@ -608,7 +574,7 @@ const KeyManagementTab = () => {
                         onClick={() => handleCancelTransfer(request.id)}
                         disabled={loading}
                       >
-                        {loading ? 'В процессе...' : 'Отменить запрос'} 
+                        {loading ? 'Processing...' : 'Cancel Request'} 
                       </button>
                     </div>
                   )}

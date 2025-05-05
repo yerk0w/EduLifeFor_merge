@@ -26,8 +26,6 @@ async def get_key(key_id: int, current_user: dict = Depends(get_current_user)):
         )
     return key
 
-
-
 @router.post("/", response_model=dict, dependencies=[Depends(check_admin_role)])
 async def create_key(key: KeyCreate, current_user: dict = Depends(check_admin_role)):
     """Create a new key (admin only)"""
@@ -72,32 +70,35 @@ async def delete_key(key_id: int, current_user: dict = Depends(check_admin_role)
             detail=str(e)
         )
 
-@router.get("/teacher/{user_id}", response_model=List[KeyResponse])
-async def get_teacher_keys(
+@router.get("/user/{user_id}", response_model=List[KeyResponse])
+async def get_user_keys(
     user_id: int, 
     current_user: dict = Depends(get_current_user)
 ):
-    """Get all keys assigned to a specific teacher"""
-    # Check if the user is requesting their own keys or is an admin
-    if current_user["id"] != user_id and current_user["role"] != "admin" and current_user["role"] != "teacher":
+    """Get all keys assigned to a specific user"""
+    # Check if the user is requesting their own keys or is an admin/teacher
+    user_role = current_user.get("role_name") or current_user.get("role")
+    is_admin_or_teacher = user_role in ["admin", "teacher"]
+    
+    if current_user["id"] != user_id and not is_admin_or_teacher:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access to other teachers' keys is not allowed"
+            detail="Access to other users' keys is not allowed"
         )
     
-    return database.get_teacher_keys(user_id)
+    return database.get_user_keys(user_id)
 
-@router.post("/{key_id}/assign/{teacher_id}", response_model=dict, dependencies=[Depends(check_admin_role)])
+@router.post("/{key_id}/assign/{user_id}", response_model=dict, dependencies=[Depends(check_admin_role)])
 async def admin_assign_key(
     key_id: int, 
-    teacher_id: int, 
+    user_id: int, 
     notes: Optional[str] = None,
     current_user: dict = Depends(check_admin_role)
 ):
-    """Assign a key to a teacher (admin only)"""
+    """Assign a key to a user (admin only)"""
     try:
-        database.assign_key(key_id, teacher_id, notes)
-        return {"message": f"Key assigned to teacher successfully"}
+        database.assign_key(key_id, user_id, notes)
+        return {"message": f"Key assigned to user successfully"}
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

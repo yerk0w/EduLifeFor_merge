@@ -936,8 +936,8 @@ const apiService = {
       }
     }
   },
-    // Key Management Service APIs
-  keys: {
+  
+    keys: {
       // Get all keys (admin only)
       getAllKeys: async () => {
         try {
@@ -948,13 +948,25 @@ const apiService = {
           return [];
         }
       },
-      // Get keys assigned to a specific teacher
-      getTeacherKeys: async (teacherId) => {
+      
+      // Get a specific key by ID
+      getKey: async (keyId) => {
         try {
-          const response = await apiClient.get(`${API_BASE_URL.keys}/keys/teacher/${teacherId}`);
+          const response = await apiClient.get(`${API_BASE_URL.keys}/keys/${keyId}`);
           return response.data;
         } catch (error) {
-          console.error(`Error fetching keys for teacher ${teacherId}:`, error);
+          console.error(`Error fetching key ${keyId}:`, error);
+          throw error;
+        }
+      },
+      
+      // Get keys assigned to a specific user
+      getUserKeys: async (userId) => {
+        try {
+          const response = await apiClient.get(`${API_BASE_URL.keys}/keys/user/${userId}`);
+          return response.data;
+        } catch (error) {
+          console.error(`Error fetching keys for user ${userId}:`, error);
           return [];
         }
       },
@@ -1006,6 +1018,7 @@ const apiService = {
       // Reject a key transfer request
       rejectTransfer: async (transferId, reason) => {
         try {
+          // Use params to pass the reason
           const response = await apiClient.post(
             `${API_BASE_URL.keys}/transfers/${transferId}/reject`,
             null,
@@ -1040,13 +1053,13 @@ const apiService = {
         }
       },
       
-      // Get teacher key history
-      getTeacherHistory: async (teacherId) => {
+      // Get user key history
+      getUserHistory: async (userId) => {
         try {
-          const response = await apiClient.get(`${API_BASE_URL.keys}/history/teacher/${teacherId}`);
+          const response = await apiClient.get(`${API_BASE_URL.keys}/history/user/${userId}`);
           return response.data;
         } catch (error) {
-          console.error(`Error fetching key history for teacher ${teacherId}:`, error);
+          console.error(`Error fetching key history for user ${userId}:`, error);
           return [];
         }
       },
@@ -1093,16 +1106,16 @@ const apiService = {
         }
       },
       
-      assignKey: async (keyId, teacherId, notes) => {
+      assignKey: async (keyId, userId, notes) => {
         try {
           const response = await apiClient.post(
-            `${API_BASE_URL.keys}/keys/${keyId}/assign/${teacherId}`,
+            `${API_BASE_URL.keys}/keys/${keyId}/assign/${userId}`,
             null,
             { params: { notes } }
           );
           return response.data;
         } catch (error) {
-          console.error(`Error assigning key ${keyId} to teacher ${teacherId}:`, error);
+          console.error(`Error assigning key ${keyId} to user ${userId}:`, error);
           throw error;
         }
       },

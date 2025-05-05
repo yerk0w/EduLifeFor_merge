@@ -35,7 +35,7 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS key_assignments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             key_id INTEGER NOT NULL,
-            teacher_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
             assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             is_active BOOLEAN DEFAULT 1,
             FOREIGN KEY (key_id) REFERENCES keys(id),
@@ -43,13 +43,13 @@ def create_tables():
         )
     """)
 
-    # Key Transfer Requests table - tracks requests to transfer keys between teachers
+    # Key Transfer Requests table - tracks requests to transfer keys between users
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS key_transfers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             key_id INTEGER NOT NULL,
-            from_teacher_id INTEGER NOT NULL,
-            to_teacher_id INTEGER NOT NULL,
+            from_user_id INTEGER NOT NULL,
+            to_user_id INTEGER NOT NULL,
             status TEXT NOT NULL DEFAULT 'pending',
             requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             completed_at TIMESTAMP,
@@ -63,8 +63,8 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS key_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             key_id INTEGER NOT NULL,
-            from_teacher_id INTEGER,
-            to_teacher_id INTEGER NOT NULL,
+            from_user_id INTEGER,
+            to_user_id INTEGER NOT NULL,
             action TEXT NOT NULL,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             notes TEXT,
@@ -103,7 +103,7 @@ def get_all_keys():
     cursor.execute("""
         SELECT 
             k.id, k.key_code, k.room_number, k.building, k.floor, k.description,
-            ka.teacher_id, ka.assigned_at, ka.is_active
+            ka.user_id, ka.assigned_at, ka.is_active
         FROM keys k
         LEFT JOIN key_assignments ka ON k.id = ka.key_id AND ka.is_active = 1
         ORDER BY k.building, k.floor, k.room_number
@@ -121,7 +121,7 @@ def get_key_by_id(key_id: int):
     cursor.execute("""
         SELECT 
             k.id, k.key_code, k.room_number, k.building, k.floor, k.description,
-            ka.teacher_id, ka.assigned_at, ka.is_active
+            ka.user_id, ka.assigned_at, ka.is_active
         FROM keys k
         LEFT JOIN key_assignments ka ON k.id = ka.key_id AND ka.is_active = 1
         WHERE k.id = ?
@@ -152,20 +152,19 @@ def create_key(key_data: Dict[str, Any]):
         
         key_id = cursor.lastrowid
         
-        if "teacher_id" in key_data and key_data["teacher_id"]:
-
+        if "user_id" in key_data and key_data["user_id"]:
             cursor.execute("""
-                INSERT INTO key_assignments (key_id, teacher_id)
+                INSERT INTO key_assignments (key_id, user_id)
                 VALUES (?, ?)
-            """, (key_id, key_data["teacher_id"]))
+            """, (key_id, key_data["user_id"]))
             
             # Add to history
             cursor.execute("""
-                INSERT INTO key_history (key_id, to_teacher_id, action, notes)
+                INSERT INTO key_history (key_id, to_user_id, action, notes)
                 VALUES (?, ?, ?, ?)
             """, (
                 key_id,
-                key_data["teacher_id"],
+                key_data["user_id"],
                 "initial_assignment",
                 "Initial key assignment"
             ))
@@ -259,8 +258,8 @@ def delete_key(key_id: int):
         conn.close()
 
 # Key Assignment operations
-def get_teacher_keys(user_id: int):
-    """Get all keys currently assigned to a teacher"""
+def get_user_keys(user_id: int):
+    """Get all keys currently assigned to a user"""
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -270,7 +269,7 @@ def get_teacher_keys(user_id: int):
             ka.assigned_at
         FROM keys k
         JOIN key_assignments ka ON k.id = ka.key_id
-        WHERE ka.teacher_id = ? AND ka.is_active = 1
+        WHERE ka.user_id = ? AND ka.is_active = 1
         ORDER BY k.building, k.floor, k.room_number
     """, (user_id,))
     
@@ -278,8 +277,8 @@ def get_teacher_keys(user_id: int):
     conn.close()
     return keys
 
-def assign_key(key_id: int, teacher_id: int, notes: Optional[str] = None):
-    """Assign a key to a teacher"""
+def assign_key(key_id: int, user_id: int, notes: Optional[str] = None):
+    """Assign a key to a user"""
     conn = get_db_connection()
 
     try:
@@ -292,15 +291,15 @@ def assign_key(key_id: int, teacher_id: int, notes: Optional[str] = None):
         
         # Check if key is already assigned to someone else
         cursor.execute(
-            "SELECT teacher_id FROM key_assignments WHERE key_id = ? AND is_active = 1", 
+            "SELECT user_id FROM key_assignments WHERE key_id = ? AND is_active = 1", 
             (key_id,)
         )
         
         existing = cursor.fetchone()
         if existing:
-            if existing["teacher_id"] == teacher_id:
+            if existing["user_id"] == user_id:
                 conn.close()
-                raise ValueError(f"Key is already assigned to this teacher")
+                raise ValueError(f"Key is already assigned to this user")
             else:
                 # Deactivate the current assignment
                 cursor.execute(
@@ -311,12 +310,12 @@ def assign_key(key_id: int, teacher_id: int, notes: Optional[str] = None):
                 # Record in history
                 cursor.execute("""
                     INSERT INTO key_history 
-                    (key_id, from_teacher_id, to_teacher_id, action, notes)
+                    (key_id, from_user_id, to_user_id, action, notes)
                     VALUES (?, ?, ?, ?, ?)
                 """, (
                     key_id,
-                    existing["teacher_id"],
-                    teacher_id,
+                    existing["user_id"],
+                    user_id,
                     "transfer",
                     notes or "Direct reassignment by admin"
                 ))
@@ -324,20 +323,20 @@ def assign_key(key_id: int, teacher_id: int, notes: Optional[str] = None):
             # Record in history - initial assignment or reassignment
             cursor.execute("""
                 INSERT INTO key_history 
-                (key_id, to_teacher_id, action, notes)
+                (key_id, to_user_id, action, notes)
                 VALUES (?, ?, ?, ?)
             """, (
                 key_id,
-                teacher_id,
+                user_id,
                 "assignment",
                 notes or "Assigned by admin"
             ))
         
         # Create the new assignment
         cursor.execute("""
-            INSERT INTO key_assignments (key_id, teacher_id)
+            INSERT INTO key_assignments (key_id, user_id)
             VALUES (?, ?)
-        """, (key_id, teacher_id))
+        """, (key_id, user_id))
         
         conn.commit()
         return True
@@ -356,7 +355,7 @@ def unassign_key(key_id: int, notes: Optional[str] = None):
         cursor = conn.cursor()
         # First check if the key exists and is assigned
         cursor.execute(
-            "SELECT teacher_id FROM key_assignments WHERE key_id = ? AND is_active = 1", 
+            "SELECT user_id FROM key_assignments WHERE key_id = ? AND is_active = 1", 
             (key_id,)
         )
         
@@ -374,11 +373,11 @@ def unassign_key(key_id: int, notes: Optional[str] = None):
         # Record in history
         cursor.execute("""
             INSERT INTO key_history 
-            (key_id, from_teacher_id, action, notes)
+            (key_id, from_user_id, action, notes)
             VALUES (?, ?, ?, ?)
         """, (
             key_id,
-            assignment["teacher_id"],
+            assignment["user_id"],
             "return",
             notes or "Returned to management"
         ))
@@ -400,7 +399,7 @@ def get_all_transfer_requests(status: Optional[str] = None):
     
     query = """
         SELECT 
-            kt.id, kt.key_id, kt.from_teacher_id, kt.to_teacher_id, 
+            kt.id, kt.key_id, kt.from_user_id, kt.to_user_id, 
             kt.status, kt.requested_at, kt.completed_at, kt.notes,
             k.key_code, k.room_number, k.building
         FROM key_transfers kt
@@ -420,41 +419,41 @@ def get_all_transfer_requests(status: Optional[str] = None):
     conn.close()
     return transfers
 
-def get_teacher_incoming_transfers(teacher_id: int):
-    """Get all pending key transfer requests to a teacher"""
+def get_user_incoming_transfers(user_id: int):
+    """Get all pending key transfer requests to a user"""
     conn = get_db_connection()
     cursor = conn.cursor()
     
     cursor.execute("""
         SELECT 
-            kt.id, kt.key_id, kt.from_teacher_id, kt.to_teacher_id, 
+            kt.id, kt.key_id, kt.from_user_id, kt.to_user_id, 
             kt.status, kt.requested_at, kt.notes,
             k.key_code, k.room_number, k.building
         FROM key_transfers kt
         JOIN keys k ON kt.key_id = k.id
-        WHERE kt.to_teacher_id = ? AND kt.status = 'pending'
+        WHERE kt.to_user_id = ? AND kt.status = 'pending'
         ORDER BY kt.requested_at DESC
-    """, (teacher_id,))
+    """, (user_id,))
     
     transfers = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return transfers
 
-def get_teacher_outgoing_transfers(teacher_id: int):
-    """Get all key transfer requests from a teacher"""
+def get_user_outgoing_transfers(user_id: int):
+    """Get all key transfer requests from a user"""
     conn = get_db_connection()
     cursor = conn.cursor()
     
     cursor.execute("""
         SELECT 
-            kt.id, kt.key_id, kt.from_teacher_id, kt.to_teacher_id, 
+            kt.id, kt.key_id, kt.from_user_id, kt.to_user_id, 
             kt.status, kt.requested_at, kt.completed_at, kt.notes,
             k.key_code, k.room_number, k.building
         FROM key_transfers kt
         JOIN keys k ON kt.key_id = k.id
-        WHERE kt.from_teacher_id = ?
+        WHERE kt.from_user_id = ?
         ORDER BY kt.requested_at DESC
-    """, (teacher_id,))
+    """, (user_id,))
     
     transfers = [dict(row) for row in cursor.fetchall()]
     conn.close()
@@ -472,11 +471,11 @@ def create_transfer_request(transfer_data: Dict[str, Any]):
 
         # Check current assignment
         cursor.execute(
-            "SELECT id FROM key_assignments WHERE key_id = ? AND teacher_id = ? AND is_active = 1", 
-            (transfer_data["key_id"], transfer_data["from_teacher_id"])
+            "SELECT id FROM key_assignments WHERE key_id = ? AND user_id = ? AND is_active = 1", 
+            (transfer_data["key_id"], transfer_data["from_user_id"])
         )
         if not cursor.fetchone():
-            raise ValueError("Key is not currently assigned to the requesting teacher")
+            raise ValueError("Key is not currently assigned to the requesting user")
 
         # Check for pending transfer
         cursor.execute(
@@ -489,12 +488,12 @@ def create_transfer_request(transfer_data: Dict[str, Any]):
         # Insert the transfer request
         cursor.execute("""
             INSERT INTO key_transfers 
-            (key_id, from_teacher_id, to_teacher_id, notes)
+            (key_id, from_user_id, to_user_id, notes)
             VALUES (?, ?, ?, ?)
         """, (
             transfer_data["key_id"],
-            transfer_data["from_teacher_id"],
-            transfer_data["to_teacher_id"],
+            transfer_data["from_user_id"],
+            transfer_data["to_user_id"],
             transfer_data.get("notes")
         ))
 
@@ -507,7 +506,6 @@ def create_transfer_request(transfer_data: Dict[str, Any]):
     finally:
         conn.close()
 
-
 def approve_transfer_request(transfer_id: int):
     """Approve and complete a key transfer request"""
     conn = get_db_connection()
@@ -516,7 +514,7 @@ def approve_transfer_request(transfer_id: int):
         cursor = conn.cursor() 
         # Get the transfer request
         cursor.execute("""
-            SELECT key_id, from_teacher_id, to_teacher_id, notes
+            SELECT key_id, from_user_id, to_user_id, notes
             FROM key_transfers
             WHERE id = ? AND status = 'pending'
         """, (transfer_id,))
@@ -541,19 +539,19 @@ def approve_transfer_request(transfer_id: int):
         
         # Create the new assignment
         cursor.execute("""
-            INSERT INTO key_assignments (key_id, teacher_id)
+            INSERT INTO key_assignments (key_id, user_id)
             VALUES (?, ?)
-        """, (transfer["key_id"], transfer["to_teacher_id"]))
+        """, (transfer["key_id"], transfer["to_user_id"]))
         
         # Record in history
         cursor.execute("""
             INSERT INTO key_history 
-            (key_id, from_teacher_id, to_teacher_id, action, notes)
+            (key_id, from_user_id, to_user_id, action, notes)
             VALUES (?, ?, ?, ?, ?)
         """, (
             transfer["key_id"],
-            transfer["from_teacher_id"],
-            transfer["to_teacher_id"],
+            transfer["from_user_id"],
+            transfer["to_user_id"],
             "transfer",
             transfer["notes"] or "Key transfer approved"
         ))
@@ -603,7 +601,7 @@ def reject_transfer_request(transfer_id: int, reason: Optional[str] = None):
         conn.close()
 
 def cancel_transfer_request(transfer_id: int):
-    """Cancel a key transfer request (by the initiating teacher)"""
+    """Cancel a key transfer request (by the initiating user)"""
     conn = get_db_connection()
     
     try:
@@ -642,7 +640,7 @@ def get_key_history(key_id: int):
     
     cursor.execute("""
         SELECT 
-            id, key_id, from_teacher_id, to_teacher_id, action, timestamp, notes
+            id, key_id, from_user_id, to_user_id, action, timestamp, notes
         FROM key_history
         WHERE key_id = ?
         ORDER BY timestamp DESC
@@ -652,21 +650,21 @@ def get_key_history(key_id: int):
     conn.close()
     return history
 
-def get_teacher_key_history(teacher_id: int):
-    """Get the key history for a specific teacher"""
+def get_user_key_history(user_id: int):
+    """Get the key history for a specific user"""
     conn = get_db_connection()
     cursor = conn.cursor()
     
     cursor.execute("""
         SELECT 
-            kh.id, kh.key_id, kh.from_teacher_id, kh.to_teacher_id, 
+            kh.id, kh.key_id, kh.from_user_id, kh.to_user_id, 
             kh.action, kh.timestamp, kh.notes,
             k.key_code, k.room_number, k.building
         FROM key_history kh
         JOIN keys k ON kh.key_id = k.id
-        WHERE kh.from_teacher_id = ? OR kh.to_teacher_id = ?
+        WHERE kh.from_user_id = ? OR kh.to_user_id = ?
         ORDER BY kh.timestamp DESC
-    """, (teacher_id, teacher_id))
+    """, (user_id, user_id))
     
     history = [dict(row) for row in cursor.fetchall()]
     conn.close()
@@ -681,7 +679,7 @@ def get_all_active_key_assignments():
     cursor.execute("""
         SELECT 
             k.id, k.key_code, k.room_number, k.building, k.floor, k.description,
-            ka.teacher_id, ka.assigned_at
+            ka.user_id, ka.assigned_at
         FROM keys k
         LEFT JOIN key_assignments ka ON k.id = ka.key_id AND ka.is_active = 1
         ORDER BY k.building, k.floor, k.room_number
